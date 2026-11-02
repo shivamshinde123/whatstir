@@ -20,7 +20,7 @@ A personal tool for exploring YC startups by sector and the customer problem the
 - Ingestion tests call `run({ timeBudgetMs: 0 })` to load data without enriching it.
 - Database tests use `TEST_DATABASE_URL`, never `DATABASE_URL`. Locally, `npm run db:test:up` starts a pgvector container on port 54329 (Docker must be running). In CI it's a service container.
 - `createTestDb()` in `test/db.ts` gives each test file its own migrated schema, so test files can run in parallel. Database test files start with `// @vitest-environment node`.
-- `npm run migrate` applies `db/migrations/*.sql` to `DATABASE_URL`. `npm run refresh` loads yc-oss into it.
+- `npm run migrate` applies `db/migrations/*.sql` to `DATABASE_URL`. `npm run refresh` loads yc-oss into it, then `npm run subcategories` and `npm run backfill` (see README → First-time setup).
 - The ingestion fixture `test/fixtures/yc-sample.json` holds 37 real-shaped records covering all 9 sectors and every status. Expected counts are in `lib/refresh.test.ts`.
 
 ## Frontend design

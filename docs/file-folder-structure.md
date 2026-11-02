@@ -22,7 +22,8 @@ Whatstir/
 ├─ components/                     UI components (see component-map.md)
 ├─ lib/                            server-only modules plus *.test.ts beside them
 ├─ db/migrations/                  001_init.sql, …
-├─ scripts/                        migrate.mts, generate-subcategories.mts, backfill.mts
+├─ scripts/                        migrate.mts, refresh.mts, generate-subcategories.mts, backfill.mts
+├─ README.md                       setup and commands
 ├─ docs/                           this documentation; intial_idea.md is the requirements source
 ├─ e2e/                            Playwright specs (*.spec.ts)
 ├─ test/                           shared test helpers, fixtures, harness checks

@@ -34,10 +34,11 @@
 | `tiles.ts` | `appendTiles(sessionId, messageId, ids)`. Unit tested against a real database. |
 | `retrieval.ts` | `retrieve(scope, query)` → the candidate companies. |
 | `founders.ts` | `parseFounders(html)` (from the `data-page` JSON), `fetchFounders(ycUrl)`, `foundersEnabled()`. |
+| `subcategories.ts` | `generateSubcategories({ sql, sectorId?, minCompanies? })` → per-sector results, and `parseSectorArg(argv)`. |
 | `enrich.ts` | `enrich({ sql, timeBudgetMs, deps? })` → `EnrichSummary`. Runs the four steps, each with its own hash. `countPending`. |
 
 ## Scripts (`scripts/`)
 - `migrate.mts` applies the SQL files in `db/migrations`.
-- `refresh.mts` runs one refresh (`trigger=script`) against `DATABASE_URL`.
+- `refresh.mts [--load-only]` runs one refresh (`trigger=script`) against `DATABASE_URL`.
 - `generate-subcategories.mts` names the problem groups for each sector, once.
 - `backfill.mts` runs the full pipeline locally with no time limit.

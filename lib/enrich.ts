@@ -65,6 +65,8 @@ export async function enrich(opts: {
   batchSize?: number;
   concurrency?: number;
   deps?: Partial<EnrichDeps>;
+  /** Called after each group of companies finishes (for long backfills). */
+  onProgress?: (s: Readonly<EnrichSummary>) => void;
 }): Promise<EnrichSummary> {
   const { sql, batchSize = 50, concurrency = 4 } = opts;
   const deps = { ...defaultDeps, ...opts.deps };
@@ -185,6 +187,7 @@ export async function enrich(opts: {
         else if (waiting.has(c.id)) summary.waiting++;
         else summary.enriched++;
       }
+      opts.onProgress?.(summary);
     }
   }
 
