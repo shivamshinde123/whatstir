@@ -22,7 +22,7 @@ Whatstir/
 ├─ components/                     UI components (see component-map.md)
 ├─ lib/                            server-only modules plus *.test.ts beside them
 ├─ db/migrations/                  001_init.sql, …
-├─ scripts/                        migrate.ts, generate-subcategories.ts, backfill.ts
+├─ scripts/                        migrate.mts, generate-subcategories.mts, backfill.mts
 ├─ docs/                           this documentation; intial_idea.md is the requirements source
 ├─ e2e/                            Playwright specs (*.spec.ts)
 ├─ test/                           shared test helpers, fixtures, harness checks
@@ -36,7 +36,8 @@ Whatstir/
 ```
 
 ## Rules
-- Code in `lib/` runs only on the server. Every module there starts with `import "server-only"`, except the scripts and modules with no side effects, such as `sector.ts`.
+- Code in `lib/` runs only on the server. Never import it from a `"use client"` component. It doesn't use the `server-only` package, because scripts and Vitest import the same modules outside Next.js.
+- Scripts are `.mts` files run with `tsx --env-file=.env`. The `.mts` extension makes them ES modules, so top-level `await` works.
 - Each test sits next to the code it checks, as `*.test.ts(x)`. End-to-end tests live in `e2e/`, and shared fixtures live in `test/`.
 - Database schema changes go in a new numbered migration. Never edit a migration that has already been applied.
 - There is no `utils/` grab-bag folder. A helper lives in the module that uses it until a second module needs it too.

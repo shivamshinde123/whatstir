@@ -7,7 +7,7 @@
 2. `app/page.tsx` → `GET /api/sectors` → the `sector_counts` view → `<Treemap>`.
 3. `app/sector/[id]/page.tsx` → `GET /api/sectors/:id` and `GET /api/sectors/:id/session` → `<Workspace>`.
 4. `GET /api/cron/refresh` (Vercel Cron) → `lib/refresh.run({ trigger: "cron" })`.
-5. `scripts/*.ts` (local, via `tsx`) → the same `lib/` modules.
+5. `scripts/*.mts` (local, via `tsx`) → the same `lib/` modules.
 
 ## Asking a question
 ```

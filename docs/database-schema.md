@@ -61,7 +61,7 @@ Indexes: an HNSW index on `embedding` (`vector_cosine_ops`), plus indexes on `se
 `id` uuid PK, `sector_id` FK, `created_at`, `ended_at`. A partial unique index on `(sector_id) WHERE ended_at IS NULL` guarantees one active session per sector.
 
 ### `session_tiles`
-`session_id` FK, `company_id` FK, `position` int, `added_by` FK → messages, `added_at`. **Primary key `(session_id, company_id)`.** This key is what keeps duplicate tiles impossible. Inserts use `ON CONFLICT DO NOTHING RETURNING company_id`, so the rows returned are exactly the new tiles to animate.
+`session_id` FK, `company_id` FK, `position` int, `added_by` FK → messages, `added_at`. **Primary key `(session_id, company_id)`.** This key is what keeps duplicate tiles impossible. Inserts use `ON CONFLICT DO NOTHING RETURNING company_id`, so the rows returned are exactly the new tiles to animate. A unique constraint on `(session_id, position)` also stops two tiles from sharing a slot. Deleting a session deletes its tiles and messages too.
 
 ### `messages`
 `id` bigserial PK, `session_id` FK, `role` (`user` or `assistant`), `action` (`ask`, `explore`, `challenge`), `content` text, `scope` jsonb (`{subcategoryId, selectedCompanyIds}`), `company_ids` int[] (the companies supporting this answer), `status` (`ok` or `error`), `created_at`.
@@ -79,6 +79,15 @@ Indexes: an HNSW index on `embedding` (`vector_cosine_ops`), plus indexes on `se
 ### `app_settings`
 `key` text PK, `value` jsonb. See environment-config-reference.md.
 
+### `schema_migrations`
+`name` text PK (the migration filename) and `applied_at`. `lib/migrate.ts` maintains it and runs each pending file in its own transaction, so a migration that fails leaves nothing behind and isn't recorded.
+
 ## Views
-- `sector_counts`: `sector_id`, `total`, and `active` (status = Active), excluding `missing_since IS NOT NULL`. Counts are always computed live from committed rows, so they can't drift from the data.
-- `subcategory_counts`: `subcategory_id`, `total`, `active`.
+- `sector_counts`: `sector_id`, `name`, `sort`, `total`, and `active` (status = Active), excluding companies with `missing_since` set. Every sector appears, even with 0. Counts are computed live from committed rows, so they can't drift from the data.
+- `subcategory_counts`: `subcategory_id`, `sector_id`, `total`, `active`, with the same exclusion of missing companies.
+- Counts are cast to `int`, so they arrive in JS as numbers rather than bigint strings.
+
+## Implementation notes
+- Identity columns are `bigint generated always as identity`. postgres.js returns `bigint` values as strings, so wrap ids with `Number()` when they're used as JS numbers.
+- `companies.status` has no check constraint, because yc-oss may add new values and a refresh should never fail over one. The UI treats unknown values as unknown.
+- Every constraint here is covered by a test in `db/schema.test.ts`.

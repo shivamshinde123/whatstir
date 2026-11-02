@@ -9,6 +9,7 @@ All variables live in `.env` at the repository root. That file is listed in `.gi
 | `TYPESAFE_API_KEY` | yes | Jev assignment | The SDK reads it automatically. |
 | `APP_PASSWORD` | on deploy | `proxy.ts` | Leave blank to switch the gate off, which is only acceptable locally. |
 | `CRON_SECRET` | on deploy | `/api/cron/refresh` | Vercel Cron sends it as `Authorization: Bearer <secret>`. |
+| `TEST_DATABASE_URL` | tests only | Vitest | A throwaway Postgres with pgvector. It defaults to `postgres://postgres:postgres@localhost:54329/whatstir_test`, the container that `npm run db:test:up` starts, and CI points it at its own service container. Each test file migrates its own `t_<random>` schema. **Never point this at a real database.** |
 | `FOUNDERS_FETCH` | no | refresh | `on` by default. Set it to `off` to skip fetching founders from YC pages (see decision.md, open item A). |
 
 ## Settings stored in the database
