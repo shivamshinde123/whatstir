@@ -36,8 +36,9 @@ Workspace state update
 ## Refresh
 ```
 refresh.run(trigger)
- ├─ advisory lock (skip if a run holds it); if cron && paused → record 'skipped'
- ├─ fetch all.json → validate (array, ≥90% of stored count)
+ ├─ if cron && paused → record 'skipped'
+ ├─ fail stale 'running' rows; insert 'running' row (unique index = lock) → else record 'skipped'
+ ├─ fetch all.json (retry network/5xx ×2) → validate (array, ≥90% of stored count)
  ├─ diff by id + source_hash
  ├─ BEGIN; upsert; mark missing; COMMIT
  ├─ while time left: pick pending batch → founders → embed → jev.assign → ai.writeCard → enriched_hash = source_hash

@@ -19,7 +19,8 @@ A personal tool for exploring YC startups by sector and the customer problem the
 - `AI_FAKE=1` makes the OpenAI and Jev calls return predictable fake responses. CI always sets it, so CI needs no API keys.
 - Database tests use `TEST_DATABASE_URL`, never `DATABASE_URL`. Locally, `npm run db:test:up` starts a pgvector container on port 54329 (Docker must be running). In CI it's a service container.
 - `createTestDb()` in `test/db.ts` gives each test file its own migrated schema, so test files can run in parallel. Database test files start with `// @vitest-environment node`.
-- `npm run migrate` applies `db/migrations/*.sql` to `DATABASE_URL`.
+- `npm run migrate` applies `db/migrations/*.sql` to `DATABASE_URL`. `npm run refresh` loads yc-oss into it.
+- The ingestion fixture `test/fixtures/yc-sample.json` holds 37 real-shaped records covering all 9 sectors and every status. Expected counts are in `lib/refresh.test.ts`.
 
 ## Frontend design
 Follow the `apple-design` skill and the "Design language" section of `docs/ui-ux-wireframes.md`:

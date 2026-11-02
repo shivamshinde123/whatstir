@@ -1,12 +1,12 @@
 // @vitest-environment node
-import { mkdtemp, rm, writeFile } from "node:fs/promises";
+import { mkdtemp, readdir, rm, writeFile } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import path from "node:path";
 import { randomBytes } from "node:crypto";
 import type { Sql } from "postgres";
 import { afterEach, describe, expect, it } from "vitest";
 import { createSql } from "./db";
-import { migrate } from "./migrate";
+import { MIGRATIONS_DIR, migrate } from "./migrate";
 import { TEST_DATABASE_URL } from "@/test/db";
 
 // These tests need an *empty* schema, so they don't use createTestDb (which migrates).
@@ -48,7 +48,9 @@ async function snapshot(sql: Sql, schema: string) {
 describe("migrate", () => {
   it("builds the schema from scratch on an empty schema", async () => {
     const { sql } = await emptySchema();
-    expect(await migrate(sql)).toEqual(["001_init.sql"]);
+    const all = (await readdir(MIGRATIONS_DIR)).filter((f) => f.endsWith(".sql")).sort();
+    expect(all[0]).toBe("001_init.sql");
+    expect(await migrate(sql)).toEqual(all);
     const tables = await sql`select tablename from pg_tables where schemaname = current_schema() order by 1`;
     expect(tables.map((t) => t.tablename)).toEqual([
       "app_settings",

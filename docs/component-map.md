@@ -29,13 +29,14 @@
 | `migrate.ts` | `migrate(sql, dir?)` applies the pending SQL migrations. Used by the CLI and the test helpers. |
 | `ai.ts` | Model constants and the OpenAI client: `embed(texts)`, `answer(...)`, `writeCard(...)`, `nameGroups(...)`. |
 | `jev.ts` | `assign(company, groups)` → `{ problem, ai }`, each with a confidence. |
-| `refresh.ts` | Runs the pipeline: fetch, diff, apply, enrich, record. |
-| `sector.ts` | Pure `industryToSector(industry)` mapping. Unit tested. |
+| `refresh.ts` | `run({ trigger, sql?, fetchImpl?, retryDelaysMs? })` → `RunSummary`. Runs the pipeline: claim the run slot, fetch with retries, map (`mapRecord`), diff by `hashRow`, apply in one transaction, record. Enrichment is added in #4. |
+| `sector.ts` | `SECTOR_IDS`, `slugify`, and `industryToSector(industry)` → `{ sectorId, reason }`. A pure function, unit tested. |
 | `tiles.ts` | `appendTiles(sessionId, messageId, ids)`. Unit tested against a real database. |
 | `retrieval.ts` | `retrieve(scope, query)` → the candidate companies. |
 | `founders.ts` | Pulls founders out of a YC company page. |
 
 ## Scripts (`scripts/`)
 - `migrate.mts` applies the SQL files in `db/migrations`.
+- `refresh.mts` runs one refresh (`trigger=script`) against `DATABASE_URL`.
 - `generate-subcategories.mts` names the problem groups for each sector, once.
 - `backfill.mts` runs the full pipeline locally with no time limit.
