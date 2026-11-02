@@ -3,7 +3,7 @@
 *This describes the planned design and gets updated as the code lands.*
 
 ## Entry points
-1. `middleware.ts` runs on every request and enforces the password gate when `APP_PASSWORD` is set.
+1. `proxy.ts` runs on every request and enforces the password gate when `APP_PASSWORD` is set.
 2. `app/page.tsx` → `GET /api/sectors` → the `sector_counts` view → `<Treemap>`.
 3. `app/sector/[id]/page.tsx` → `GET /api/sectors/:id` and `GET /api/sectors/:id/session` → `<Workspace>`.
 4. `GET /api/cron/refresh` (Vercel Cron) → `lib/refresh.run({ trigger: "cron" })`.

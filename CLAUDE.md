@@ -1,0 +1,30 @@
+@AGENTS.md
+
+# Whatstir
+
+A personal tool for exploring YC startups by sector and the customer problem they solve. The requirements are in `docs/intial_idea.md`. Decisions made since then are in `docs/decision.md` and win where the two disagree. Every other design doc is in `docs/`; keep them current as the code changes.
+
+## Workflow (required)
+`main` is protected, so every change reaches it through a pull request.
+1. Pick the next open GitHub issue (#1–#14) whose dependencies are done.
+2. Create a branch from the latest `main`, named `issue-<n>-<slug>`.
+3. Implement the issue, and write tests for **every** item in its test plan: unit, integration, component and e2e as the issue lists. Check UI features by hand in the browser too.
+4. `npm run ci` must pass locally. Database tests need Docker running.
+5. Push the branch and open a PR whose description says `Closes #<n>`. Wait for the `ci` check to pass and confirm the PR is mergeable, then squash-merge. The branch is deleted automatically.
+6. An issue isn't done until its tests pass.
+
+## Testing
+- `npm test` runs Vitest: unit, integration and component tests, kept next to the code as `*.test.ts(x)`.
+- `npm run test:e2e` runs Playwright from `e2e/` against a production build.
+- `AI_FAKE=1` makes the OpenAI and Jev calls return predictable fake responses. CI always sets it, so CI needs no API keys.
+- Database tests use `DATABASE_URL`. In CI that's a `pgvector/pgvector:pg16` service container.
+
+## Frontend design
+Follow the `apple-design` skill and the "Design language" section of `docs/ui-ux-wireframes.md`:
+- Use the system font and the colour tokens in `app/globals.css`, with generous whitespace.
+- Navigation and toolbars are translucent.
+- Springs have no overshoot by default.
+- Respect the user's reduced-motion and reduced-transparency settings.
+
+## Next.js 16
+Next 16 renamed `middleware.ts` to `proxy.ts`, and `cacheComponents` is switched on. Before using any Next API, check the docs bundled in `node_modules/next/dist/docs/`.

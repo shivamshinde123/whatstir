@@ -13,5 +13,11 @@
   - Esc closes panels and modals.
   - Keyboard focus is held inside an open modal.
 - **Comments explain why, not what.** A deliberate shortcut gets a `ponytail:` comment that names its limit and how to upgrade it.
-- **Tests** use `node:test` with `assert`, one file per module whose logic can break. Run them with `npm test`.
+- **Tests are comprehensive and required for every issue.** Every item in an issue's test plan has a test.
+  - Vitest (`npm test`) runs unit, integration and component tests, each as `*.test.ts(x)` next to the code it checks.
+  - Playwright (`npm run test:e2e`) runs the user journeys in `e2e/`.
+  - Tests cover failure paths as well as the happy path.
+  - AI calls use `AI_FAKE=1` and are never made for real in tests.
+  - An e2e test may only inject things into the page after hydration has finished (`waitForLoadState("networkidle")`).
+- **Frontend design.** Follow the Apple design rules ("Design language" in ui-ux-wireframes.md). Use the tokens and classes in `app/globals.css` (`text-display`, `material`, `pressable`, the colour tokens) rather than one-off values.
 - **Formatting** is Prettier's defaults with nothing customised. Variables are `camelCase`, components are `PascalCase`, and database columns are `snake_case`. Route handlers map database columns to camelCase JSON.
