@@ -25,7 +25,7 @@ Whatstir/
 ├─ scripts/                        migrate.mts, refresh.mts, generate-subcategories.mts, backfill.mts
 ├─ README.md                       setup and commands
 ├─ docs/                           this documentation; intial_idea.md is the requirements source
-├─ e2e/                            Playwright specs (*.spec.ts)
+├─ e2e/                            Playwright specs (*.spec.ts), global-setup.ts (e2e DB), db-urls.ts
 ├─ test/                           shared test helpers, fixtures, harness checks
 ├─ .github/workflows/ci.yml        the required `ci` check
 ├─ proxy.ts                        password gate (Next 16 name for middleware)

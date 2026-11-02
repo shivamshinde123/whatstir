@@ -18,6 +18,6 @@
   - Playwright (`npm run test:e2e`) runs the user journeys in `e2e/`.
   - Tests cover failure paths as well as the happy path.
   - AI calls use `AI_FAKE=1` and are never made for real in tests.
-  - An e2e test may only inject things into the page after hydration has finished (`waitForLoadState("networkidle")`).
+  - E2E tests wait for something visible, such as a tile or a heading, never `networkidle`: Next.js link prefetching keeps the network busy, so `networkidle` can hang. Prefer testing real elements to injecting probes into the page.
 - **Frontend design.** Follow the Apple design rules ("Design language" in ui-ux-wireframes.md). Use the tokens and classes in `app/globals.css` (`text-display`, `material`, `pressable`, the colour tokens) rather than one-off values.
 - **Formatting** is Prettier's defaults with nothing customised. Variables are `camelCase`, components are `PascalCase`, and database columns are `snake_case`. Route handlers map database columns to camelCase JSON.

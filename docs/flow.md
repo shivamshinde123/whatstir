@@ -4,7 +4,7 @@
 
 ## Entry points
 1. `proxy.ts` runs on every request and enforces the password gate when `APP_PASSWORD` is set.
-2. `app/page.tsx` → `GET /api/sectors` → the `sector_counts` view → `<Treemap>`.
+2. `app/page.tsx` → `<HomeView>` (client) → `GET /api/sectors` → `getSectorOverview` (the `sector_counts` view plus the last successful run) → `layoutTreemap` at the measured size → `<Treemap>`. The Active-only toggle and the list view reuse the data already loaded.
 3. `app/sector/[id]/page.tsx` → `GET /api/sectors/:id` and `GET /api/sectors/:id/session` → `<Workspace>`.
 4. `GET /api/cron/refresh` (Vercel Cron) → `lib/refresh.run({ trigger: "cron" })`.
 5. `scripts/*.mts` (local, via `tsx`) → the same `lib/` modules.
