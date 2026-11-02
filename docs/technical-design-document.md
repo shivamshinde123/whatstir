@@ -4,7 +4,7 @@
 - **Scope.** The query is always limited to `sector_id = :sector` and `missing_since IS NULL`.
   - If a subcategory is selected, an `EXISTS` subquery on `company_subcategories` narrows it further.
   - If companies are selected, it becomes `id = ANY(:ids)` and the vector search is skipped, because the selected companies are already the full scope.
-- **Ranking.** Results are ordered by cosine distance (`embedding <=> :q`), and the top 40 go to `gpt-6.1-sol`. Companies with no embedding yet are left out, and the answer says how many were left out.
+- **Ranking.** Results are ordered by cosine distance (`embedding <=> :q`, with id as a tiebreak), and the top 40 go to `gpt-6.1-sol`. Companies with no embedding yet are left out and counted as `skipped`; the prompt tells the model how many there are. Selected companies keep the order they were selected in, and ids from another sector are ignored.
 - **Prompt.** The system prompt sets the rules:
   - Use only the listed companies.
   - Cite them by id.
@@ -16,19 +16,23 @@
   - **explore:** describe one concrete scenario, labelled *Hypothetical*. Then compare how the cited companies approach the problem, and list directions worth investigating.
   - **challenge:** list the assumptions in the user's idea and the related companies. Then suggest customer-interview questions about the customer's past behaviour. Never give a success score.
 - **Output.** Structured Outputs with a strict JSON schema, `{ text, companyIds: int[] }`, guarantees the shape with no text parsing. Any id that wasn't among the candidates is dropped.
-- **Context.** The last 10 messages of the session go into the prompt as conversation history.
+- **Context.** The last 10 successful messages of the session (`status = 'ok'`, oldest first) go into the Responses API `input` as role-tagged turns, before the turn with the companies and the question. Failed replies are left out.
+- **Code:** `lib/answer.ts` holds `instructionsFor`, `buildAnswerInput` and `filterIds`, which are pure and unit-tested, and `answer()`. `lib/chat.ts` holds `postMessage`, the full flow independent of Next.js, plus `parseMessageInput`. `lib/retrieval.ts` holds `retrieve`.
+- **Fake mode** (`AI_FAKE=1`) can be scripted for tests: a question containing `[ids:1,2]` cites exactly those ids, which still go through `filterIds`; `[fail]` makes it throw; anything else cites the first 3 candidates.
+- **JSON columns:** pass objects with `sql.json(value)`. `${JSON.stringify(x)}::jsonb` double-encodes with postgres.js v4 and stores a JSON string.
 
 ## Grid accumulation (the core rule)
-```sql
-INSERT INTO session_tiles (session_id, company_id, position, added_by)
-SELECT :sid, c, (SELECT coalesce(max(position), -1) FROM session_tiles WHERE session_id = :sid) + ord, :mid
-FROM unnest(:ids::int[]) WITH ORDINALITY AS t(c, ord)
-ON CONFLICT DO NOTHING
-RETURNING company_id;
-```
-The primary key makes duplicate tiles impossible. The returned ids are exactly the new tiles, the ones that should animate. If the answer cites no companies, nothing is inserted and the grid stays as it was. Positions only ever grow, so existing tiles never move.
+`appendTiles` (`lib/session.ts`) does the following in one transaction:
+1. It locks the session row (`SELECT … FOR UPDATE`) so that two answers landing at once can't pick the same positions.
+2. It drops any cited ids that are already in the grid, and duplicates within the answer.
+3. It inserts the rest at `max(position) + 1, + 2, …`, in the answer's order, with `added_by` set to the assistant message.
 
-The check for this lives in `lib/tiles.test.ts`. It confirms that answers citing [A, B] and then [B, C] leave the grid as A, B, C, with C as the only new tile, and that a later answer citing [] or [A] changes nothing.
+The returned ids are exactly the new tiles, the ones that should animate. The `(session_id, company_id)` primary key and the `(session_id, position)` unique constraint back this up in the database. If the answer cites no companies, nothing is inserted. Positions are consecutive and only ever grow, so existing tiles never move.
+
+The checks live in `lib/session.test.ts` and `lib/chat.test.ts`:
+- Answers citing [A, B] then [B, C] give the grid A, B, C, with C as the only new tile.
+- A later answer citing [] or [A] changes nothing.
+- Four answers appended at once still give 5 unique tiles at positions 0–4.
 
 ## Animation
 - Each basket logo and its grid tile share `layoutId={"co-" + id}`.

@@ -73,6 +73,10 @@ Listed in the order they were made. Decisions 1–14 are recorded in §16 of [in
     - *Why:* with `cacheComponents` and partial prerendering, the static shell starts streaming with a 200 before the page can call `notFound()`, and `dynamicParams` isn't available. The proxy already sits in front of every request and knows the 9 ids without touching the database.
 44. **Logos are decorative images (`alt=""`)** because the company name is always visible beside them. This supersedes the earlier rule of `alt="<name> logo"`, which would make screen readers announce every company twice.
 
+45. **Explore and Challenge are rejected with a 400 until #12.** `ACTIONS` in `lib/chat.ts` lists what the API accepts, and the prompt rules for both are already written in `lib/answer.ts`.
+46. **An answer that fails keeps the user's message and stores an assistant message with `status: "error"`.** Failed replies are left out of the history sent to the model. Retrying sends the question again as a new message, so there's no "edit and replace" flow.
+47. **Positions in the grid are consecutive.** Only companies new to the grid get positions, under a row lock on the session. This supersedes the earlier `ON CONFLICT` approach, which left gaps and, without a lock, could silently drop a tile if two answers chose the same position.
+
 ## Open items
 
 - **A. Founder data.** Founders come from YC company pages. Check YC's terms before production use. Until then, the founder fetch can be switched off with `FOUNDERS_FETCH=off`.
