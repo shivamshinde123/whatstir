@@ -41,7 +41,8 @@ refresh.run(trigger)
  ├─ fetch all.json (retry network/5xx ×2) → validate (array, ≥90% of stored count)
  ├─ diff by id + source_hash
  ├─ BEGIN; upsert; mark missing; COMMIT
- ├─ while time left: pick pending batch → founders → embed → jev.assign → ai.writeCard → enriched_hash = source_hash
+ ├─ enrich(): while time left: pick ≤50 pending (each once per run) → embed batch → per company (4 at a time):
+ │    founders → jev.assign (or wait if the sector has no groups) → ai.writeCard; each step sets its own *_hash
  └─ refresh_runs row updated
 ```
 

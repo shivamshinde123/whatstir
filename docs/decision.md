@@ -53,6 +53,12 @@ Listed in the order they were made. Decisions 1–14 are recorded in §16 of [in
 35. **Tests use the `TEST_DATABASE_URL` variable, never `DATABASE_URL`, and each test file gets its own migrated schema.**
     - *Why:* tests must never be able to touch the real database, and test files need to run in parallel.
 
+36. **Enrichment tracks each step with its own hash** (`embedded_hash`, `assigned_hash`, `carded_hash`, `founders_hash`) instead of one `enriched_hash`. This supersedes the single-hash design.
+    - *Why:* with one hash, any failure or reassignment redoes every step. Regenerating a sector's subcategories (#5) would then re-pay for thousands of `gpt-6-luna` cards just to reassign companies.
+    - With separate hashes, only the stale step runs. A failed card doesn't redo the embedding, and a sector without subcategories yet still gets its embeddings and cards.
+37. **"Is AI central?" is asked as a Jev `noul` (yes/no probability) question rather than a yes/no `choice`.** The `noul` question type returns a calibrated probability directly, which is compared with the same `jev_min_confidence` threshold.
+38. **The TypeScript compile target is ES2022** (create-next-app's default is ES2017). This allows modern syntax such as the regex `s` flag. Next.js does its own compiling, so this only affects type-checking.
+
 ## Open items
 
 - **A. Founder data.** Founders come from YC company pages. Check YC's terms before production use. Until then, the founder fetch can be switched off with `FOUNDERS_FETCH=off`.

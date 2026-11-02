@@ -1,6 +1,7 @@
 import { createHash } from "node:crypto";
 import type { Sql } from "postgres";
 import { db } from "./db";
+import { enrich, type EnrichDeps, type EnrichSummary } from "./enrich";
 import { industryToSector } from "./sector";
 
 export const SOURCE_URL = "https://yc-oss.github.io/api/companies/all.json";
@@ -43,6 +44,8 @@ export interface RunSummary {
   updated: number;
   missing: number;
   invalid: number;
+  /** Enrichment results; absent when the run didn't get that far. */
+  enrichment?: Omit<EnrichSummary, "errors"> & { errors: number };
   error?: string;
 }
 
@@ -154,6 +157,11 @@ export async function run(opts: {
   fetchImpl?: typeof fetch;
   /** Waits between fetch attempts; its length is the number of retries. */
   retryDelaysMs?: number[];
+  /** Time allowed for enrichment after the data is applied (default 240 s; 0 = load only). */
+  timeBudgetMs?: number;
+  /** Fetch used for YC company pages (founders). */
+  pageFetchImpl?: typeof fetch;
+  enrichDeps?: Partial<EnrichDeps>;
 }): Promise<RunSummary> {
   const sql = opts.sql ?? db();
   const fetchImpl = opts.fetchImpl ?? fetch;
@@ -165,6 +173,7 @@ export async function run(opts: {
   if (runId === null) return recordSkip(sql, opts.trigger, "another refresh is already running");
 
   const summary: RunSummary = { runId, status: "ok", sourceCount: 0, added: 0, updated: 0, missing: 0, invalid: 0 };
+  let applied = false;
   try {
     const records = await fetchSource(fetchImpl, opts.retryDelaysMs ?? [2_000, 5_000]);
     summary.sourceCount = records.length;
@@ -217,14 +226,26 @@ export async function run(opts: {
         await tx`update companies set missing_since = now() where id = any(${vanished}::int[])`;
       }
     });
+    applied = true;
+
+    const e = await enrich({
+      sql,
+      timeBudgetMs: opts.timeBudgetMs ?? 240_000,
+      fetchImpl: opts.pageFetchImpl,
+      deps: opts.enrichDeps,
+    });
+    summary.enrichment = { ...e, errors: e.errors.length };
+    if (e.errors.length) console.warn(`refresh ${runId}: ${e.errors.length} enrichment errors`, e.errors.slice(0, 5));
 
     await sql`update refresh_runs set status = 'ok', finished_at = now(), source_count = ${summary.sourceCount},
-      added = ${summary.added}, updated = ${summary.updated} where id = ${runId}`;
+      added = ${summary.added}, updated = ${summary.updated}, enriched = ${e.enriched}, pending = ${e.pending}
+      where id = ${runId}`;
     return summary;
   } catch (e) {
     const error = errorText(e);
     await sql`update refresh_runs set status = 'failed', finished_at = now(), source_count = ${summary.sourceCount},
-      error = ${error} where id = ${runId}`;
-    return { ...summary, status: "failed", added: 0, updated: 0, missing: 0, error };
+      added = ${applied ? summary.added : 0}, updated = ${applied ? summary.updated : 0}, error = ${error} where id = ${runId}`;
+    // Counts stand only if the data transaction committed before the failure.
+    return applied ? { ...summary, status: "failed", error } : { ...summary, status: "failed", added: 0, updated: 0, missing: 0, error };
   }
 }

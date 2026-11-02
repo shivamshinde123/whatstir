@@ -41,13 +41,13 @@ One run is used by the daily cron, the manual button and the backfill script (`l
    - Set `missing_since = now()` on stored companies the source no longer lists, and clear it on any that reappear.
    - Nothing is ever deleted.
    Because counts are views over committed rows, readers see either the old dataset or the new one, never a mix.
-5. **Enrich.** Process companies where `enriched_hash IS DISTINCT FROM source_hash`, in batches, until the time budget runs out (240 s on Vercel; unlimited in the script). For each company:
-   1. Fetch founders and upsert them by `(company_id, name)`. A LinkedIn URL is stored only if it matches `^https://(www\.)?linkedin\.com/in/`.
-   2. Embed the company with OpenAI `text-embedding-3-small`. Up to 256 texts go in one request.
-   3. Assign subcategories with Jev (see below).
-   4. Write the problem card with `gpt-6-luna` (see below).
-   5. Set `enriched_hash = source_hash`.
-   A company whose enrichment fails stays pending and is retried on the next run. The work is idempotent, so retrying never creates duplicates.
+5. **Enrich** (`lib/enrich.ts`). Each step has its own hash column on `companies`, and a step is pending when its hash differs from `source_hash` (decision 36). Enrichment works through pending companies in batches of 50, with 4 at a time in parallel, until the time budget runs out: 240 s on Vercel, and as long as it needs in a script. Each company is attempted at most once per run, and companies missing from the source are skipped. The steps are:
+   1. **Embed** (`embedded_hash`): one OpenAI `text-embedding-3-small` request per batch (the client sends at most 256 texts per request), using `companyText`: name, one-liner, description and tags, capped at 8,000 characters. If the request fails, every company in the batch counts as failed for this step.
+   2. **Founders** (`founders_hash`, only when `FOUNDERS_FETCH` isn't `off`): fetch the YC page and parse the `data-page` JSON (`props.company.founders[]`: `full_name`, `title`, `linkedin_url`). Founders are upserted by `(company_id, name)`, and anyone no longer listed is deleted. A LinkedIn URL is kept only if it matches `^https://(www\.)?linkedin\.com/in/<handle>/?$`, with no query string; otherwise it's null. A 404 means the company has no founders listed. Any other HTTP error makes the step fail and retry next run.
+   3. **Assign** (`assigned_hash`): Jev, see below. If the sector has no `ai` and `unclassified` groups yet, this step waits. The other steps still run, and the company stays pending until the groups exist. Only Jev's own assignments (`assigned_by = 'jev'`) are replaced, so manual ones survive.
+   4. **Card** (`carded_hash`): see "Problem cards" below. The row is upserted into `problem_cards`.
+
+   A step that fails leaves only its own hash stale. The other steps are kept, and only that step is retried on the next run. Every write is an upsert, so a retry never creates duplicates. Measured on the real feed with fake AI: 6,362 companies in about 8 minutes, all of it local database round-trips. With real AI, API latency dominates.
 6. **Record.** Write the run's counts and status to `refresh_runs`.
 
 If any step before 4 fails, the database is left untouched and the last good dataset is still served.
@@ -62,18 +62,21 @@ This runs only from the `scripts/generate-subcategories.ts` script, never during
 
 ## Assignment (Jev)
 
-Each company gets two `choice` questions in a single `client.systemOne` call. The state holds the company's name, one-liner, description and tags.
+Each company gets one `client.systemOne` call (`@typesafe-ai/sdk` 0.7, model `jev-latest`) asking two questions. The state is `companyText`.
 
-- **`problem`:** "Which customer problem does this company primarily address?" The options are the sector's problem-group slugs plus `none`.
-- **`ai`:** "Is AI central to this company's product?" The options are `yes` and `no`.
+- **`problem`:** a `choice` question, "Which customer problem does this company primarily address?". The options are the sector's problem-group slugs, each described by the group's description, plus `none`. The answer comes back as `{ choice, confidence, probabilities }`, which was confirmed from the SDK's types.
+- **`ai`:** a `noul` question, "Is AI central to this company's product?". The answer is `{ noul }`, the probability of yes.
 
-If `problem` comes back below `jev_min_confidence`, or as `none`, the company goes to the sector's Unclassified group. If `ai` is `yes` with enough confidence, the company is also added to the AI group. The explanation stored with the assignment is "Jev: <option> (p=0.82)".
-
-*To verify at build time:* the field name Jev uses for probabilities. Its docs only show `answers.<q>.choice`. If no probability is returned, every choice other than `none` is accepted and recorded as `confidence = null`.
+The mapping (`toAssignments`) gives each company exactly one of {a problem group, Unclassified}, plus AI when it applies:
+- The chosen problem group is used when its `confidence` is at least `jev_min_confidence`.
+- `none`, an unknown label, or a confidence below the threshold sends the company to Unclassified, and the explanation says why.
+- `noul` at or above the threshold also adds the company to the AI group.
+- If no confidence comes back, the choice is accepted with `confidence = null`.
+- Explanations look like "Jev: billing (p=0.82)".
 
 ## Problem cards (`gpt-6-luna`)
 
-`gpt-6-luna` receives the company's own text and, through Structured Outputs, must return JSON with `customer`, `problem`, `workaround`, `solution` and `evidence`. Each field must be supported by a quote from that text, or be `null`. It must not use outside knowledge. Any field whose evidence quote can't be found in the company's text is replaced with `null` before saving.
+The card is written with one Responses API call (`openai` SDK 7). It uses `text.format = { type: "json_schema", name: "problem_card", strict: true }`, and the result is read from `output_text`. `gpt-6-luna` receives the company's own text and must return JSON with `customer`, `problem`, `workaround`, `solution` and `evidence`. Each field must be supported by a quote from that text, or be `null`. It must not use outside knowledge. Any field whose evidence quote can't be found in the company's text is replaced with `null` before saving.
 
 ## Provenance
 

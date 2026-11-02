@@ -31,7 +31,7 @@ Seeded with the nine sectors listed in decision 21.
 | `sector_reason` | text | Filled in when the company landed in `other`, e.g. "industry=Unspecified". |
 | `source_hash` | text | A hash of the source fields; when it changes, the company is re-enriched. |
 | `embedding` | vector(1536) | OpenAI `text-embedding-3-small` embedding of name, one-liner, description and tags. |
-| `enriched_hash` | text | The `source_hash` that the embedding, assignment and card were last built from. If it differs from `source_hash`, enrichment is pending. |
+| `embedded_hash`, `assigned_hash`, `carded_hash`, `founders_hash` | text | The `source_hash` each enrichment step last finished with (migration 003, decision 36). A step is pending when its hash differs from `source_hash`. The partial index `companies_pending_idx` covers all four. |
 | `first_seen_at`, `refreshed_at` | timestamptz | |
 | `missing_since` | timestamptz | Set when the company drops out of the source. Companies are never deleted. |
 
