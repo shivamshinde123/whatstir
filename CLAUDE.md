@@ -15,7 +15,7 @@ A personal tool for exploring YC startups by sector and the customer problem the
 
 ## Testing
 - `npm test` runs Vitest: unit, integration and component tests, kept next to the code as `*.test.ts(x)`.
-- `npm run test:e2e` runs Playwright from `e2e/` against a production build.
+- `npm run test:e2e` runs Playwright from `e2e/` against a production build. There are two servers of the same build: `:3100` with the gate off (the `chromium` project) and `:3101` with `APP_PASSWORD=e2e-password` (the `gated` project, which runs only `gate.spec.ts`). Next.js renders an empty `role="alert"` route announcer, so find your own alerts by id or text.
 - `AI_FAKE=1` makes the OpenAI and Jev calls return predictable fake responses. The Vitest config sets `AI_FAKE=1` and `FOUNDERS_FETCH=off` for every test. A test that needs the real code path uses `vi.stubEnv` together with `setOpenAIClient` or `setJevClient`, and enrichment tests swap single steps through the `deps` option of `enrich()`.
 - Ingestion tests call `run({ timeBudgetMs: 0 })` to load data without enriching it.
 - Database tests use `TEST_DATABASE_URL`, never `DATABASE_URL`. Locally, `npm run db:test:up` starts a pgvector container on port 54329 (Docker must be running). In CI it's a service container.

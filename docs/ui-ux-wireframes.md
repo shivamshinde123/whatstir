@@ -64,6 +64,19 @@ Outbound links open in a new tab with `rel="noopener"`, so the research session 
 ## 4. Compare (modal)
 The modal is a table with one column per company (2–3 companies) and one row each for customer, problem, workaround, solution, batch, status and website. Unknown values show as a muted "Unknown".
 
+## 4b. Login (only when `APP_PASSWORD` is set)
+```
+            ┌────────────────────────────┐
+            │          Whatstir          │
+            │ Enter the password to      │
+            │ continue.                  │
+            │ [ Password              ]  │   ← autofocused, labelled
+            │ That password isn't right. │   ← role="alert", --danger
+            │ (        Continue        ) │   ← disabled until typed; "Checking…" while busy
+            └────────────────────────────┘
+```
+A centred card on a `surface` page in light mode. In dark mode the page is black and the card is `#1c1c1e`, because elevated surfaces are lighter in dark mode. A wrong password clears the field and keeps you on the page.
+
 ## 5. Admin
 ```
 Refresh: daily 11:00 UTC  ·  [Pause]  [Refresh now]
@@ -82,7 +95,7 @@ The interface should look clean and calm, the way apple.com does. The `apple-des
   - Large text gets tighter letter spacing and line height: `text-display` is −0.015em and 1.05, `text-headline` is −0.01em and 1.1.
   - Hierarchy comes from weight plus size, never from colour alone.
 - **Colour.**
-  - Light mode: white and `#f5f5f7` surfaces, `#1d1d1f` text, `#6e6e73` for secondary text, and a single accent, `#0071e3`.
+  - Light mode: white and `#f5f5f7` surfaces, `#1d1d1f` text, `#6e6e73` for secondary text, and a single accent, `#0071e3`. Errors use `--danger` (`#d70015` in light mode, `#ff453a` in dark).
   - Dark mode: true black, `#1c1c1e` surfaces, and `#2997ff` as the accent.
   - Secondary text uses `text-secondary` so it stays readable. `text-tertiary` is only for decoration that carries no information.
 - **Space.** Generous whitespace, content inside a `max-w-5xl` column, and 16 px side margins on phones. No horizontal scrolling at 375 px.
