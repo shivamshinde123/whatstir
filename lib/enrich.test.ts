@@ -83,6 +83,14 @@ describe("enrich", () => {
     expect(row.n).toBe(1);
   });
 
+  it("stores card evidence as a JSON object, not a JSON string", async () => {
+    await seedGroups();
+    await go();
+    const [row] = await sql`select jsonb_typeof(evidence) as kind, evidence from problem_cards limit 1`;
+    expect(row.kind).toBe("object");
+    expect(row.evidence).toHaveProperty("problem");
+  });
+
   it("stores embeddings that pgvector can rank", async () => {
     await seedGroups();
     await go();

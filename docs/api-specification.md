@@ -46,12 +46,14 @@ The full profile. Missing fields come back as `null`, never left out.
 ## Sessions and chat
 
 ### `GET /api/sectors/:id/session`
-Returns the sector's active session, creating one if none exists.
+Returns the sector's active session, creating one if none exists. If several requests arrive at once, they all get the same session.
 ```json
-{ "session": { "id": "uuid", "createdAt": "…" },
+{ "session": { "id": "uuid", "sectorId": "healthcare", "createdAt": "…" },
   "tiles": [{ "companyId": 5, "position": 0, "addedBy": 41 }],
-  "messages": [{ "id": 41, "role": "assistant", "action": "ask", "content": "…", "companyIds": [5, 9], "status": "ok" }] }
+  "messages": [{ "id": 41, "role": "assistant", "action": "ask", "content": "…", "scope": { "subcategoryId": null, "selectedCompanyIds": [] },
+                 "companyIds": [5, 9], "status": "ok", "createdAt": "…" }] }
 ```
+Tiles come in `position` order and messages in `id` order. An unknown sector returns 404, and a database failure returns 500.
 
 ### `POST /api/sectors/:id/session/reset`
 Ends the active session and starts a new one. Returns the same shape as the GET above, with empty tiles and messages.
@@ -62,16 +64,24 @@ Ends the active session and starts a new one. Returns the same shape as the GET 
   "subcategoryId": 14, "selectedCompanyIds": [5, 9] }
 ```
 `subcategoryId` and `selectedCompanyIds` can be left out. A non-empty `selectedCompanyIds` limits the question to those companies.
+- **Validation (400):**
+  - `text` must be 1–2,000 characters after trimming.
+  - `action` must be `ask`; `explore` and `challenge` are accepted from #12.
+  - `subcategoryId` must be a positive integer belonging to this session's sector.
+  - `selectedCompanyIds` can hold at most 20 positive integers; duplicates are removed.
+- **Other errors:** an id that isn't a UUID, or an unknown session, returns 404. An ended session returns 409, telling the client to reload into the new one.
 
 Response:
 ```json
-{ "message": { "id": 42, "content": "…", "companyIds": [9, 17] },
-  "newTileIds": [17], "tiles": [ … the full tile list … ] }
+{ "userMessage": { … }, "message": { "id": 42, "role": "assistant", "content": "…", "companyIds": [9, 17], "status": "ok", … },
+  "newTileIds": [17], "tiles": [ … the full tile list … ], "skipped": 0 }
 ```
+- `skipped` is the number of companies in scope that couldn't be searched because they have no embedding yet.
+- If nothing at all is in scope, the model isn't called, and the reply is "No companies in <scope> match yet."
 - `companyIds` are the companies the latest answer cites. The grid highlights them.
 - `newTileIds` are the companies just added to the grid. Only these animate.
 - If nothing matches, `companyIds` is `[]` and the grid is unchanged.
-- If the answer can't be generated, the response is a 502 with `{ "error", "retryable": true }`. The user's message is still saved, so a retry doesn't make the user retype it.
+- If the answer can't be generated (the model or the embedding call failed), the response is a 502 with `{ "error", "retryable": true, "userMessage", "message" }`. The user's message is still saved, so a retry doesn't make the user retype it, and an assistant message with `status: "error"` is stored. The grid is unchanged.
 
 ## Notes
 

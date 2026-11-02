@@ -41,8 +41,10 @@
 | `jev.ts` | `assign(company, groups, minConfidence)` → assignment rows. Asks a `choice` question (problem) and a `noul` question (AI). `toAssignments` is the pure mapping. Has a fake version, and `setJevClient` lets tests swap the client. |
 | `refresh.ts` | `run({ trigger, sql?, fetchImpl?, retryDelaysMs? })` → `RunSummary`. Runs the pipeline: claim the run slot, fetch with retries, map (`mapRecord`), diff by `hashRow`, apply in one transaction, record. Enrichment is added in #4. |
 | `sector.ts` | `SECTOR_IDS`, `slugify`, and `industryToSector(industry)` → `{ sectorId, reason }`. A pure function, unit tested. |
-| `tiles.ts` | `appendTiles(sessionId, messageId, ids)`. Unit tested against a real database. |
-| `retrieval.ts` | `retrieve(scope, query)` → the candidate companies. |
+| `session.ts` | `getOrCreateSession` (safe when requests race), `resetSession`, `appendTiles` (locks the session, appends only new companies), `listTiles`. |
+| `chat.ts` | `parseMessageInput`, and `postMessage(sql, sessionId, input, deps?)`: the whole question-to-answer-to-tiles flow. |
+| `answer.ts` | `instructionsFor(action)`, `buildAnswerInput`, `filterIds`, and `answer()` (`gpt-6.1-sol`, Structured Outputs, scriptable fake). |
+| `retrieval.ts` | `retrieve(sql, scope, question)` → `{ candidates (top 40), skipped }`, scoped by sector, subcategory or selected ids. |
 | `founders.ts` | `parseFounders(html)` (from the `data-page` JSON), `fetchFounders(ycUrl)`, `foundersEnabled()`. |
 | `subcategories.ts` | `generateSubcategories({ sql, sectorId?, minCompanies? })` → per-sector results, and `parseSectorArg(argv)`. |
 | `enrich.ts` | `enrich({ sql, timeBudgetMs, deps? })` → `EnrichSummary`. Runs the four steps, each with its own hash. `countPending`. |

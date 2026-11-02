@@ -166,7 +166,7 @@ export async function enrich(opts: {
           await sql.begin(async (tx) => {
             await tx`insert into problem_cards (company_id, customer, problem, workaround, solution, evidence, model, source_hash)
               values (${c.id}, ${card.customer}, ${card.problem}, ${card.workaround}, ${card.solution},
-                      ${JSON.stringify(card.evidence)}::jsonb, ${ai.isFake() ? "fake" : ai.MODELS.write}, ${c.source_hash})
+                      ${tx.json(card.evidence)}, ${ai.isFake() ? "fake" : ai.MODELS.write}, ${c.source_hash})
               on conflict (company_id) do update set customer = excluded.customer, problem = excluded.problem,
                 workaround = excluded.workaround, solution = excluded.solution, evidence = excluded.evidence,
                 model = excluded.model, source_hash = excluded.source_hash, generated_at = now()`;

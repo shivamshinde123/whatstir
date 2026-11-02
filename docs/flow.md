@@ -13,15 +13,20 @@
 ```
 Chat.submit(text, action)
  └─ POST /api/sessions/:id/messages
-     ├─ insert messages(role=user)
-     ├─ retrieval.retrieve(scope, text)
-     │    ├─ ai.embed([text])                (text-embedding-3-small)
-     │    └─ SQL: pgvector top 40 within scope
-     ├─ ai.answer(candidates, history, action)   (gpt-6.1-sol, Structured Outputs)
-     ├─ drop company ids that weren't candidates
-     ├─ insert messages(role=assistant, company_ids)
-     ├─ tiles.appendTiles(sid, mid, ids) → newTileIds
-     └─ return { message, newTileIds, tiles }
+     ├─ parseMessageInput(body)          → 400 if invalid
+     └─ chat.postMessage(sql, sid, input)
+          ├─ session exists? (404) still active? (409); subcategory in sector? (400)
+          ├─ history = last 10 ok messages
+          ├─ insert messages(role=user, scope)
+          ├─ retrieval.retrieve(scope, text)
+          │    ├─ ai.embed([text])                (text-embedding-3-small)
+          │    └─ SQL: pgvector top 40 within scope (+ count skipped)
+          ├─ answer.answer(...)                   (gpt-6.1-sol, Structured Outputs); skipped if no candidates
+          │    └─ on error: insert assistant(status=error) → 502 retryable
+          ├─ answer.filterIds(ids, candidates)
+          ├─ insert messages(role=assistant, company_ids)
+          ├─ session.appendTiles(sid, mid, ids) → newTileIds
+          └─ return { userMessage, message, newTileIds, tiles, skipped }
 Workspace state update
  ├─ tiles appended  → ResultsGrid renders new tiles; motion animates them via layoutId
  └─ citations set   → cited tiles get the accent ring

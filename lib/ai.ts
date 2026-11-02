@@ -65,10 +65,10 @@ export async function embed(texts: string[]): Promise<number[][]> {
 }
 
 /** One Responses API call with a strict JSON schema; returns the parsed object. */
-async function structured<T>(
+export async function structured<T>(
   model: string,
   instructions: string,
-  input: string,
+  input: string | OpenAI.Responses.ResponseInput,
   name: string,
   schema: Record<string, unknown>,
 ): Promise<T> {
