@@ -27,13 +27,14 @@
 |---|---|
 | `db.ts` | `createSql(url)` (with `prepare: false`) and the lazily created shared `db()` client. |
 | `migrate.ts` | `migrate(sql, dir?)` applies the pending SQL migrations. Used by the CLI and the test helpers. |
-| `ai.ts` | Model constants and the OpenAI client: `embed(texts)`, `answer(...)`, `writeCard(...)`, `nameGroups(...)`. |
-| `jev.ts` | `assign(company, groups)` → `{ problem, ai }`, each with a confidence. |
+| `ai.ts` | `MODELS`, `companyText`, `embed(texts)`, `writeCard(company)` (Structured Outputs, then `verifyCard` drops any field whose evidence quote isn't in the text), `nameGroups(sector, oneLiners)` (then `cleanGroups`: 6–14 groups, with the reserved slugs ai, unclassified, none and all removed). Has fake versions for `AI_FAKE`, and `setOpenAIClient` lets tests swap the client. `answer()` arrives in #9. |
+| `jev.ts` | `assign(company, groups, minConfidence)` → assignment rows. Asks a `choice` question (problem) and a `noul` question (AI). `toAssignments` is the pure mapping. Has a fake version, and `setJevClient` lets tests swap the client. |
 | `refresh.ts` | `run({ trigger, sql?, fetchImpl?, retryDelaysMs? })` → `RunSummary`. Runs the pipeline: claim the run slot, fetch with retries, map (`mapRecord`), diff by `hashRow`, apply in one transaction, record. Enrichment is added in #4. |
 | `sector.ts` | `SECTOR_IDS`, `slugify`, and `industryToSector(industry)` → `{ sectorId, reason }`. A pure function, unit tested. |
 | `tiles.ts` | `appendTiles(sessionId, messageId, ids)`. Unit tested against a real database. |
 | `retrieval.ts` | `retrieve(scope, query)` → the candidate companies. |
-| `founders.ts` | Pulls founders out of a YC company page. |
+| `founders.ts` | `parseFounders(html)` (from the `data-page` JSON), `fetchFounders(ycUrl)`, `foundersEnabled()`. |
+| `enrich.ts` | `enrich({ sql, timeBudgetMs, deps? })` → `EnrichSummary`. Runs the four steps, each with its own hash. `countPending`. |
 
 ## Scripts (`scripts/`)
 - `migrate.mts` applies the SQL files in `db/migrations`.

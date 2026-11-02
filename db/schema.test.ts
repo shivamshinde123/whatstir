@@ -62,8 +62,8 @@ describe("companies", () => {
 
   it("defaults arrays to empty and timestamps to now", async () => {
     await insertCompany(sql, { id: 1 });
-    const [c] = await sql`select tags, industries, regions, former_names, first_seen_at, enriched_hash from companies`;
-    expect(c).toMatchObject({ tags: [], industries: [], regions: [], former_names: [], enriched_hash: null });
+    const [c] = await sql`select tags, industries, regions, former_names, first_seen_at, carded_hash from companies`;
+    expect(c).toMatchObject({ tags: [], industries: [], regions: [], former_names: [], carded_hash: null });
     expect(c.first_seen_at).toBeInstanceOf(Date);
   });
 });

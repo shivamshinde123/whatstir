@@ -119,7 +119,7 @@ describe("run (integration)", () => {
   });
 
   const load = (body: unknown = FIXTURE, trigger: "cron" | "manual" | "script" = "manual") =>
-    run({ trigger, sql, fetchImpl: feed(body), retryDelaysMs: [0, 0] });
+    run({ trigger, sql, fetchImpl: feed(body), retryDelaysMs: [0, 0], timeBudgetMs: 0 });
   const companyCount = async () => (await sql`select count(*)::int as n from companies`)[0].n as number;
 
   it("first load inserts every record into the right sector", async () => {
