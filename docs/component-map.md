@@ -25,7 +25,8 @@
 ## Server modules (`lib/`)
 | Module | Responsibility |
 |---|---|
-| `db.ts` | The single `postgres` client. |
+| `db.ts` | `createSql(url)` (with `prepare: false`) and the lazily created shared `db()` client. |
+| `migrate.ts` | `migrate(sql, dir?)` applies the pending SQL migrations. Used by the CLI and the test helpers. |
 | `ai.ts` | Model constants and the OpenAI client: `embed(texts)`, `answer(...)`, `writeCard(...)`, `nameGroups(...)`. |
 | `jev.ts` | `assign(company, groups)` → `{ problem, ai }`, each with a confidence. |
 | `refresh.ts` | Runs the pipeline: fetch, diff, apply, enrich, record. |
@@ -35,6 +36,6 @@
 | `founders.ts` | Pulls founders out of a YC company page. |
 
 ## Scripts (`scripts/`)
-- `migrate.ts` applies the SQL files in `db/migrations`.
-- `generate-subcategories.ts` names the problem groups for each sector, once.
-- `backfill.ts` runs the full pipeline locally with no time limit.
+- `migrate.mts` applies the SQL files in `db/migrations`.
+- `generate-subcategories.mts` names the problem groups for each sector, once.
+- `backfill.mts` runs the full pipeline locally with no time limit.

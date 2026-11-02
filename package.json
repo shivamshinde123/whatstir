@@ -14,10 +14,13 @@
     "test": "vitest run",
     "test:watch": "vitest",
     "test:e2e": "playwright test",
-    "ci": "npm run typecheck && npm run lint && npm run test && npm run test:e2e"
+    "ci": "npm run typecheck && npm run lint && npm run test && npm run test:e2e",
+    "migrate": "tsx --env-file=.env scripts/migrate.mts",
+    "db:test:up": "docker start whatstir-test-db || docker run -d --name whatstir-test-db -e POSTGRES_PASSWORD=postgres -e POSTGRES_DB=whatstir_test -p 54329:5432 pgvector/pgvector:pg16"
   },
   "dependencies": {
     "next": "16.4.4",
+    "postgres": "^4.0.0",
     "react": "19.3.0",
     "react-dom": "19.3.0"
   },
@@ -35,6 +38,7 @@
     "eslint-config-next": "16.4.4",
     "jsdom": "^30",
     "tailwindcss": "^4",
+    "tsx": "^4.23.15",
     "typescript": "^5",
     "vitest": "^5"
   }

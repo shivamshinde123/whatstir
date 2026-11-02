@@ -25,7 +25,7 @@ Empty strings become null.
 
 One run is used by the daily cron, the manual button and the backfill script (`lib/refresh.ts`).
 
-1. **Guard.** Skip when `refresh_paused` is set (for cron runs) or another run is still `running`. A Postgres advisory lock enforces the second rule.
+1. **Guard.** Skip when `refresh_paused` is set (for cron runs) or another run is still `running`. A Postgres advisory lock enforces the second rule. It must be a transaction-scoped lock (`pg_try_advisory_xact_lock`), because a lock held at the session level doesn't survive Supabase's transaction pooler.
 2. **Fetch.** Download `all.json`. Fail the run if the HTTP status is not 200, the JSON doesn't parse, the response isn't an array, or the record count is below **90 %** of the stored non-missing count. The 90 % check catches truncated responses.
 3. **Diff.** Compute `source_hash`, a SHA-1 of the mapped fields, for every record. A record is new if its id isn't stored yet, and changed if its hash differs from the stored one.
 4. **Apply.** In **one transaction**:
