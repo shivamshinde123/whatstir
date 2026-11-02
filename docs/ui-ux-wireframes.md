@@ -72,7 +72,34 @@ Jev min confidence: [0.5]
 Recent runs table: trigger, start, status, added, updated, error
 ```
 
-## Visual direction
-- Calm and neutral, with one accent colour for highlights, and supporting both light and dark mode.
-- Every logo sits next to its company name.
-- Status badges: Active (green), Acquired (blue), Public (purple), Inactive (grey).
+## Design language (Apple-style, the owner's requirement)
+
+The interface should look clean and calm, the way apple.com does. The `apple-design` skill is the reference, and the tokens live in `app/globals.css`.
+
+- **Type.**
+  - The system font stack (SF Pro on Apple devices, Segoe UI on Windows).
+  - Body text is 17 px with 1.47 line height.
+  - Large text gets tighter letter spacing and line height: `text-display` is −0.015em and 1.05, `text-headline` is −0.01em and 1.1.
+  - Hierarchy comes from weight plus size, never from colour alone.
+- **Colour.**
+  - Light mode: white and `#f5f5f7` surfaces, `#1d1d1f` text, `#6e6e73` for secondary text, and a single accent, `#0071e3`.
+  - Dark mode: true black, `#1c1c1e` surfaces, and `#2997ff` as the accent.
+  - Secondary text uses `text-secondary` so it stays readable. `text-tertiary` is only for decoration that carries no information.
+- **Space.** Generous whitespace, content inside a `max-w-5xl` column, and 16 px side margins on phones. No horizontal scrolling at 375 px.
+- **Surfaces.**
+  - Cards have an 18 px radius and a soft `shadow-card`, and no heavy borders.
+  - Navigation and toolbars use the translucent `material` class, with content scrolling underneath.
+  - Separators are hairlines in `--separator`.
+- **Motion.**
+  - Buttons respond the moment they're pressed (`pressable`, scale 0.97 over 100 ms).
+  - Springs are critically damped: Motion `{ type: "spring", bounce: 0, duration: 0.4 }`. A little bounce is allowed only where a gesture carried momentum.
+  - Panels enter and leave along the same path. The profile slides in from the left and leaves to the left.
+  - Every animation can be interrupted.
+- **Accessibility.**
+  - Respect the reduced-motion setting by replacing movement with cross-fades.
+  - Respect the reduced-transparency setting with solid materials.
+  - Focus rings are visible (2 px, accent colour).
+  - Text contrast meets WCAG AA.
+- **Content.**
+  - Every logo sits next to its company name.
+  - Status badges are small pills: Active (green), Acquired (blue), Public (purple), Inactive (grey).

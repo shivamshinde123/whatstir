@@ -2,7 +2,7 @@
 
 ```
                 ┌──────────────── Vercel (Next.js) ────────────────┐
- Browser ──────▶│ middleware (password gate)                        │
+ Browser ──────▶│ proxy.ts (password gate)                          │
   treemap       │ pages: /  /sector/[id]  /admin  /login            │
   workspace     │ route handlers: /api/*                            │
                 │   chat ─────▶ retrieval ──▶ OpenAI gpt-6.1-sol    │

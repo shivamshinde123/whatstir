@@ -7,7 +7,7 @@ All variables live in `.env` at the repository root. That file is listed in `.gi
 | `DATABASE_URL` | yes | server, scripts | The Supabase **transaction pooler** URL (port 6543). The client is created with `prepare: false`, which the pooler requires. |
 | `OPENAI_API_KEY` | yes | chat, writing jobs, embeddings | Server only. |
 | `TYPESAFE_API_KEY` | yes | Jev assignment | The SDK reads it automatically. |
-| `APP_PASSWORD` | on deploy | middleware | Leave blank to switch the gate off, which is only acceptable locally. |
+| `APP_PASSWORD` | on deploy | `proxy.ts` | Leave blank to switch the gate off, which is only acceptable locally. |
 | `CRON_SECRET` | on deploy | `/api/cron/refresh` | Vercel Cron sends it as `Authorization: Bearer <secret>`. |
 | `FOUNDERS_FETCH` | no | refresh | `on` by default. Set it to `off` to skip fetching founders from YC pages (see decision.md, open item A). |
 

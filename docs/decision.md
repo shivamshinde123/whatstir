@@ -31,7 +31,7 @@ Listed in the order they were made. Decisions 1–14 are recorded in §16 of [in
 27. **The MVP extras are** notes, problem cards, compare (2–3 companies), Explore this problem, and Challenge my idea.
 28. **The refresh runs daily at 06:00 America/New_York** through Vercel Cron, with pause and manual-refresh controls.
     - *Trade-off:* Vercel's cron schedule is fixed in `vercel.json`, so changing the time means a redeploy. Pausing is a database flag and takes effect immediately.
-29. **There is no login.** On Vercel, a single `APP_PASSWORD` gate in middleware protects the app.
+29. **There is no login.** On Vercel, a single `APP_PASSWORD` gate in the Next.js proxy protects the app.
 30. **Development is local first,** against a hosted Supabase project, and moves to Vercel once the core journey works.
 31. **The initial backfill runs as a local script, not on Vercel.**
     - *Why:* enriching 6,362 companies (founders, embeddings, Jev, problem cards) takes far longer than a serverless function is allowed to run. The daily cron then handles only new and changed records.

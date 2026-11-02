@@ -24,14 +24,19 @@ Whatstir/
 ├─ db/migrations/                  001_init.sql, …
 ├─ scripts/                        migrate.ts, generate-subcategories.ts, backfill.ts
 ├─ docs/                           this documentation; intial_idea.md is the requirements source
-├─ middleware.ts
+├─ e2e/                            Playwright specs (*.spec.ts)
+├─ test/                           shared test helpers, fixtures, harness checks
+├─ .github/workflows/ci.yml        the required `ci` check
+├─ proxy.ts                        password gate (Next 16 name for middleware)
 ├─ vercel.json                     cron schedule
+├─ vitest.config.mts, vitest.setup.ts, playwright.config.ts
+├─ CLAUDE.md, AGENTS.md            agent instructions (workflow, design, Next 16 notes)
 ├─ .env                            local secrets (gitignored)
 └─ package.json
 ```
 
 ## Rules
 - Code in `lib/` runs only on the server. Every module there starts with `import "server-only"`, except the scripts and modules with no side effects, such as `sector.ts`.
-- Each test sits next to the code it checks, as `*.test.ts`.
+- Each test sits next to the code it checks, as `*.test.ts(x)`. End-to-end tests live in `e2e/`, and shared fixtures live in `test/`.
 - Database schema changes go in a new numbered migration. Never edit a migration that has already been applied.
 - There is no `utils/` grab-bag folder. A helper lives in the module that uses it until a second module needs it too.

@@ -47,7 +47,7 @@ B2B has about 3.2k companies. The basket is a scrolling wrap of 40 px logos styl
 `d3-hierarchy`'s `treemap().tile(treemapSquarify)` lays out the sectors at the container's size, recalculated when the container resizes (`ResizeObserver`). The boxes are `<button>` elements positioned absolutely on the page. Boxes smaller than 80×40 px show only the count, with the full label in a tooltip and an `aria-label`. An `<ul>` list of the sectors sits underneath for screen readers and has a "Show as list" toggle.
 
 ## Password gate
-`middleware.ts` runs only when `APP_PASSWORD` is set. Every route except `/login`, `/api/login` and `/api/cron/*` needs a cookie equal to `HMAC(APP_PASSWORD, "whatstir")`, checked in constant time.
+`proxy.ts` runs only when `APP_PASSWORD` is set. Every route except `/login`, `/api/login` and `/api/cron/*` needs a cookie equal to `HMAC(APP_PASSWORD, "whatstir")`, checked in constant time.
 
 ## Failure handling
 - If the chat call fails, the user's message is saved, the reply is marked `status=error`, and a Retry button reposts the same text.
