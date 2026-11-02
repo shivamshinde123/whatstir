@@ -27,7 +27,7 @@ test.describe("password gate", () => {
     await page.getByLabel("Password").fill(E2E_PASSWORD);
     await page.keyboard.press("Enter");
     await expect(page).toHaveURL(/\/\?from=test$/);
-    await expect(page.getByRole("heading", { level: 1 })).toHaveText("Whatstir");
+    await expect(page.getByRole("heading", { level: 1 })).toHaveText("Explore startups by sector");
 
     const cookie = (await page.context().cookies()).find((c) => c.name === "whatstir_auth");
     expect(cookie?.httpOnly).toBe(true);
@@ -43,6 +43,18 @@ test.describe("password gate", () => {
     await expect(page).toHaveURL(/\/$/);
 
     expect((await page.request.post("/api/logout")).status()).toBe(204);
+    await page.goto("/");
+    await expect(page).toHaveURL(/\/login/);
+  });
+
+  test("the header's Sign out button logs out and returns to the login page", async ({ page }) => {
+    await page.goto("/login");
+    await page.getByLabel("Password").fill(E2E_PASSWORD);
+    await page.getByRole("button", { name: "Continue" }).click();
+    const signOut = page.getByRole("button", { name: "Sign out" });
+    await expect(signOut).toBeVisible();
+    await signOut.click();
+    await expect(page).toHaveURL(/\/login$/);
     await page.goto("/");
     await expect(page).toHaveURL(/\/login/);
   });

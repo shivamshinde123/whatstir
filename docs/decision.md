@@ -63,6 +63,12 @@ Listed in the order they were made. Decisions 1–14 are recorded in §16 of [in
     - *Why:* 6–14 AI-suggested groups for Other's 18 companies would be groups of one or two, which is noise, not structure. Their companies stay findable through All and Unclassified.
     - Regenerating replaces the problem groups instead of keeping old versions next to them. Old groups are deleted together with their assignments, and the sector's companies are reassigned on the next run.
 
+40. **The home page fetches its data in the browser** (`HomeView` calls `/api/sectors`) rather than rendering it on the server.
+    - *Why:* with `cacheComponents`, a server component that reads the database needs Suspense or caching, or the build tries to prerender it against a database that isn't there. Fetching in the browser gives the loading, error-with-retry and empty states the spec asks for. It's one small request.
+    - Database route handlers call `await connection()` for the same reason.
+41. **`/api/sectors` returns both total and active counts in one response,** replacing the `?active=` parameter, so the toggle switches instantly. It also returns `gate`, which tells the client header whether to show Sign out.
+42. **E2E tests run against a real database**: global setup recreates `whatstir_e2e` on the test Postgres server and loads the 37-record fixture.
+
 ## Open items
 
 - **A. Founder data.** Founders come from YC company pages. Check YC's terms before production use. Until then, the founder fetch can be switched off with `FOUNDERS_FETCH=off`.

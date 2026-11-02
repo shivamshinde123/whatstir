@@ -2,8 +2,10 @@
 
 ## 1. Landing page: treemap
 ```
-┌ Whatstir ─────────────────────────────── [Active only ☐] [Admin] ┐
-│ 6,362 companies from yc-oss · updated Nov 2 · not affiliated w/ YC│
+┌ Whatstir (translucent bar) ──────────────────────────── [Sign out]┐
+│ Explore startups by sector                                        │
+│ 6,362 companies from yc-oss · updated Nov 2, 2026                 │
+│ ( All companies | Active only )                     Show as list  │
 │ ┌───────────────────────────────┬──────────────┬────────────────┐ │
 │ │                               │  Consumer    │  Healthcare    │ │
 │ │          B2B                  │    889       │    708         │ │
@@ -16,6 +18,7 @@
 │ [Show as list]                                                    │
 └───────────────────────────────────────────────────────────────────┘
 ```
+- **Tiles:** a soft tint of each sector's Apple system colour, with the name at the top left and a large tinted count at the bottom left. Small tiles show only the count. "Not affiliated with Y Combinator" sits in the footer.
 - **Loading:** grey skeleton boxes.
 - **Source unavailable:** "Couldn't load data. Retry."
 - **Empty:** "No companies loaded yet. Run the backfill."

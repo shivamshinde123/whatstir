@@ -3,13 +3,18 @@ import { expect, test } from "@playwright/test";
 test.describe("home page", () => {
   test("loads with the product title and heading", async ({ page }) => {
     const errors: string[] = [];
-    page.on("console", (m) => m.type() === "error" && errors.push(m.text()));
+    page.on("console", (m) => {
+      if (m.type() !== "error") return;
+      // TODO(#8): remove once /sector/[id] exists. Until then, Next's prefetch of the tile links 404s.
+      if (m.text().startsWith("Failed to load resource") && m.location().url.includes("/sector/")) return;
+      errors.push(`${m.text()} (${m.location().url})`);
+    });
     page.on("pageerror", (e) => errors.push(e.message));
 
     const res = await page.goto("/");
     expect(res?.status()).toBe(200);
     await expect(page).toHaveTitle(/Whatstir/);
-    await expect(page.getByRole("heading", { level: 1 })).toHaveText("Whatstir");
+    await expect(page.getByRole("heading", { level: 1 })).toHaveText("Explore startups by sector");
     await expect(page.getByText("Not affiliated with Y Combinator.")).toBeVisible();
     expect(errors).toEqual([]);
   });
@@ -38,17 +43,11 @@ test.describe("home page", () => {
 
   test("shows a visible focus ring for keyboard users", async ({ page }) => {
     await page.goto("/");
-    // Inject only after hydration, or React may discard the probe.
-    await page.waitForLoadState("networkidle");
-    await page.evaluate(() => {
-      const b = document.createElement("button");
-      b.textContent = "probe";
-      document.querySelector("main")!.append(b);
-    });
+    // The first Tab lands on the header's home link.
     await page.keyboard.press("Tab");
-    const outline = await page.evaluate(
-      () => getComputedStyle(document.activeElement!).outlineStyle,
-    );
-    expect(outline).toBe("solid");
+    const home = page.getByRole("link", { name: "Whatstir" });
+    await expect(home).toBeFocused();
+    await expect(home).toHaveCSS("outline-style", "solid");
+    await expect(home).toHaveCSS("outline-width", "2px");
   });
 });

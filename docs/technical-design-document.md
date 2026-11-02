@@ -44,7 +44,20 @@ The check for this lives in `lib/tiles.test.ts`. It confirms that answers citing
 B2B has about 3.2k companies. The basket is a scrolling wrap of 40 px logos styled with `content-visibility: auto`. Images use `loading="lazy"`, and a missing or broken logo falls back to the company's initials on a colour derived from its id. A filter box above the basket narrows it by name.
 
 ## Treemap
-`d3-hierarchy`'s `treemap().tile(treemapSquarify)` lays out the sectors at the container's size, recalculated when the container resizes (`ResizeObserver`). The boxes are `<button>` elements positioned absolutely on the page. Boxes smaller than 80×40 px show only the count, with the full label in a tooltip and an `aria-label`. An `<ul>` list of the sectors sits underneath for screen readers and has a "Show as list" toggle.
+The home page is a static shell, and `HomeView` (a client component) fetches `/api/sectors` once.
+- **States:** loading shows pulsing skeleton tiles (without the pulse for reduced motion); an error has a "Try again" button; an empty dataset shows "No companies loaded yet". Each has its own message.
+- **Layout:** `layoutTreemap` (`lib/treemap.ts`) runs `d3-hierarchy`'s `treemap().tile(treemapSquarify)` with no inner padding, so each tile's area is exactly proportional to its count, which the unit tests check to within 1%. The spacing between tiles comes from CSS padding on each tile instead. The layout is recalculated when the always-mounted container resizes (`ResizeObserver`). A sector with 0 companies gets no tile, but still appears in the list view.
+- **Tiles** are `<a href="/sector/:id">` links, because they navigate, inside a `<ul aria-label="Sectors sized by number of companies">`. Every tile has an `aria-label` and a tooltip of the form "B2B, 3,233 companies".
+  - A tile under 110×72 px is "compact" and shows only its count; the name is in the label and tooltip.
+  - A tile under 48×36 px is "tiny" and gets less padding and 11 px digits, so even Other's 18 still fits on a phone.
+  - The count's colour is the sector's colour mixed 72 % toward the text colour. That makes it darker in light mode and lighter in dark mode, which meets the 3:1 contrast needed for large text on the tile's 14 % tint.
+- **Controls:**
+  - An "All companies / Active only" segmented control (`aria-pressed`) switches every count, using data already loaded.
+  - "Show as list" swaps the map for a list of every sector, largest first, as an accessible alternative.
+- **Coverage line:** "N companies from yc-oss · updated <date>". It never claims to cover "all YC companies".
+
+## Database access in route handlers
+With `cacheComponents` on, Next.js starts running GET handlers at build time. So every route handler that reads the database calls `await connection()` (from `next/server`) first, which keeps the query at request time and means the build never needs `DATABASE_URL`.
 
 ## Password gate
 `proxy.ts` (Next 16's replacement for middleware, which runs on the Node.js runtime) does nothing unless `APP_PASSWORD` is set. When it is:

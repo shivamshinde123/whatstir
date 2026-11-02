@@ -11,7 +11,9 @@
 ## UI components (`components/`)
 | Component | Props / role | Talks to |
 |---|---|---|
-| `Treemap` | Takes `sectors[]` and calls `onSelect(id)`. Lays out boxes with d3-hierarchy and includes the screen-reader list. | — |
+| `SiteHeader` | The translucent top bar with a link home, plus a Sign out form (posting to `/api/logout`) when the gate is on. | — |
+| `HomeView` (client) | The landing page: fetches the data, handles loading, error and empty states, the coverage line, the All/Active toggle, the map/list switch, and measures the container. | `GET /api/sectors` |
+| `Treemap` | Draws the laid-out `Tile[]` as absolutely positioned links with labels, the compact and tiny variants, and sector tints (`lib/sector-style.ts`). | — |
 | `Workspace` | The three-column layout. Owns the session state: tiles, messages and the citations of the latest answer. | session and message APIs |
 | `SubcategoryBar` | Chips for All, the subcategories with counts, AI and Unclassified, plus an "AI-suggested" label. | — |
 | `Basket` | Logos for the companies in scope, plus a name filter. Clicking a logo opens its profile. | — |
@@ -25,6 +27,9 @@
 ## Server modules (`lib/`)
 | Module | Responsibility |
 |---|---|
+| `sectors.ts` | `getSectorOverview(sql)` → sectors with total and active counts, both totals, and `lastRefreshAt`. |
+| `treemap.ts` | `layoutTreemap(items, w, h)` → `Tile[]` (squarified, proportional), plus `isCompact` and `isTiny`. Pure functions. |
+| `sector-style.ts` | `sectorColor(id)`: Apple system colours, one per sector. |
 | `auth.ts` | The cookie name and lifetime, `authToken`, `isValidToken`, `isCorrectPassword` (constant-time), `isPublicPath`, `gatePassword`. Server only (`node:crypto`). |
 | `safe-next.ts` | `safeNext(next)`, the open-redirect guard. Safe in the browser. |
 | `db.ts` | `createSql(url)` (with `prepare: false`) and the lazily created shared `db()` client. |
