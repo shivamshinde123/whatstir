@@ -74,7 +74,7 @@ Indexes: an HNSW index on `embedding` (`vector_cosine_ops`), plus indexes on `se
 ## Operations
 
 ### `refresh_runs`
-`id` bigserial PK, `trigger` (`cron`, `manual` or `script`), `started_at`, `finished_at`, `status` (`running`, `ok`, `failed` or `skipped`), `source_count`, `added`, `updated`, `enriched`, `pending`, `error` text.
+`id` bigserial PK, `trigger` (`cron`, `manual` or `script`), `started_at`, `finished_at`, `status` (`running`, `ok`, `failed` or `skipped`), `source_count`, `added`, `updated`, `enriched`, `pending`, `error` text. A partial unique index allows only one `running` row at a time (migration 002); that index is the refresh lock, see decision 33. Skipped runs are recorded too, with the reason in `error`.
 
 ### `app_settings`
 `key` text PK, `value` jsonb. See environment-config-reference.md.

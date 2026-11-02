@@ -43,6 +43,16 @@ Listed in the order they were made. Decisions 1–14 are recorded in §16 of [in
     - *Why:* Anthropic has no embeddings API, and the owner preferred a single provider over adding Voyage. This leaves two keys: `OPENAI_API_KEY` and `TYPESAFE_API_KEY`.
     - *Model choice:* Sol is OpenAI's balanced model, close to the flagship Astra at lower cost, which is plenty for answers grounded in 40 listed companies. Switching to `gpt-6-astra` is a one-constant change if answer quality falls short.
 
+## 2026-11-02
+
+33. **The refresh lock is a unique index on `refresh_runs`, not an advisory lock.** A partial unique index lets only one row have `status = 'running'`.
+    - *Why:* a session-level advisory lock doesn't survive Supabase's transaction pooler. A transaction-level one would mean holding a transaction open for the whole run, including several minutes of enrichment. The unique index works through any pooler and is visible on the admin page.
+    - A run that crashes without finishing would hold the slot for ever, so a `running` row older than 15 minutes is marked `failed` and the slot is freed.
+34. **Fetching the feed retries network errors and 5xx responses twice, after 2 s and then 5 s.**
+    - *Why:* while building #3, the first real refresh failed with a transient `fetch failed`, and the spec asks for transient failures to be retried. 4xx responses and bad bodies aren't retried, because retrying can't fix them.
+35. **Tests use the `TEST_DATABASE_URL` variable, never `DATABASE_URL`, and each test file gets its own migrated schema.**
+    - *Why:* tests must never be able to touch the real database, and test files need to run in parallel.
+
 ## Open items
 
 - **A. Founder data.** Founders come from YC company pages. Check YC's terms before production use. Until then, the founder fetch can be switched off with `FOUNDERS_FETCH=off`.

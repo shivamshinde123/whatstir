@@ -1,0 +1,1536 @@
+[
+ {
+  "id": 14,
+  "name": "HireArt",
+  "slug": "hireart",
+  "former_names": [],
+  "small_logo_thumb_url": "https://bookface-images.s3.amazonaws.com/small_logos/1313424ffcccb181d4a78eec0cde6b8bcab2da6d.png",
+  "website": "http://hireart.com",
+  "all_locations": "New York City, NY, USA; New York, NY, USA",
+  "long_description": "Hire Smarter with HireArt.\r\n\r\nWe're a modern staffing agency that uses work samples and video assessments to generate deeper insight & connect contractors to companies where they'll thrive.\r\n\r\nOur graders and account managers individually assess each candidate on culture fit, experience, and communication skills. The proof is in the talent: our candidates have filled roles at leading start-up and technology companies like Facebook, Airbnb, and Waymo. \r\n\r\nWe put people first, from our candidates to our clients, we believe in the power of transparent hiring.\r\n\r\nLearn more about our team and our platform at HireArt.com.",
+  "one_liner": "Gives businesses everything needed to hire & manage W2 contractors.",
+  "team_size": 90,
+  "industry": "B2B",
+  "subindustry": "B2B -> Recruiting and Talent",
+  "launched_at": 1322045617,
+  "tags": [
+   "SaaS",
+   "B2B",
+   "HR Tech"
+  ],
+  "tags_highlighted": [],
+  "top_company": false,
+  "isHiring": false,
+  "nonprofit": false,
+  "batch": "Winter 2012",
+  "status": "Active",
+  "industries": [
+   "B2B",
+   "Recruiting and Talent"
+  ],
+  "regions": [
+   "United States of America",
+   "America / Canada",
+   "Remote",
+   "Partly Remote"
+  ],
+  "stage": "Growth",
+  "app_video_public": false,
+  "demo_day_video_public": false,
+  "app_answers": null,
+  "question_answers": false,
+  "url": "https://www.ycombinator.com/companies/hireart",
+  "api": "https://yc-oss.github.io/api/batches/winter-2012/hireart.json"
+ },
+ {
+  "id": 19,
+  "name": "Rescale",
+  "slug": "rescale",
+  "former_names": [],
+  "small_logo_thumb_url": "https://bookface-images.s3.amazonaws.com/small_logos/711fea8d5911eff2cca6ae58f7c2371f123c9dc1.png",
+  "website": "https://rescale.com",
+  "all_locations": "San Francisco, CA, USA",
+  "long_description": "Rescale is a cloud-based platform for computational engineering and R&D, that empowers engineers and researchers to accelerate discovery, testing, and optimization. We democratize access to the latest technologies that drive greater efficiency and competitiveness, including high performance computing, simulation, modeling, AI/ML, and digital twins.\r\n\r\nThe majority of industry leaders worldwide use Rescale as the backbone of R&D, connecting the digital thread of new product innovation to develop products that enrich humanity, from autonomous vehicles to drug discovery. Rescale customers include 7 of the top 10 automotive companies and 3 of the top 6 life science companies.\r\n\r\nRescale’s full-stack, open platform automates systems, data, and workflows into a user-centric experience, so customers can focus on innovation. Choose from 1000+ pre-installed applications for multiphysics simulation and AI/ML-assisted design exploration, including commercial, open-source, and custom software. We offer the largest global network of hyperscale and specialty cloud infrastructure to leverage the latest CPU, GPU, and other specialized architectures.\r\n\r\nRescale is enterprise-ready to enable any size organization to achieve their digital transformation goals–with unified management that gives IT teams full visibility and control of hybrid-cloud operations. Rescale’s intelligent automation gives customers flexibility to improve performance and reduce costs of computing, while our enhanced security and compliance ensures industry-leading standards are met from end to end.\r\n\r\nGetting started is simple, flexible, and free to try. Our team of experts is ready to help you achieve your most ambitious engineering goals – schedule a demo today.\r\n\r\nJoin us and help us build products that change the world: www.rescale.com/careers",
+  "one_liner": "High Performance Computing Built for the Cloud",
+  "team_size": 250,
+  "industry": "B2B",
+  "subindustry": "B2B -> Engineering, Product and Design",
+  "launched_at": 1322045674,
+  "tags": [
+   "Cloud Computing"
+  ],
+  "tags_highlighted": [],
+  "top_company": false,
+  "isHiring": true,
+  "nonprofit": false,
+  "batch": "Winter 2012",
+  "status": "Active",
+  "industries": [
+   "B2B",
+   "Engineering, Product and Design"
+  ],
+  "regions": [
+   "United States of America",
+   "America / Canada",
+   "Remote",
+   "Partly Remote"
+  ],
+  "stage": "Growth",
+  "app_video_public": false,
+  "demo_day_video_public": false,
+  "app_answers": null,
+  "question_answers": true,
+  "url": "https://www.ycombinator.com/companies/rescale",
+  "api": "https://yc-oss.github.io/api/batches/winter-2012/rescale.json"
+ },
+ {
+  "id": 9,
+  "name": "WireOver",
+  "slug": "wireover",
+  "former_names": [],
+  "small_logo_thumb_url": "/company/thumb/missing.png",
+  "website": "http://wireover.com",
+  "all_locations": "Boston, MA, USA; Cambridge, MA, USA",
+  "long_description": "WireOver is a desktop application that leverages peer-to-peer technology for sending files privately. It's free and unlimited, solving an unmet need for sending large files easily. Pro accounts get incredibly strong security, with end-to-end encryption.",
+  "one_liner": "Really secure file sending for big files.",
+  "team_size": 2,
+  "industry": "B2B",
+  "subindustry": "B2B -> Productivity",
+  "launched_at": 1322045564,
+  "tags": [
+   "Security",
+   "Enterprise"
+  ],
+  "tags_highlighted": [],
+  "top_company": false,
+  "isHiring": false,
+  "nonprofit": false,
+  "batch": "Winter 2012",
+  "status": "Inactive",
+  "industries": [
+   "B2B",
+   "Productivity"
+  ],
+  "regions": [
+   "United States of America",
+   "America / Canada"
+  ],
+  "stage": "Early",
+  "app_video_public": false,
+  "demo_day_video_public": false,
+  "app_answers": null,
+  "question_answers": false,
+  "url": "https://www.ycombinator.com/companies/wireover",
+  "api": "https://yc-oss.github.io/api/batches/winter-2012/wireover.json"
+ },
+ {
+  "id": 146,
+  "name": "Instapainting",
+  "slug": "instapainting",
+  "former_names": [
+   "Like.fm"
+  ],
+  "small_logo_thumb_url": "https://bookface-images.s3.amazonaws.com/small_logos/aa49fcc24922318b5f81788c61ee254fd8f5fddf.png",
+  "website": "http://instapainting.com",
+  "all_locations": "Tokyo, Tokyo, Japan; San Francisco, CA, USA; Remote",
+  "long_description": "Instapainting turns any photo (from your phone, Facebook, Instagram, DSLR, the internet) into a hand-painted oil painting on real canvas, for $45 (for 10\"x10\"), and delivered in less than two weeks.\r\n\r\nThe company is backed by Y Combinator and Start Fund (SV Angel and Yuri Milner).\r\n\r\nCustomers include founder and CEO of Pebble Technology, Eric Migicovsky, and founder and CEO of Apportable, Inc., Collin Jackson.",
+  "one_liner": "Custom-made artwork from artists e-commerce marketplace.",
+  "team_size": 2,
+  "industry": "Consumer",
+  "subindustry": "Consumer -> Home and Personal",
+  "launched_at": 1326789787,
+  "tags": [],
+  "tags_highlighted": [],
+  "top_company": false,
+  "isHiring": false,
+  "nonprofit": false,
+  "batch": "Winter 2011",
+  "status": "Active",
+  "industries": [
+   "Consumer",
+   "Home and Personal"
+  ],
+  "regions": [
+   "Japan",
+   "United States of America",
+   "East Asia",
+   "America / Canada",
+   "Remote",
+   "Fully Remote"
+  ],
+  "stage": "Early",
+  "app_video_public": false,
+  "demo_day_video_public": false,
+  "app_answers": null,
+  "question_answers": false,
+  "url": "https://www.ycombinator.com/companies/instapainting",
+  "api": "https://yc-oss.github.io/api/batches/winter-2011/instapainting.json"
+ },
+ {
+  "id": 164,
+  "name": "Mino Games",
+  "slug": "mino-games",
+  "former_names": [
+   "Minomonsters"
+  ],
+  "small_logo_thumb_url": "https://bookface-images.s3.amazonaws.com/small_logos/573373ab6401e76024bab0260b4ba1cd64b7a1fe.png",
+  "website": "http://minomonsters.com",
+  "all_locations": "San Francisco, CA, USA; Montreal, QC, Canada",
+  "long_description": "Top-25 grossing mobile gaming studio. Backed by Andreessen Horowitz and Y Combinator. ",
+  "one_liner": "Mobile games company",
+  "team_size": 11,
+  "industry": "Consumer",
+  "subindustry": "Consumer -> Gaming",
+  "launched_at": 1326789959,
+  "tags": [
+   "Gaming"
+  ],
+  "tags_highlighted": [],
+  "top_company": false,
+  "isHiring": true,
+  "nonprofit": false,
+  "batch": "Winter 2011",
+  "status": "Active",
+  "industries": [
+   "Consumer",
+   "Gaming"
+  ],
+  "regions": [
+   "United States of America",
+   "Canada",
+   "America / Canada"
+  ],
+  "stage": "Growth",
+  "app_video_public": false,
+  "demo_day_video_public": false,
+  "app_answers": null,
+  "question_answers": false,
+  "url": "https://www.ycombinator.com/companies/mino-games",
+  "api": "https://yc-oss.github.io/api/batches/winter-2011/mino-games.json"
+ },
+ {
+  "id": 6,
+  "name": "iCracked",
+  "slug": "icracked",
+  "former_names": [],
+  "small_logo_thumb_url": "/company/thumb/missing.png",
+  "website": "http://icracked.com",
+  "all_locations": "San Francisco, CA, USA; Redwood City, CA, USA",
+  "long_description": "Founded in 2010 and located in the heart of Silicon Valley, iCracked is the most uncommonly awesome way to repair your iPhone, iPad or Samsung Galaxy at the time and location of your choosing. Powered by a nationwide network of thousands of certified, background-checked technicians, iCracked provides customers unparalleled convenience and peace of mind knowing that trustworthy experts are always there to get you back up and running with your most crucial devices. Home, office or coffee shop, you name it, and we’ll be there with smiles on our faces to repair your device in 30 minutes or less. Yes, seriously. \r\n\r\nWe exist to bridge the ever-widening gap between people and that moment of magic they experience when their technology simply works the way it should - wherever and whenever they need it most. \r\n\r\nWant to find out more about how you can be a part of our vibrant, inclusive, and innovative team? Check out our open positions and apply today so you can join us in our quest to change the way consumers care for their devices.",
+  "one_liner": "On-demand smartphone repair in 3 countries and launching smart home…",
+  "team_size": 51,
+  "industry": "Consumer",
+  "subindustry": "Consumer -> Home and Personal",
+  "launched_at": 1322045532,
+  "tags": [],
+  "tags_highlighted": [],
+  "top_company": false,
+  "isHiring": false,
+  "nonprofit": false,
+  "batch": "Winter 2012",
+  "status": "Acquired",
+  "industries": [
+   "Consumer",
+   "Home and Personal"
+  ],
+  "regions": [
+   "United States of America",
+   "America / Canada"
+  ],
+  "stage": "Growth",
+  "app_video_public": false,
+  "demo_day_video_public": false,
+  "app_answers": null,
+  "question_answers": false,
+  "url": "https://www.ycombinator.com/companies/icracked",
+  "api": "https://yc-oss.github.io/api/batches/winter-2012/icracked.json"
+ },
+ {
+  "id": 85,
+  "name": "Quartzy",
+  "slug": "quartzy",
+  "former_names": [],
+  "small_logo_thumb_url": "https://bookface-images.s3.amazonaws.com/small_logos/4040613ddc6090974d404ee7a77c5ebad60a1e10.png",
+  "website": "https://www.quartzy.com",
+  "all_locations": "San Francisco, CA, USA; Hayward, CA, USA",
+  "long_description": "The world’s No. 1 lab management platform. We help scientists easily organize orders, manage inventory, and save money.",
+  "one_liner": "Marketplace for life science supplies.",
+  "team_size": 100,
+  "industry": "Healthcare",
+  "subindustry": "Healthcare -> Healthcare IT",
+  "launched_at": 1326789155,
+  "tags": [
+   "SaaS",
+   "B2B",
+   "E-commerce"
+  ],
+  "tags_highlighted": [],
+  "top_company": false,
+  "isHiring": true,
+  "nonprofit": false,
+  "batch": "Summer 2011",
+  "status": "Active",
+  "industries": [
+   "Healthcare",
+   "Healthcare IT"
+  ],
+  "regions": [
+   "United States of America",
+   "America / Canada",
+   "Remote",
+   "Partly Remote"
+  ],
+  "stage": "Growth",
+  "app_video_public": false,
+  "demo_day_video_public": false,
+  "app_answers": null,
+  "question_answers": false,
+  "url": "https://www.ycombinator.com/companies/quartzy",
+  "api": "https://yc-oss.github.io/api/batches/summer-2011/quartzy.json"
+ },
+ {
+  "id": 90,
+  "name": "AgileMD",
+  "slug": "agilemd",
+  "former_names": [],
+  "small_logo_thumb_url": "https://bookface-images.s3.amazonaws.com/small_logos/809b12f827ff69a7f32abee89d407ac3eac9359d.png",
+  "website": "https://agilemd.com",
+  "all_locations": "San Francisco, CA, USA; Remote",
+  "long_description": "At AgileMD, we are building the most advanced real-time predictive analytics and clinical algorithms platform for hospitals. Our cloud-based engine helps thousands of doctors and nurses around the country make medical decisions, so that every patient receives the highest quality and value of care based on the latest medical knowledge and data.",
+  "one_liner": "Predictive analytics and clinical pathways for hospitals ",
+  "team_size": 19,
+  "industry": "Healthcare",
+  "subindustry": "Healthcare -> Healthcare IT",
+  "launched_at": 1326789206,
+  "tags": [
+   "Machine Learning",
+   "Healthcare"
+  ],
+  "tags_highlighted": [],
+  "top_company": false,
+  "isHiring": false,
+  "nonprofit": false,
+  "batch": "Summer 2011",
+  "status": "Active",
+  "industries": [
+   "Healthcare",
+   "Healthcare IT"
+  ],
+  "regions": [
+   "United States of America",
+   "America / Canada",
+   "Remote",
+   "Fully Remote"
+  ],
+  "stage": "Growth",
+  "app_video_public": false,
+  "demo_day_video_public": false,
+  "app_answers": null,
+  "question_answers": false,
+  "url": "https://www.ycombinator.com/companies/agilemd",
+  "api": "https://yc-oss.github.io/api/batches/summer-2011/agilemd.json"
+ },
+ {
+  "id": 83,
+  "name": "Science Exchange",
+  "slug": "science-exchange",
+  "former_names": [],
+  "small_logo_thumb_url": "https://bookface-images.s3.amazonaws.com/small_logos/0db3228fbd884724c2ad75aeac20b60376478518.png",
+  "website": "https://www.scienceexchange.com/",
+  "all_locations": "San Francisco, CA, USA; Palo Alto, CA, USA; Remote",
+  "long_description": "Science Exchange powers R&D outsourcing for the world’s top life sciences companies. Our marketplace gives scientists access to the innovation and research they need and our platform fully automates R&D outsourcing from source to pay so scientists can focus on what they love—science.",
+  "one_liner": "Powering scientific outsourcing",
+  "team_size": 50,
+  "industry": "Healthcare",
+  "subindustry": "Healthcare -> Healthcare Services",
+  "launched_at": 1326789132,
+  "tags": [
+   "SaaS",
+   "Health Tech",
+   "Biotech",
+   "Enterprise"
+  ],
+  "tags_highlighted": [],
+  "top_company": false,
+  "isHiring": false,
+  "nonprofit": false,
+  "batch": "Summer 2011",
+  "status": "Acquired",
+  "industries": [
+   "Healthcare",
+   "Healthcare Services"
+  ],
+  "regions": [
+   "United States of America",
+   "America / Canada",
+   "Remote",
+   "Fully Remote"
+  ],
+  "stage": "Growth",
+  "app_video_public": false,
+  "demo_day_video_public": false,
+  "app_answers": null,
+  "question_answers": false,
+  "url": "https://www.ycombinator.com/companies/science-exchange",
+  "api": "https://yc-oss.github.io/api/batches/summer-2011/science-exchange.json"
+ },
+ {
+  "id": 64,
+  "name": "Y Combinator",
+  "slug": "y-combinator",
+  "former_names": [],
+  "small_logo_thumb_url": "https://bookface-images.s3.amazonaws.com/small_logos/2db694dd7905db37d037821a2fdaf9fa0708a964.png",
+  "website": "https://www.ycombinator.com",
+  "all_locations": "",
+  "long_description": "Make something people want.",
+  "one_liner": "Make something people want.",
+  "team_size": 100,
+  "industry": "Fintech",
+  "subindustry": "Fintech",
+  "launched_at": 1322046644,
+  "tags": [],
+  "tags_highlighted": [],
+  "top_company": false,
+  "isHiring": true,
+  "nonprofit": false,
+  "batch": "Unspecified",
+  "status": "Active",
+  "industries": [
+   "Fintech"
+  ],
+  "regions": [
+   "Remote",
+   "Partly Remote"
+  ],
+  "stage": "Early",
+  "app_video_public": false,
+  "demo_day_video_public": false,
+  "app_answers": null,
+  "question_answers": false,
+  "url": "https://www.ycombinator.com/companies/y-combinator",
+  "api": "https://yc-oss.github.io/api/batches/unspecified/y-combinator.json"
+ },
+ {
+  "id": 149,
+  "name": "Tremendous",
+  "slug": "tremendous",
+  "former_names": [
+   "GiftRocket"
+  ],
+  "small_logo_thumb_url": "https://bookface-images.s3.amazonaws.com/small_logos/4113d9f505976529d750df754ce34c986d9cf14a.png",
+  "website": "https://www.tremendous.com",
+  "all_locations": "New York City, NY, USA; Remote",
+  "long_description": "Tremendous is a payouts platform for businesses to send money and gift cards to anyone, anywhere. Used by 25k+ companies for one-time payments, including research compensation, marketing incentives, and employee recognition.",
+  "one_liner": "How businesses send money to people at scale. Fast, free, global.",
+  "team_size": 150,
+  "industry": "Fintech",
+  "subindustry": "Fintech -> Payments",
+  "launched_at": 1326789805,
+  "tags": [
+   "Fintech",
+   "Payments"
+  ],
+  "tags_highlighted": [],
+  "top_company": false,
+  "isHiring": false,
+  "nonprofit": false,
+  "batch": "Winter 2011",
+  "status": "Active",
+  "industries": [
+   "Fintech",
+   "Payments"
+  ],
+  "regions": [
+   "United States of America",
+   "America / Canada",
+   "Remote",
+   "Fully Remote"
+  ],
+  "stage": "Early",
+  "app_video_public": false,
+  "demo_day_video_public": false,
+  "app_answers": null,
+  "question_answers": false,
+  "url": "https://www.ycombinator.com/companies/tremendous",
+  "api": "https://yc-oss.github.io/api/batches/winter-2011/tremendous.json"
+ },
+ {
+  "id": 20,
+  "name": "SlidePay",
+  "slug": "slidepay",
+  "former_names": [
+   "Cube"
+  ],
+  "small_logo_thumb_url": "https://bookface-images.s3.amazonaws.com/small_logos/a95cbb96c6b5ae3c541364a7180555d9f08fdab7.png",
+  "website": "https://angel.co/slidepay",
+  "all_locations": "San Francisco, CA, USA; Mountain View, CA, USA",
+  "long_description": "SlidePay, formerly Cube, is an API that makes it easy for any app to accept credit cards that are processed in person. Integration takes hours, not weeks, and works on any platform or device.",
+  "one_liner": "Banking and Payment Platform APIs. Exited October 2014.",
+  "team_size": 2,
+  "industry": "Fintech",
+  "subindustry": "Fintech -> Payments",
+  "launched_at": 1322045681,
+  "tags": [
+   "Fintech",
+   "Payments",
+   "API"
+  ],
+  "tags_highlighted": [],
+  "top_company": false,
+  "isHiring": false,
+  "nonprofit": false,
+  "batch": "Winter 2012",
+  "status": "Acquired",
+  "industries": [
+   "Fintech",
+   "Payments"
+  ],
+  "regions": [
+   "United States of America",
+   "America / Canada"
+  ],
+  "stage": "Early",
+  "app_video_public": false,
+  "demo_day_video_public": false,
+  "app_answers": null,
+  "question_answers": false,
+  "url": "https://www.ycombinator.com/companies/slidepay",
+  "api": "https://yc-oss.github.io/api/batches/winter-2012/slidepay.json"
+ },
+ {
+  "id": 5,
+  "name": "CircuitHub",
+  "slug": "circuithub",
+  "former_names": [],
+  "small_logo_thumb_url": "https://bookface-images.s3.amazonaws.com/small_logos/5967d06c7b101af8570dc47b6eea5cd8567dd32b.png",
+  "website": "https://circuithub.com",
+  "all_locations": "London, England, United Kingdom",
+  "long_description": "CircuitHub offers on-demand electronics manufacturing powered by our factory-scale robotics platform, The Grid. This platform delivers a 10x improvement in the speed and cost of small-batch electronics production. Leading customers like Tesla, NASA, and Zipline rely on CircuitHub to cut their time to market in half.",
+  "one_liner": "On-Demand Electronics Manufacturing",
+  "team_size": 58,
+  "industry": "Industrials",
+  "subindustry": "Industrials -> Manufacturing and Robotics",
+  "launched_at": 1322045523,
+  "tags": [
+   "Hard Tech",
+   "Hardware",
+   "Robotics",
+   "Manufacturing",
+   "Automation"
+  ],
+  "tags_highlighted": [],
+  "top_company": false,
+  "isHiring": true,
+  "nonprofit": false,
+  "batch": "Winter 2012",
+  "status": "Active",
+  "industries": [
+   "Industrials",
+   "Manufacturing and Robotics"
+  ],
+  "regions": [
+   "United Kingdom",
+   "Europe",
+   "Remote",
+   "Partly Remote"
+  ],
+  "stage": "Early",
+  "app_video_public": false,
+  "demo_day_video_public": false,
+  "app_answers": null,
+  "question_answers": false,
+  "url": "https://www.ycombinator.com/companies/circuithub",
+  "api": "https://yc-oss.github.io/api/batches/winter-2012/circuithub.json"
+ },
+ {
+  "id": 52,
+  "name": "Per Vices",
+  "slug": "per-vices",
+  "former_names": [],
+  "small_logo_thumb_url": "https://bookface-images.s3.amazonaws.com/small_logos/6babeda54b0ed96762130082cdda8af29de466eb.png",
+  "website": "https://www.pervices.com",
+  "all_locations": "Toronto, ON, Canada",
+  "long_description": "Per Vices builds the highest performing Software Defined Radios for mission critical applications for industries that can't live without them. Our products are modular, easy to use, provide the best possible performance, and replace a number complex sub-systems and components. \r\n\r\nCustomers developing wireless applications use our products because they dramatically lower integration and development complexity, total cost of ownership, and time to market. Our proprietary, industry leading, technology provides the best performance and maintains an efficient abstraction layer that allows customers to easily incorporate our product into their application.",
+  "one_liner": "Building Mission Critical Software Defined Radio products.",
+  "team_size": 11,
+  "industry": "Industrials",
+  "subindustry": "Industrials",
+  "launched_at": 1322045975,
+  "tags": [
+   "Hardware",
+   "IoT",
+   "Telecommunications",
+   "Defense"
+  ],
+  "tags_highlighted": [],
+  "top_company": false,
+  "isHiring": false,
+  "nonprofit": false,
+  "batch": "Winter 2012",
+  "status": "Active",
+  "industries": [
+   "Industrials"
+  ],
+  "regions": [
+   "Canada",
+   "America / Canada"
+  ],
+  "stage": "Growth",
+  "app_video_public": false,
+  "demo_day_video_public": false,
+  "app_answers": null,
+  "question_answers": false,
+  "url": "https://www.ycombinator.com/companies/per-vices",
+  "api": "https://yc-oss.github.io/api/batches/winter-2012/per-vices.json"
+ },
+ {
+  "id": 47,
+  "name": "FarmLogs",
+  "slug": "farmlogs",
+  "former_names": [
+   "Farmlogs"
+  ],
+  "small_logo_thumb_url": "https://bookface-images.s3.amazonaws.com/small_logos/35fa71f12e6026ecae1091f58bad04774936fbb8.png",
+  "website": "http://farmlogs.com",
+  "all_locations": "Ann Arbor, MI, USA; Remote",
+  "long_description": "Technology that simplifies farming. Get timely, unbiased information to improve yield, eliminate waste, and maximize the profitability of every acre.",
+  "one_liner": "Software that helps farmers operate more profitable businesses.",
+  "team_size": 5,
+  "industry": "Industrials",
+  "subindustry": "Industrials -> Agriculture",
+  "launched_at": 1322045914,
+  "tags": [
+   "Analytics",
+   "Agriculture"
+  ],
+  "tags_highlighted": [],
+  "top_company": false,
+  "isHiring": false,
+  "nonprofit": false,
+  "batch": "Winter 2012",
+  "status": "Acquired",
+  "industries": [
+   "Industrials",
+   "Agriculture"
+  ],
+  "regions": [
+   "United States of America",
+   "America / Canada",
+   "Remote",
+   "Fully Remote"
+  ],
+  "stage": "Growth",
+  "app_video_public": false,
+  "demo_day_video_public": false,
+  "app_answers": null,
+  "question_answers": false,
+  "url": "https://www.ycombinator.com/companies/farmlogs",
+  "api": "https://yc-oss.github.io/api/batches/winter-2012/farmlogs.json"
+ },
+ {
+  "id": 147,
+  "name": "You Got Listings",
+  "slug": "you-got-listings-inc",
+  "former_names": [
+   "YouGotListings",
+   "You Got Listings"
+  ],
+  "small_logo_thumb_url": "https://bookface-images.s3.amazonaws.com/small_logos/8214cadc759a9cb954edf802db5794105e9999b7.png",
+  "website": "http://www.yougotlistings.com",
+  "all_locations": "Remote",
+  "long_description": "You Got Listings is an all-in-one apartment Marketing Platform for brokerages and management companies. Founded in 2009, You Got Listings through innovation and automation has helped push over 3 Million properties in front of prospect renters. We are here to provide the rentals industry with the most comprehensive online marketing solution.",
+  "one_liner": "All-in-one apartment Marketing Platform for brokerages and landlords.",
+  "team_size": 3,
+  "industry": "Real Estate and Construction",
+  "subindustry": "Real Estate and Construction -> Housing and Real Estate",
+  "launched_at": 1326789790,
+  "tags": [
+   "SaaS",
+   "Real Estate"
+  ],
+  "tags_highlighted": [],
+  "top_company": false,
+  "isHiring": false,
+  "nonprofit": false,
+  "batch": "Winter 2011",
+  "status": "Active",
+  "industries": [
+   "Real Estate and Construction",
+   "Housing and Real Estate"
+  ],
+  "regions": [
+   "Remote",
+   "Fully Remote"
+  ],
+  "stage": "Early",
+  "app_video_public": false,
+  "demo_day_video_public": false,
+  "app_answers": null,
+  "question_answers": false,
+  "url": "https://www.ycombinator.com/companies/you-got-listings-inc",
+  "api": "https://yc-oss.github.io/api/batches/winter-2011/you-got-listings-inc.json"
+ },
+ {
+  "id": 258,
+  "name": "RentHop",
+  "slug": "renthop",
+  "former_names": [],
+  "small_logo_thumb_url": "https://bookface-images.s3.amazonaws.com/small_logos/1d46a914ebd920dcb8bc39852cc8704c1b4ef08f.png",
+  "website": "http://renthop.com",
+  "all_locations": "New York City, NY, USA; New York, NY, USA",
+  "long_description": "RentHop (www.renthop.com) helps renters find great apartments.  We use sophisticated data analysis to rank apartment listings based on their \"freshness\"​, their accuracy and completeness and the responsiveness of the manager who listed the apartment on our site.  \r\n\r\nAs a renter, you can use list-based or map-based search tools to browse listings and comprehensive search filters to narrow our 100,000+ listings to just the ones you want.  It’s easy and fast to reach out to brokers and property managers to schedule viewings and to manage responses.\r\n\r\nYou can also use our innovative \"Appointments on Demand\"​ feature, a map showing the real-time locations of brokers and property managers available to show apartments, to reach out and schedule viewings on the fly! \r\n\r\nFor brokers and property managers, RentHop provides a cost-effective, easy-to-use tool to promote your listings, get qualified leads and schedule viewings.  You can also post and repost listings on the go using RentHop Manager, our mobile app for brokers and property managers, currently available in the iOS App Store.  (You can download the mobile app at https://itunes.apple.com/us/app/renthop-manager/id695651355.)\r\n\r\nYour commitment to give good service will make you stand out on RentHop - our algorithm will credit you for your responsiveness and help give your listings the boost they need to get seen - and rented - by qualified renters.\r\n \r\nLook for our mobile app for consumers, due out soon!\r\n\r\nAnd please let us know any questions, thoughts or comments you may have - we'll look forward to hearing from you!  You can reach us at feedback@renthop.com.  You can also find us on Facebook, Twitter (@RentHop), Google+ and Pinterest.",
+  "one_liner": "Apartment rental marketplace",
+  "team_size": 9,
+  "industry": "Real Estate and Construction",
+  "subindustry": "Real Estate and Construction -> Housing and Real Estate",
+  "launched_at": 1326790743,
+  "tags": [
+   "Marketplace",
+   "Real Estate"
+  ],
+  "tags_highlighted": [],
+  "top_company": false,
+  "isHiring": true,
+  "nonprofit": false,
+  "batch": "Summer 2009",
+  "status": "Active",
+  "industries": [
+   "Real Estate and Construction",
+   "Housing and Real Estate"
+  ],
+  "regions": [
+   "United States of America",
+   "America / Canada"
+  ],
+  "stage": "Early",
+  "app_video_public": false,
+  "demo_day_video_public": false,
+  "app_answers": null,
+  "question_answers": false,
+  "url": "https://www.ycombinator.com/companies/renthop",
+  "api": "https://yc-oss.github.io/api/batches/summer-2009/renthop.json"
+ },
+ {
+  "id": 7,
+  "name": "42Floors",
+  "slug": "42floors",
+  "former_names": [],
+  "small_logo_thumb_url": "/company/thumb/missing.png",
+  "website": "http://42floors.com",
+  "all_locations": "San Francisco, CA, USA; Remote",
+  "long_description": "*Acquired by Knotel in 2018\r\n\r\n42Floors was founded in November of 2011 with the vision of making it easy to discover and create your dream office space. Based in San Francisco, the 42Floors team is made up of experienced entrepreneurs, engineers, and real estate professionals. All with a passion for making the commercial real estate search process easier for everyone.\r\n\r\nOn the site, you'll find available spaces, complete with high quality photography and all the data you need to make a decision. The site 100% free to use.\r\n\r\n42Floors is currently in every major market in the United States, and we are still growing.\r\n\r\nWe're always here to serve you.",
+  "one_liner": "We make it easy to search for office space.",
+  "team_size": 60,
+  "industry": "Real Estate and Construction",
+  "subindustry": "Real Estate and Construction -> Housing and Real Estate",
+  "launched_at": 1322045536,
+  "tags": [
+   "Real Estate",
+   "Proptech"
+  ],
+  "tags_highlighted": [],
+  "top_company": false,
+  "isHiring": false,
+  "nonprofit": false,
+  "batch": "Winter 2012",
+  "status": "Acquired",
+  "industries": [
+   "Real Estate and Construction",
+   "Housing and Real Estate"
+  ],
+  "regions": [
+   "United States of America",
+   "America / Canada",
+   "Remote",
+   "Fully Remote"
+  ],
+  "stage": "Growth",
+  "app_video_public": false,
+  "demo_day_video_public": false,
+  "app_answers": null,
+  "question_answers": false,
+  "url": "https://www.ycombinator.com/companies/42floors",
+  "api": "https://yc-oss.github.io/api/batches/winter-2012/42floors.json"
+ },
+ {
+  "id": 181,
+  "name": "Recurse Center",
+  "slug": "recurse-center",
+  "former_names": [
+   "Hacker School"
+  ],
+  "small_logo_thumb_url": "https://bookface-images.s3.amazonaws.com/small_logos/c7483410d4db1933c69b95c2325d7111eb787cf5.png",
+  "website": "https://www.recurse.com",
+  "all_locations": "New York City, NY, USA",
+  "long_description": "The Recurse Center is a self-directed, educational retreat for people who want to get better at programming, whether they've been programming for three decades or three months.\r\n\r\nThe retreat is free for all participants because we run an integrated recruiting agency and provide (optional) personalized recruiting services to anyone in our community considering a new job.",
+  "one_liner": "The retreat where curious programmers recharge and grow",
+  "team_size": 7,
+  "industry": "Education",
+  "subindustry": "Education",
+  "launched_at": 1326790098,
+  "tags": [
+   "Education",
+   "Community",
+   "Recruiting"
+  ],
+  "tags_highlighted": [],
+  "top_company": false,
+  "isHiring": false,
+  "nonprofit": false,
+  "batch": "Summer 2010",
+  "status": "Active",
+  "industries": [
+   "Education"
+  ],
+  "regions": [
+   "United States of America",
+   "America / Canada",
+   "Remote",
+   "Partly Remote"
+  ],
+  "stage": "Early",
+  "app_video_public": false,
+  "demo_day_video_public": false,
+  "app_answers": null,
+  "question_answers": false,
+  "url": "https://www.ycombinator.com/companies/recurse-center",
+  "api": "https://yc-oss.github.io/api/batches/summer-2010/recurse-center.json"
+ },
+ {
+  "id": 549,
+  "name": "Panorama Education",
+  "slug": "panorama-education",
+  "former_names": [],
+  "small_logo_thumb_url": "https://bookface-images.s3.amazonaws.com/small_logos/cf3c7c83086821a88ee659c700552b3a9a953709.png",
+  "website": "https://www.panoramaed.com/",
+  "all_locations": "Los Angeles, CA, USA",
+  "long_description": "Panorama Education partners with K-12 districts to support student success in the classroom and beyond through a secure, research-backed software platform for AI, student support, and community voice and engagement. Serving 15 million students nationwide, Panorama helps educators boost achievement, attendance, behavior, and readiness for graduation and beyond.",
+  "one_liner": "Improving education for every student.",
+  "team_size": 350,
+  "industry": "Education",
+  "subindustry": "Education",
+  "launched_at": 1367523611,
+  "tags": [
+   "Education",
+   "SaaS",
+   "B2B"
+  ],
+  "tags_highlighted": [],
+  "top_company": false,
+  "isHiring": false,
+  "nonprofit": false,
+  "batch": "Summer 2013",
+  "status": "Active",
+  "industries": [
+   "Education"
+  ],
+  "regions": [
+   "United States of America",
+   "America / Canada",
+   "Remote",
+   "Partly Remote"
+  ],
+  "stage": "Growth",
+  "app_video_public": false,
+  "demo_day_video_public": false,
+  "app_answers": null,
+  "question_answers": false,
+  "url": "https://www.ycombinator.com/companies/panorama-education",
+  "api": "https://yc-oss.github.io/api/batches/summer-2013/panorama-education.json"
+ },
+ {
+  "id": 33,
+  "name": "Make School",
+  "slug": "make-school",
+  "former_names": [
+   "makegameswithus"
+  ],
+  "small_logo_thumb_url": "https://bookface-images.s3.amazonaws.com/small_logos/557da125a8094c87218283cd0858b20228d67826.png",
+  "website": "http://www.makeschool.com",
+  "all_locations": "San Francisco, CA, USA",
+  "long_description": "Make School is redesigning college for the 21st century. Our bachelor's degree program combines liberal arts, computer science theory, software development, and character development with an emphasis on preparing students for successful careers as software engineers, product managers, or entrepreneurs. Our alumni work at Facebook, Google, Apple, Snapchat, LinkedIn, Lyft and more.\r\n\r\nOur college is accessible to students of all backgrounds, 40% are underrepresented minority students and 50% come from low income families. Students pay tuition as a percentage of earnings once they are employed, directly aligning their incentives with ours. Make School is funded by Learn Capital, Y Combinator, Mitch Kapor, Alexis Ohanian, Tim Draper and others.",
+  "one_liner": "Make School is redesigning college for the 21st century. Students…",
+  "team_size": 45,
+  "industry": "Education",
+  "subindustry": "Education",
+  "launched_at": 1322045792,
+  "tags": [
+   "Education",
+   "Coding Bootcamps"
+  ],
+  "tags_highlighted": [],
+  "top_company": false,
+  "isHiring": false,
+  "nonprofit": false,
+  "batch": "Winter 2012",
+  "status": "Inactive",
+  "industries": [
+   "Education"
+  ],
+  "regions": [
+   "United States of America",
+   "America / Canada"
+  ],
+  "stage": "Growth",
+  "app_video_public": false,
+  "demo_day_video_public": false,
+  "app_answers": null,
+  "question_answers": false,
+  "url": "https://www.ycombinator.com/companies/make-school",
+  "api": "https://yc-oss.github.io/api/batches/winter-2012/make-school.json"
+ },
+ {
+  "id": 1434,
+  "name": "DemocracyOS",
+  "slug": "democracyos",
+  "former_names": [],
+  "small_logo_thumb_url": "https://bookface-images.s3.amazonaws.com/small_logos/74f22bc34079364b8ce68dc36391a903a1d478b2.png",
+  "website": "http://www.democracyos.org",
+  "all_locations": "Buenos Aires, CABA, Argentina",
+  "long_description": "DemocracyOS is an online space for deliberation and voting on political proposals. It is a platform for a more open and participatory government.The software aims to stimulate better arguments and come to better rulings, as peers.",
+  "one_liner": "Online space for deliberation, policy making and democratic…",
+  "team_size": 1,
+  "industry": "Government",
+  "subindustry": "Government",
+  "launched_at": 1465769416,
+  "tags": [
+   "Civic Tech",
+   "GovTech"
+  ],
+  "tags_highlighted": [],
+  "top_company": false,
+  "isHiring": false,
+  "nonprofit": true,
+  "batch": "Winter 2015",
+  "status": "Active",
+  "industries": [
+   "Government"
+  ],
+  "regions": [
+   "Argentina",
+   "Latin America"
+  ],
+  "stage": "Early",
+  "app_video_public": false,
+  "demo_day_video_public": false,
+  "app_answers": null,
+  "question_answers": false,
+  "url": "https://www.ycombinator.com/companies/democracyos",
+  "api": "https://yc-oss.github.io/api/batches/winter-2015/democracyos.json"
+ },
+ {
+  "id": 1488,
+  "name": "Token Transit",
+  "slug": "token-transit",
+  "former_names": [],
+  "small_logo_thumb_url": "https://bookface-images.s3.amazonaws.com/small_logos/a20ca2e23eec17b0ed9a952b4a38cc39b71f8e1e.png",
+  "website": "https://tokentransit.com",
+  "all_locations": "San Francisco, CA, USA",
+  "long_description": "Token Transit puts cities in the center of managing new mobility by providing a complete fare payment platform for public transportation.\r\n\r\nToken Transit launched our mobile ticketing app in 2016. We now provide payments for transportation in over 200 cities across the United States and Canada with integration into the major third party trip planning apps such as Transit, Moovit and Google Maps.",
+  "one_liner": "Complete fare payment platform for public transportation",
+  "team_size": 12,
+  "industry": "Government",
+  "subindustry": "Government",
+  "launched_at": 1478224835,
+  "tags": [
+   "Fintech",
+   "GovTech",
+   "Transportation"
+  ],
+  "tags_highlighted": [],
+  "top_company": false,
+  "isHiring": false,
+  "nonprofit": false,
+  "batch": "Winter 2017",
+  "status": "Active",
+  "industries": [
+   "Government"
+  ],
+  "regions": [
+   "United States of America",
+   "America / Canada",
+   "Remote",
+   "Partly Remote"
+  ],
+  "stage": "Early",
+  "app_video_public": false,
+  "demo_day_video_public": false,
+  "app_answers": null,
+  "question_answers": false,
+  "url": "https://www.ycombinator.com/companies/token-transit",
+  "api": "https://yc-oss.github.io/api/batches/winter-2017/token-transit.json"
+ },
+ {
+  "id": 675,
+  "name": "GovPredict",
+  "slug": "govpredict",
+  "former_names": [],
+  "small_logo_thumb_url": "https://bookface-images.s3.amazonaws.com/small_logos/c85a771877685f192d67b6cffa7215e8fff5dda1.png",
+  "website": "http://govpredict.com",
+  "all_locations": "Washington, DC, USA; Remote",
+  "long_description": "You work in government affairs? Keep it all at your fingertips. Every bill. Every meeting. Every report. Every mention. Get more work done.\r\n\r\n",
+  "one_liner": "The system of record for government affairs.",
+  "team_size": 60,
+  "industry": "Government",
+  "subindustry": "Government",
+  "launched_at": 1398907759,
+  "tags": [
+   "SaaS",
+   "GovTech",
+   "B2B"
+  ],
+  "tags_highlighted": [],
+  "top_company": false,
+  "isHiring": false,
+  "nonprofit": false,
+  "batch": "Summer 2014",
+  "status": "Acquired",
+  "industries": [
+   "Government"
+  ],
+  "regions": [
+   "United States of America",
+   "America / Canada",
+   "Remote",
+   "Fully Remote"
+  ],
+  "stage": "Early",
+  "app_video_public": false,
+  "demo_day_video_public": false,
+  "app_answers": null,
+  "question_answers": false,
+  "url": "https://www.ycombinator.com/companies/govpredict",
+  "api": "https://yc-oss.github.io/api/batches/summer-2014/govpredict.json"
+ },
+ {
+  "id": 608,
+  "name": "One Degree",
+  "slug": "one-degree",
+  "former_names": [],
+  "small_logo_thumb_url": "https://bookface-images.s3.amazonaws.com/small_logos/4daa7fd21d65b981692645ee375dffdb06b67d0e.png",
+  "website": "http://1degree.org",
+  "all_locations": "San Francisco, CA, USA",
+  "long_description": "One Degree is a technology driven nonprofit organization that helps individuals and families access the resources they need to improve their lives and achieve social and economic mobility. \r\n\r\nOne Degree's mission is to empower people to create a path out of poverty for themselves and for their communities. Our core product is a web and mobile platform makes it easy for low-income families to find, manage, and review nonprofit and government services. \r\n\r\nOur platform has become the go-to tool for help-seekers – and the people who support them, such as case managers and social workers – throughout the San Francisco Bay Area and Los Angeles County in California, and in Gainesville, Florida.\r\n\r\nWe currently operate three major products: the One Degree website and Android and iOS apps. Thousands of people in the Bay Area and Los Angeles rely on One Degree’s website and apps to access health care, food banks, employment services, and much more. We also support communities around the country to start their own One Degree chapters.",
+  "one_liner": "One Degree is a nonprofit organization that makes it easy for…",
+  "team_size": 14,
+  "industry": "Unspecified",
+  "subindustry": "Unspecified",
+  "launched_at": 1384978902,
+  "tags": [
+   "Nonprofit"
+  ],
+  "tags_highlighted": [],
+  "top_company": false,
+  "isHiring": false,
+  "nonprofit": true,
+  "batch": "Winter 2014",
+  "status": "Active",
+  "industries": [
+   "Unspecified"
+  ],
+  "regions": [
+   "United States of America",
+   "America / Canada",
+   "Remote",
+   "Partly Remote"
+  ],
+  "stage": "Early",
+  "app_video_public": false,
+  "demo_day_video_public": false,
+  "app_answers": null,
+  "question_answers": false,
+  "url": "https://www.ycombinator.com/companies/one-degree",
+  "api": "https://yc-oss.github.io/api/batches/winter-2014/one-degree.json"
+ },
+ {
+  "id": 642,
+  "name": "OpenCurriculum",
+  "slug": "opencurriculum",
+  "former_names": [],
+  "small_logo_thumb_url": "https://bookface-images.s3.amazonaws.com/small_logos/04fd9eb75663f94c36937a33d5a36579f95693e1.png",
+  "website": "https://opencurriculum.org",
+  "all_locations": "Sacramento, CA, USA; Mountain View, CA, USA",
+  "long_description": "A library of community curated teaching and learning materials, free to the entire world. Come collaborate; we can teach better together.\r\n\r\nOpenCurriculum, Inc. is a California based technology nonprofit organization with a mission to bring openness and innovation to K12 education around the world",
+  "one_liner": "Helping K-12 teachers and school administrators build awesome…",
+  "team_size": null,
+  "industry": "Unspecified",
+  "subindustry": "Unspecified",
+  "launched_at": 1385117560,
+  "tags": [
+   "Education",
+   "AI"
+  ],
+  "tags_highlighted": [],
+  "top_company": false,
+  "isHiring": false,
+  "nonprofit": true,
+  "batch": "Winter 2014",
+  "status": "Active",
+  "industries": [
+   "Unspecified"
+  ],
+  "regions": [
+   "United States of America",
+   "America / Canada",
+   "Remote",
+   "Partly Remote"
+  ],
+  "stage": "Early",
+  "app_video_public": false,
+  "demo_day_video_public": false,
+  "app_answers": null,
+  "question_answers": false,
+  "url": "https://www.ycombinator.com/companies/opencurriculum",
+  "api": "https://yc-oss.github.io/api/batches/winter-2014/opencurriculum.json"
+ },
+ {
+  "id": 1553,
+  "name": "No Lean Season",
+  "slug": "no-lean-season",
+  "former_names": [],
+  "small_logo_thumb_url": "/company/thumb/missing.png",
+  "website": "http://",
+  "all_locations": "",
+  "long_description": "No Lean Season reduces the negative effects of seasonality on the poorest in rural agricultural areas by enabling labor mobility that increases incomes. It is a new program that they are testing in Evidence Action Beta's portfolio, based on rigorous experimental evidence.\r\n\r\nThey give a travel subsidy of $20 to very poor rural laborers so they can send a family member to a nearby city to find a job during the period between planting and harvesting. This is the time in rural areas when there are no jobs, no income, and when families miss meals. This seasonal poverty affects 600 million people around the world.\r\n\r\nWith a temporary job during this 'lean season,' households are are able to put an additional meal on the table for every member of the family each and every day. That’s 500 additional meals during the lean season.",
+  "one_liner": "A bus ticket out of poverty",
+  "team_size": null,
+  "industry": "Unspecified",
+  "subindustry": "Unspecified",
+  "launched_at": 1481767230,
+  "tags": [
+   "Nonprofit"
+  ],
+  "tags_highlighted": [],
+  "top_company": false,
+  "isHiring": false,
+  "nonprofit": true,
+  "batch": "Winter 2017",
+  "status": "Inactive",
+  "industries": [
+   "Unspecified"
+  ],
+  "regions": [
+   "Remote",
+   "Partly Remote"
+  ],
+  "stage": "Early",
+  "app_video_public": false,
+  "demo_day_video_public": false,
+  "app_answers": null,
+  "question_answers": false,
+  "url": "https://www.ycombinator.com/companies/no-lean-season",
+  "api": "https://yc-oss.github.io/api/batches/winter-2017/no-lean-season.json"
+ },
+ {
+  "id": 8,
+  "name": "PlanGrid",
+  "slug": "plangrid",
+  "former_names": [],
+  "small_logo_thumb_url": "https://bookface-images.s3.amazonaws.com/small_logos/33ee27aa9c6b3036b40ec6c7f0c2a98ccaf32f40.png",
+  "website": "http://plangrid.com",
+  "all_locations": "San Francisco, CA, USA",
+  "long_description": "PlanGrid is the leader in construction productivity software, used on more than one million projects in 84 countries. PlanGrid's cloud-based platform empowers contractors and owners in commercial, heavy civil, and other industries to collaborate easily from their mobile devices and desktop, managing blueprints, specs, photos, RFIs, field reports, and punch lists. With over 100 million digital blueprints on its platform, PlanGrid is also the largest digital blueprint repository in the world. \r\n\r\nFounded in 2011, the company was part of Y Combinator in 2012, and has secured over $69 million in funding from Sequoia Capital, Tenaya Capital and several other top firms.",
+  "one_liner": "Mobile applications for the construction industry.",
+  "team_size": 355,
+  "industry": "Real Estate and Construction",
+  "subindustry": "Real Estate and Construction -> Construction",
+  "launched_at": 1322045547,
+  "tags": [
+   "Construction"
+  ],
+  "tags_highlighted": [],
+  "top_company": true,
+  "isHiring": false,
+  "nonprofit": false,
+  "batch": "Winter 2012",
+  "status": "Acquired",
+  "industries": [
+   "Real Estate and Construction",
+   "Construction"
+  ],
+  "regions": [
+   "United States of America",
+   "America / Canada"
+  ],
+  "stage": "Growth",
+  "app_video_public": false,
+  "demo_day_video_public": false,
+  "app_answers": null,
+  "question_answers": false,
+  "url": "https://www.ycombinator.com/companies/plangrid",
+  "api": "https://yc-oss.github.io/api/batches/winter-2012/plangrid.json"
+ },
+ {
+  "id": 30,
+  "name": "Matterport",
+  "slug": "matterport",
+  "former_names": [
+   "MatterPort"
+  ],
+  "small_logo_thumb_url": "https://bookface-images.s3.amazonaws.com/small_logos/b271a79c3b59d6344c90e2803525a22f2a5e8406.png",
+  "website": "http://matterport.com",
+  "all_locations": "San Francisco, CA, USA; Sunnyvale, CA, USA",
+  "long_description": "Matterport is an immersive media technology company that is shaking up the 3D / VR world.  Our team has built the first end-to-end system for creating, modifying, distributing, and navigating immersive 3D and virtual reality (VR) versions of real-world spaces on web and mobile devices. Matterport offers the world's most inexpensive and simplest way to capture 3D spaces. \r\n\r\nOur products include:\r\n- Matterport Pro Camera for capturing real spaces in 3D.  It collects accurate visual and spatial data to map entire areas in minutes and is all about automation and ease of use.\r\n- The Matterport Cloud for processing and hosting 3D models\r\n- Matterport Portal, our system for viewing, editing, and managing models; collaborating with colleagues; and sharing models with others\r\n- Matterport 3D Showcase, a browser-based 3D media player, which allows anyone to view 3D models in their browser with no additional software\r\n- Matterport Core VR: All Spaces can be converted to VR and experienced on Samsung Gear VR or Google Cardboard (in beta), with additional device support coming soon.\r\n\r\nMatterport 3D media solutions power industries from real estate (residential, multi-family and commercial) and travel and hospitality (hotels, vacation rentals, and venue booking), to business listings, architecture, engineering and construction, news and entertainment, and everything in between. \r\n\r\nWe’re growing fast. If you’re passionate about solving cutting-edge problems in computer vision and hardware design and creating order-of-magnitude improvements in the ability to easily create and share 3D models of real world spaces, we want to talk to you. See open positions at matterport.com/jobs.\r\n\r\nTry Matterport for yourself at matterport.com/try.",
+  "one_liner": "Turn physical objects and environments into 3D models in seconds.",
+  "team_size": 201,
+  "industry": "Consumer",
+  "subindustry": "Consumer -> Virtual and Augmented Reality",
+  "launched_at": 1322045771,
+  "tags": [
+   "Computer Vision"
+  ],
+  "tags_highlighted": [],
+  "top_company": true,
+  "isHiring": false,
+  "nonprofit": false,
+  "batch": "Winter 2012",
+  "status": "Public",
+  "industries": [
+   "Consumer",
+   "Virtual and Augmented Reality"
+  ],
+  "regions": [
+   "United States of America",
+   "America / Canada"
+  ],
+  "stage": "Growth",
+  "app_video_public": false,
+  "demo_day_video_public": false,
+  "app_answers": null,
+  "question_answers": false,
+  "url": "https://www.ycombinator.com/companies/matterport",
+  "api": "https://yc-oss.github.io/api/batches/winter-2012/matterport.json"
+ },
+ {
+  "id": 10,
+  "name": "The Muse",
+  "slug": "the-muse",
+  "former_names": [],
+  "small_logo_thumb_url": "https://bookface-images.s3.amazonaws.com/small_logos/bb7ca44603c00a75f64928d565e780f76a618ec7.png",
+  "website": "http://themuse.com",
+  "all_locations": "New York City, NY, USA; New York, NY, USA",
+  "long_description": "The Muse is a values-based careers site that helps Gen Z and millennial candidates find a career path and search for jobs at companies whose people, benefits, and values align with their unique professional needs. For employers, our marketplace results in a more efficient hiring process that results in better \"matches\" - and therefore better retention.",
+  "one_liner": "The Muse is values-based job search & hiring for 7M+ monthly",
+  "team_size": 60,
+  "industry": "B2B",
+  "subindustry": "B2B -> Recruiting and Talent",
+  "launched_at": 1322045574,
+  "tags": [
+   "Marketplace",
+   "SaaS",
+   "Recruiting"
+  ],
+  "tags_highlighted": [],
+  "top_company": false,
+  "isHiring": false,
+  "nonprofit": false,
+  "batch": "Winter 2012",
+  "status": "Inactive",
+  "industries": [
+   "B2B",
+   "Recruiting and Talent"
+  ],
+  "regions": [
+   "United States of America",
+   "America / Canada",
+   "Remote",
+   "Partly Remote"
+  ],
+  "stage": "Growth",
+  "app_video_public": false,
+  "demo_day_video_public": false,
+  "app_answers": null,
+  "question_answers": false,
+  "url": "https://www.ycombinator.com/companies/the-muse",
+  "api": "https://yc-oss.github.io/api/batches/winter-2012/the-muse.json"
+ },
+ {
+  "id": 12,
+  "name": "Hipmob",
+  "slug": "hipmob",
+  "former_names": [],
+  "small_logo_thumb_url": "/company/thumb/missing.png",
+  "website": "http://hipmob.com",
+  "all_locations": "Boston, MA, USA; Palo Alto, CA, USA",
+  "long_description": "Hipmob brings easy to use live chat, helpdesk, feedback and customer engagement tools to mobile and tablet businesses. Whether you're a mobile-native startup, a small business going mobile, or a large public company with a growing mobile business, we give you the tools to increase sales, transform customer support, and make your customers happy. \n\nWith real time contextual information about your customers including device, app, OS, geographic info and more, you'll be able to make take actions that improve your bottomline. Our partnerships and integrations (see more at www.hipmob.com/documentation) mean that we'll fit right into your team's habits.\n\nAND, we're insanely responsive to customer feedback - email us with questions at ayo@hipmob.com!",
+  "one_liner": "Customer communication for iOS and Android developers - an in-app…",
+  "team_size": 2,
+  "industry": "B2B",
+  "subindustry": "B2B -> Operations",
+  "launched_at": 1322045594,
+  "tags": [
+   "Customer Service"
+  ],
+  "tags_highlighted": [],
+  "top_company": false,
+  "isHiring": false,
+  "nonprofit": false,
+  "batch": "Winter 2012",
+  "status": "Inactive",
+  "industries": [
+   "B2B",
+   "Operations"
+  ],
+  "regions": [
+   "United States of America",
+   "America / Canada"
+  ],
+  "stage": "Early",
+  "app_video_public": false,
+  "demo_day_video_public": false,
+  "app_answers": null,
+  "question_answers": false,
+  "url": "https://www.ycombinator.com/companies/hipmob",
+  "api": "https://yc-oss.github.io/api/batches/winter-2012/hipmob.json"
+ },
+ {
+  "id": 17,
+  "name": "Couple",
+  "slug": "couple",
+  "former_names": [
+   "Pair"
+  ],
+  "small_logo_thumb_url": "/company/thumb/missing.png",
+  "website": null,
+  "all_locations": "San Francisco, CA, USA",
+  "long_description": "TenthBit Inc. was founded in 2012, in sunny California. The founders, having been disconnected from their significant others while being a part of the YC program, found that they were repurposing many other services to talk to their partners. After many frustrating skype calls, and international text messages, they decided to build Couple. The app now has over two million downloads on iOS and Android and has helped couples send over a billion messages to each other.",
+  "one_liner": "App that connects two phones and creates a private\r\ntimeline to share…",
+  "team_size": 2,
+  "industry": "Consumer",
+  "subindustry": "Consumer -> Social",
+  "launched_at": 1322045650,
+  "tags": [
+   "Messaging",
+   "Dating",
+   "Social"
+  ],
+  "tags_highlighted": [],
+  "top_company": false,
+  "isHiring": false,
+  "nonprofit": false,
+  "batch": "Winter 2012",
+  "status": "Inactive",
+  "industries": [
+   "Consumer",
+   "Social"
+  ],
+  "regions": [
+   "United States of America",
+   "America / Canada"
+  ],
+  "stage": "Early",
+  "app_video_public": false,
+  "demo_day_video_public": false,
+  "app_answers": null,
+  "question_answers": false,
+  "url": "https://www.ycombinator.com/companies/couple",
+  "api": "https://yc-oss.github.io/api/batches/winter-2012/couple.json"
+ },
+ {
+  "id": 81,
+  "name": "Proxino",
+  "slug": "proxino",
+  "former_names": [],
+  "small_logo_thumb_url": "/company/thumb/missing.png",
+  "website": "http://proxino.com",
+  "all_locations": "San Francisco, CA, USA; Palo Alto, CA, USA",
+  "long_description": "Proxino is a cloud platform for monitoring and debugging client-side JavaScript.",
+  "one_liner": "Javascript proxy.",
+  "team_size": null,
+  "industry": "B2B",
+  "subindustry": "B2B -> Infrastructure",
+  "launched_at": 1326789117,
+  "tags": [
+   "Developer Tools"
+  ],
+  "tags_highlighted": [],
+  "top_company": false,
+  "isHiring": false,
+  "nonprofit": false,
+  "batch": "Summer 2011",
+  "status": "Inactive",
+  "industries": [
+   "B2B",
+   "Infrastructure"
+  ],
+  "regions": [
+   "United States of America",
+   "America / Canada"
+  ],
+  "stage": "Early",
+  "app_video_public": false,
+  "demo_day_video_public": false,
+  "app_answers": null,
+  "question_answers": false,
+  "url": "https://www.ycombinator.com/companies/proxino",
+  "api": "https://yc-oss.github.io/api/batches/summer-2011/proxino.json"
+ },
+ {
+  "id": 69,
+  "name": "Picplum",
+  "slug": "picplum",
+  "former_names": [
+   "Picplum",
+   "Terminal 49"
+  ],
+  "small_logo_thumb_url": "/company/thumb/missing.png",
+  "website": "picplum.com",
+  "all_locations": "San Francisco, CA, USA",
+  "long_description": "Picplum is a photo printing service that is the perfect addition to any family with young children. We know parents are too busy to organize their photos, let alone to find the time to print and share them. That's where Picplum comes in - it's the hassle-free way to share your best moments with friends and family.",
+  "one_liner": "",
+  "team_size": 2,
+  "industry": "Consumer",
+  "subindustry": "Consumer -> Home and Personal",
+  "launched_at": 1326788957,
+  "tags": [],
+  "tags_highlighted": [],
+  "top_company": false,
+  "isHiring": false,
+  "nonprofit": false,
+  "batch": "Summer 2011",
+  "status": "Inactive",
+  "industries": [
+   "Consumer",
+   "Home and Personal"
+  ],
+  "regions": [
+   "United States of America",
+   "America / Canada"
+  ],
+  "stage": "Early",
+  "app_video_public": false,
+  "demo_day_video_public": false,
+  "app_answers": null,
+  "question_answers": false,
+  "url": "https://www.ycombinator.com/companies/picplum",
+  "api": "https://yc-oss.github.io/api/batches/summer-2011/picplum.json"
+ },
+ {
+  "id": 900000001,
+  "name": "Edge Empty Industry",
+  "slug": "edge-empty-industry",
+  "former_names": [],
+  "small_logo_thumb_url": "https://bookface-images.s3.amazonaws.com/small_logos/1313424ffcccb181d4a78eec0cde6b8bcab2da6d.png",
+  "website": "http://hireart.com",
+  "all_locations": "New York City, NY, USA; New York, NY, USA",
+  "long_description": "Hire Smarter with HireArt.\r\n\r\nWe're a modern staffing agency that uses work samples and video assessments to generate deeper insight & connect contractors to companies where they'll thrive.\r\n\r\nOur graders and account managers individually assess each candidate on culture fit, experience, and communication skills. The proof is in the talent: our candidates have filled roles at leading start-up and technology companies like Facebook, Airbnb, and Waymo. \r\n\r\nWe put people first, from our candidates to our clients, we believe in the power of transparent hiring.\r\n\r\nLearn more about our team and our platform at HireArt.com.",
+  "one_liner": "Gives businesses everything needed to hire & manage W2 contractors.",
+  "team_size": 90,
+  "industry": "",
+  "subindustry": "B2B -> Recruiting and Talent",
+  "launched_at": 1322045617,
+  "tags": [
+   "SaaS",
+   "B2B",
+   "HR Tech"
+  ],
+  "tags_highlighted": [],
+  "top_company": false,
+  "isHiring": false,
+  "nonprofit": false,
+  "batch": "Winter 2012",
+  "status": "Active",
+  "industries": [
+   "B2B",
+   "Recruiting and Talent"
+  ],
+  "regions": [
+   "United States of America",
+   "America / Canada",
+   "Remote",
+   "Partly Remote"
+  ],
+  "stage": "Growth",
+  "app_video_public": false,
+  "demo_day_video_public": false,
+  "app_answers": null,
+  "question_answers": false,
+  "url": "https://www.ycombinator.com/companies/hireart",
+  "api": "https://yc-oss.github.io/api/batches/winter-2012/hireart.json"
+ },
+ {
+  "id": 900000002,
+  "name": "Edge No Industry",
+  "slug": "edge-no-industry",
+  "former_names": [],
+  "small_logo_thumb_url": "https://bookface-images.s3.amazonaws.com/small_logos/1313424ffcccb181d4a78eec0cde6b8bcab2da6d.png",
+  "website": "http://hireart.com",
+  "all_locations": "New York City, NY, USA; New York, NY, USA",
+  "long_description": "Hire Smarter with HireArt.\r\n\r\nWe're a modern staffing agency that uses work samples and video assessments to generate deeper insight & connect contractors to companies where they'll thrive.\r\n\r\nOur graders and account managers individually assess each candidate on culture fit, experience, and communication skills. The proof is in the talent: our candidates have filled roles at leading start-up and technology companies like Facebook, Airbnb, and Waymo. \r\n\r\nWe put people first, from our candidates to our clients, we believe in the power of transparent hiring.\r\n\r\nLearn more about our team and our platform at HireArt.com.",
+  "one_liner": "Gives businesses everything needed to hire & manage W2 contractors.",
+  "team_size": 90,
+  "subindustry": "B2B -> Recruiting and Talent",
+  "launched_at": 1322045617,
+  "tags": [
+   "SaaS",
+   "B2B",
+   "HR Tech"
+  ],
+  "tags_highlighted": [],
+  "top_company": false,
+  "isHiring": false,
+  "nonprofit": false,
+  "batch": "Winter 2012",
+  "status": "Active",
+  "industries": [
+   "B2B",
+   "Recruiting and Talent"
+  ],
+  "regions": [
+   "United States of America",
+   "America / Canada",
+   "Remote",
+   "Partly Remote"
+  ],
+  "stage": "Growth",
+  "app_video_public": false,
+  "demo_day_video_public": false,
+  "app_answers": null,
+  "question_answers": false,
+  "url": "https://www.ycombinator.com/companies/hireart",
+  "api": "https://yc-oss.github.io/api/batches/winter-2012/hireart.json"
+ },
+ {
+  "id": 900000003,
+  "name": "Edge Unknown Industry",
+  "slug": "edge-unknown-industry",
+  "former_names": [],
+  "small_logo_thumb_url": "https://bookface-images.s3.amazonaws.com/small_logos/1313424ffcccb181d4a78eec0cde6b8bcab2da6d.png",
+  "website": "http://hireart.com",
+  "all_locations": "New York City, NY, USA; New York, NY, USA",
+  "long_description": "Hire Smarter with HireArt.\r\n\r\nWe're a modern staffing agency that uses work samples and video assessments to generate deeper insight & connect contractors to companies where they'll thrive.\r\n\r\nOur graders and account managers individually assess each candidate on culture fit, experience, and communication skills. The proof is in the talent: our candidates have filled roles at leading start-up and technology companies like Facebook, Airbnb, and Waymo. \r\n\r\nWe put people first, from our candidates to our clients, we believe in the power of transparent hiring.\r\n\r\nLearn more about our team and our platform at HireArt.com.",
+  "one_liner": "Gives businesses everything needed to hire & manage W2 contractors.",
+  "team_size": 90,
+  "industry": "Space",
+  "subindustry": "B2B -> Recruiting and Talent",
+  "launched_at": 1322045617,
+  "tags": [
+   "SaaS",
+   "B2B",
+   "HR Tech"
+  ],
+  "tags_highlighted": [],
+  "top_company": false,
+  "isHiring": false,
+  "nonprofit": false,
+  "batch": "Winter 2012",
+  "status": "Active",
+  "industries": [
+   "B2B",
+   "Recruiting and Talent"
+  ],
+  "regions": [
+   "United States of America",
+   "America / Canada",
+   "Remote",
+   "Partly Remote"
+  ],
+  "stage": "Growth",
+  "app_video_public": false,
+  "demo_day_video_public": false,
+  "app_answers": null,
+  "question_answers": false,
+  "url": "https://www.ycombinator.com/companies/hireart",
+  "api": "https://yc-oss.github.io/api/batches/winter-2012/hireart.json"
+ }
+]

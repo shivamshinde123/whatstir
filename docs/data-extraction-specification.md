@@ -16,7 +16,7 @@
 | `industry` | `industry_raw`, and `sector_id` through the mapping below |
 | `launched_at` (unix seconds) | `launched_at` |
 
-Empty strings become null.
+Empty strings become null. yc-oss's placeholder logo `/company/thumb/missing.png` (used by about 620 companies) becomes a null `logo_url`, and so does any other logo that isn't an absolute URL. A null `team_size` stays null.
 
 ### Sector mapping
 `industry` is slugified and checked against `sectors.id`. `B2B` becomes `b2b`, `Real Estate and Construction` becomes `real-estate-and-construction`, and so on. `Unspecified`, a missing value, or any slug not in the table becomes `other`, and `sector_reason` records why (e.g. `industry=Unspecified`). If yc-oss adds a new industry, it lands in `other` until a sector row is added for it.
@@ -25,8 +25,15 @@ Empty strings become null.
 
 One run is used by the daily cron, the manual button and the backfill script (`lib/refresh.ts`).
 
-1. **Guard.** Skip when `refresh_paused` is set (for cron runs) or another run is still `running`. A Postgres advisory lock enforces the second rule. It must be a transaction-scoped lock (`pg_try_advisory_xact_lock`), because a lock held at the session level doesn't survive Supabase's transaction pooler.
-2. **Fetch.** Download `all.json`. Fail the run if the HTTP status is not 200, the JSON doesn't parse, the response isn't an array, or the record count is below **90 %** of the stored non-missing count. The 90 % check catches truncated responses.
+1. **Guard.**
+   - A cron run is skipped when `refresh_paused` is set.
+   - Any run is skipped when another is still `running`. The unique index `refresh_runs_one_running_idx` (migration 002) allows only one `running` row. A run claims the slot by inserting that row, and a unique violation means another run already has it. Either way the skipped run is recorded with `status = skipped` and the reason. See decision 33.
+   - A `running` row older than 15 minutes counts as a crashed run. It's marked `failed` with the error "stale: no finish recorded", and the slot is freed.
+2. **Fetch.** Download `all.json`.
+   - Network errors and 5xx responses are retried twice, after 2 s and then 5 s. Any other non-200 status fails at once.
+   - The run fails if the JSON doesn't parse, the response isn't an array, or the number of valid records is below **90 %** of the stored non-missing count. The 90 % check catches truncated responses.
+   - The recorded error includes the underlying cause, e.g. `fetch failed (ECONNRESET)`.
+   - Records without an integer id, a slug or a name are skipped and counted as `invalid`. If an id appears twice, the later record wins.
 3. **Diff.** Compute `source_hash`, a SHA-1 of the mapped fields, for every record. A record is new if its id isn't stored yet, and changed if its hash differs from the stored one.
 4. **Apply.** In **one transaction**:
    - Upsert new and changed companies.
