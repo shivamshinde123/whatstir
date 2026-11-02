@@ -69,6 +69,10 @@ Listed in the order they were made. Decisions 1–14 are recorded in §16 of [in
 41. **`/api/sectors` returns both total and active counts in one response,** replacing the `?active=` parameter, so the toggle switches instantly. It also returns `gate`, which tells the client header whether to show Sign out.
 42. **E2E tests run against a real database**: global setup recreates `whatstir_e2e` on the test Postgres server and loads the 37-record fixture.
 
+43. **Unknown sector URLs get their 404 from `proxy.ts`, not from `notFound()`.**
+    - *Why:* with `cacheComponents` and partial prerendering, the static shell starts streaming with a 200 before the page can call `notFound()`, and `dynamicParams` isn't available. The proxy already sits in front of every request and knows the 9 ids without touching the database.
+44. **Logos are decorative images (`alt=""`)** because the company name is always visible beside them. This supersedes the earlier rule of `alt="<name> logo"`, which would make screen readers announce every company twice.
+
 ## Open items
 
 - **A. Founder data.** Founders come from YC company pages. Check YC's terms before production use. Until then, the founder fetch can be switched off with `FOUNDERS_FETCH=off`.

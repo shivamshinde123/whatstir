@@ -14,12 +14,14 @@
 | `SiteHeader` | The translucent top bar with a link home, plus a Sign out form (posting to `/api/logout`) when the gate is on. | — |
 | `HomeView` (client) | The landing page: fetches the data, handles loading, error and empty states, the coverage line, the All/Active toggle, the map/list switch, and measures the container. | `GET /api/sectors` |
 | `Treemap` | Draws the laid-out `Tile[]` as absolutely positioned links with labels, the compact and tiny variants, and sector tints (`lib/sector-style.ts`). | — |
-| `Workspace` | The three-column layout. Owns the session state: tiles, messages and the citations of the latest answer. | session and message APIs |
+| `Workspace` (client) | The three-column layout. Owns the selected subcategory, the name filter and the open profile, including putting focus back afterwards. The session, tiles and messages are added in #9 and #10. | `GET /api/sectors/:id` |
 | `SubcategoryBar` | Chips for All, the subcategories with counts, AI and Unclassified, plus an "AI-suggested" label. | — |
-| `Basket` | Logos for the companies in scope, plus a name filter. Clicking a logo opens its profile. | — |
+| `Basket` | A wall of logos for the companies in scope, styled with `content-visibility: auto`, with a name filter and an "N of M" count. Clicking opens the profile. Each cell carries `data-company-id` for the #10 animation. | — |
+| `StatusBadge` | A small pill: Active green, Acquired blue, Public purple, Inactive or unknown grey. | — |
 | `ResultsGrid` | The cumulative tiles. Marks cited and selected tiles, has a "selected: N, Compare / Ask about these" bar, and shows a count with scrolling. | — |
-| `CompanyTile` / `Logo` | Logo with a fallback to initials, name, status badge, and the shared `layoutId`. | — |
-| `ProfilePanel` | Slides over the basket column. Shows the description, problem card, founders, links and notes. Esc closes it. | `/api/companies/:id`, notes |
+| `Logo` | A lazy `<img>` that gets a white backing once loaded, falling back to initials on a per-company colour when the logo is missing or fails. Decorative (`alt=""`). | — |
+| `CompanyTile` (#10) | A grid tile with the shared `layoutId`. | — |
+| `ProfilePanel` | Slides over the basket column on desktop and becomes a full-screen sheet on phones. Shows the batch, status, one-liner, description, website and YC links (new tab, `noopener`), the problem card (labelled AI-generated, with Unknown for empty fields), groups (explanation as a tooltip), and founders (LinkedIn, or "not available"). It has loading and error-with-retry states and closes with Esc or ×. Notes arrive in #11. | `/api/companies/:id`, notes |
 | `CompareView` | A modal table of 2–3 problem cards, with unknown fields marked. | `/api/companies/:id` ×N |
 | `Chat` | The message list, action buttons (Ask, Explore, Challenge), a visible scope chip, the input, Retry, and New session. | `POST messages`, reset |
 | `NotesList` | Create, edit and delete notes for one company, or all notes. | `/api/notes` |
@@ -27,6 +29,7 @@
 ## Server modules (`lib/`)
 | Module | Responsibility |
 |---|---|
+| `workspace.ts` | `getSectorWorkspace(sql, id)` and `getCompanyProfile(sql, id)`, plus the API types. |
 | `sectors.ts` | `getSectorOverview(sql)` → sectors with total and active counts, both totals, and `lastRefreshAt`. |
 | `treemap.ts` | `layoutTreemap(items, w, h)` → `Tile[]` (squarified, proportional), plus `isCompact` and `isTiny`. Pure functions. |
 | `sector-style.ts` | `sectorColor(id)`: Apple system colours, one per sector. |

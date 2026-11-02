@@ -17,15 +17,31 @@ Data for the treemap. All nine sectors come back in display order, each with bot
 ### `GET /api/sectors/:id`
 Data for the workspace: the sector, its subcategories with counts, and every basket company in a slim form.
 ```json
-{ "sector": { "id": "healthcare", "name": "Healthcare" },
-  "subcategories": [{ "id": 12, "name": "AI", "kind": "ai", "count": 210 }],
-  "companies": [{ "id": 5, "name": "…", "logoUrl": "…|null", "status": "Active", "subcategoryIds": [12, 14] }] }
+{ "sector": { "id": "healthcare", "name": "Healthcare", "total": 708 },
+  "subcategories": [{ "id": 12, "slug": "ai", "name": "AI", "description": "…", "kind": "ai", "count": 210 }],
+  "companies": [{ "id": 5, "name": "…", "logoUrl": "…|null", "status": "Active", "subcategoryIds": [12, 14] }],
+  "gate": false }
 ```
+- **Subcategories** come in this order: AI first, then the problem groups largest first, then Unclassified. Each count comes from `subcategory_counts`, so it matches the `subcategoryIds` the companies carry.
+- **Companies** are every company in the sector that's still in the source, sorted by name case-insensitively.
+- **Errors:** an unknown sector returns `404 { error: "No such sector." }`, and a database failure returns `500 { error: "Couldn't load this sector." }`.
 
 ## Companies
 
 ### `GET /api/companies/:id`
-The full profile: every field from the `companies` table, plus `founders[]`, `problemCard` (null if none yet), and `sector`. Missing fields come back as `null`, never omitted. The compare view fetches up to 3 of these and lays them out in the browser, so compare needs no endpoint of its own.
+The full profile. Missing fields come back as `null`, never left out.
+```json
+{ "id": 5, "slug": "circuithub", "name": "CircuitHub", "oneLiner": "…", "description": "…",
+  "website": "https://…|null", "logoUrl": "…|null", "ycUrl": "…|null", "batch": "Winter 2012",
+  "status": "Active", "launchedAt": "ISO|null", "teamSize": 58, "tags": [], "regions": [],
+  "sector": { "id": "industrials", "name": "Industrials" }, "sectorReason": null,
+  "subcategories": [{ "id": 3, "name": "Operations", "kind": "problem", "explanation": "Jev: operations (p=0.90)" }],
+  "founders": [{ "name": "…", "title": "…|null", "linkedinUrl": "https://www.linkedin.com/in/…|null" }],
+  "problemCard": { "customer": "…|null", "problem": "…|null", "workaround": "…|null", "solution": "…|null", "generatedAt": "ISO" } | null,
+  "refreshedAt": "ISO", "missingFromSource": false }
+```
+- **Errors:** an id that isn't a positive 32-bit integer in plain digits returns **400**, an unknown company **404**, and a database failure **500**.
+- The compare view fetches up to 3 profiles and lays them out in the browser, so compare needs no endpoint of its own.
 
 ## Sessions and chat
 

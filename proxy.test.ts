@@ -57,6 +57,30 @@ describe("proxy with the gate on", () => {
   });
 });
 
+describe("unknown sectors", () => {
+  it.each(["/sector/space", "/sector/constructor", "/sector/toString", "/sector/%E0%A4", "/sector/B2B", "/sector/b2b%20"])(
+    "%s gets a 404 rewrite, gate or no gate",
+    (path) => {
+      for (const pw of ["", "s3cret"]) {
+        vi.stubEnv("APP_PASSWORD", pw);
+        const res = proxy(req(path));
+        expect(res.status).toBe(404);
+        expect(res.headers.get("x-middleware-rewrite")).toMatch(/\/_not-found$/);
+      }
+    },
+  );
+
+  it.each(["/sector/b2b", "/sector/other", "/sector/real-estate-and-construction/"])("%s passes through", (path) => {
+    vi.stubEnv("APP_PASSWORD", "");
+    expect(passes(proxy(req(path)))).toBe(true);
+  });
+
+  it("still gates a known sector page", () => {
+    vi.stubEnv("APP_PASSWORD", "s3cret");
+    expect(proxy(req("/sector/b2b")).status).toBe(307);
+  });
+});
+
 describe("matcher", () => {
   it("skips static assets so the login page can load", () => {
     const [pattern] = config.matcher;

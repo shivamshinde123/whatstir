@@ -1,10 +1,19 @@
 import { NextResponse, type NextRequest } from "next/server";
 import { AUTH_COOKIE, gatePassword, isPublicPath, isValidToken } from "@/lib/auth";
+import { SECTOR_NAMES } from "@/lib/sector";
 
-/** Password gate (docs/technical-design-document.md). Off when APP_PASSWORD is unset. */
+/**
+ * 1. Unknown sector pages get a real 404 status (the prerendered shell would stream a 200
+ *    before notFound() runs). 2. Password gate, off when APP_PASSWORD is unset.
+ */
 export function proxy(request: NextRequest) {
-  const password = gatePassword();
   const { pathname, search } = request.nextUrl;
+  const sector = pathname.match(/^\/sector\/([^/]+)\/?$/);
+  if (sector && !Object.hasOwn(SECTOR_NAMES, sector[1])) {
+    return NextResponse.rewrite(new URL("/_not-found", request.url), { status: 404 });
+  }
+
+  const password = gatePassword();
   if (!password || isPublicPath(pathname)) return NextResponse.next();
   if (isValidToken(request.cookies.get(AUTH_COOKIE)?.value, password)) return NextResponse.next();
 
