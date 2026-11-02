@@ -1,0 +1,75 @@
+"use client";
+
+import type { BasketCompany } from "@/lib/workspace";
+import Logo from "./Logo";
+
+const fmt = new Intl.NumberFormat("en-US");
+
+/**
+ * The sector's companies as a scrolling wall of logos. `content-visibility: auto` lets the
+ * browser skip off-screen cells, so thousands of companies stay fast without virtualisation.
+ */
+export default function Basket({
+  companies,
+  inScope,
+  query,
+  onQuery,
+  selectedId,
+  onOpen,
+}: {
+  companies: BasketCompany[];
+  /** How many are in the current subcategory scope, before the name filter. */
+  inScope: number;
+  query: string;
+  onQuery: (q: string) => void;
+  selectedId: number | null;
+  onOpen: (id: number, opener: HTMLElement) => void;
+}) {
+  return (
+    <div className="flex h-full min-h-0 flex-col">
+      <div className="flex items-baseline justify-between gap-2 px-4 pt-4">
+        <h2 className="font-semibold">Companies</h2>
+        <span className="text-sm tabular-nums text-text-secondary" aria-live="polite">
+          {companies.length === inScope ? fmt.format(inScope) : `${fmt.format(companies.length)} of ${fmt.format(inScope)}`}
+        </span>
+      </div>
+      <div className="px-4 pb-3 pt-2">
+        <input
+          type="search"
+          value={query}
+          onChange={(e) => onQuery(e.target.value)}
+          placeholder="Filter by name"
+          aria-label="Filter companies by name"
+          className="h-9 w-full rounded-lg border border-separator bg-bg px-3 text-sm outline-none focus:border-accent"
+        />
+      </div>
+
+      {companies.length ? (
+        <ul
+          aria-label="Companies in this sector"
+          className="grid min-h-0 flex-1 auto-rows-max grid-cols-[repeat(auto-fill,minmax(76px,1fr))] gap-1 overflow-y-auto px-2 pb-4"
+        >
+          {companies.map((c) => (
+            <li key={c.id} style={{ contentVisibility: "auto", containIntrinsicSize: "76px 88px" }}>
+              <button
+                type="button"
+                data-company-id={c.id}
+                aria-current={selectedId === c.id || undefined}
+                title={c.name}
+                onClick={(e) => onOpen(c.id, e.currentTarget)}
+                className="pressable flex h-[88px] w-full flex-col items-center gap-1.5 rounded-xl px-1 pt-2 text-center transition-colors hover:bg-bg aria-[current]:bg-bg aria-[current]:ring-2 aria-[current]:ring-accent"
+              >
+                <Logo id={c.id} name={c.name} url={c.logoUrl} />
+                <span className="line-clamp-2 w-full text-[11px] leading-tight">{c.name}</span>
+              </button>
+            </li>
+          ))}
+        </ul>
+      ) : (
+        <p className="px-4 py-8 text-center text-sm text-text-secondary">
+          {query.trim() ? `No companies match “${query.trim()}”.` : "No companies in this group yet."}
+        </p>
+      )}
+    </div>
+  );
+}

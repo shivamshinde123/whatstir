@@ -1,10 +1,13 @@
 import Link from "next/link";
 
 /** Translucent top bar; content scrolls beneath it. */
-export default function SiteHeader({ showSignOut = false }: { showSignOut?: boolean }) {
+export default function SiteHeader({ showSignOut = false, wide = false }: { showSignOut?: boolean; wide?: boolean }) {
   return (
     <header className="material sticky top-0 z-20 border-b border-separator">
-      <nav className="mx-auto flex h-12 max-w-5xl items-center justify-between px-4 sm:px-6" aria-label="Main">
+      <nav
+        className={`mx-auto flex h-12 items-center justify-between px-4 sm:px-6 ${wide ? "max-w-[1400px]" : "max-w-5xl"}`}
+        aria-label="Main"
+      >
         <Link href="/" className="text-sm font-semibold">
           Whatstir
         </Link>

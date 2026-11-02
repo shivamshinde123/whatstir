@@ -12,6 +12,19 @@ export const SECTOR_IDS = [
 
 const KNOWN = new Set<string>(SECTOR_IDS);
 
+/** Display names for every sector page, including Other. Kept in sync with the seeds by a test. */
+export const SECTOR_NAMES: Record<string, string> = {
+  b2b: "B2B",
+  consumer: "Consumer",
+  fintech: "Fintech",
+  healthcare: "Healthcare",
+  industrials: "Industrials",
+  education: "Education",
+  "real-estate-and-construction": "Real Estate and Construction",
+  government: "Government",
+  other: "Other / Unclassified",
+};
+
 export function slugify(s: string): string {
   return s
     .toLowerCase()

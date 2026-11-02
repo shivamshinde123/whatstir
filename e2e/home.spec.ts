@@ -5,8 +5,6 @@ test.describe("home page", () => {
     const errors: string[] = [];
     page.on("console", (m) => {
       if (m.type() !== "error") return;
-      // TODO(#8): remove once /sector/[id] exists. Until then, Next's prefetch of the tile links 404s.
-      if (m.text().startsWith("Failed to load resource") && m.location().url.includes("/sector/")) return;
       errors.push(`${m.text()} (${m.location().url})`);
     });
     page.on("pageerror", (e) => errors.push(e.message));

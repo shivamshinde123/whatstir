@@ -56,6 +56,12 @@ The home page is a static shell, and `HomeView` (a client component) fetches `/a
   - "Show as list" swaps the map for a list of every sector, largest first, as an accessible alternative.
 - **Coverage line:** "N companies from yc-oss · updated <date>". It never claims to cover "all YC companies".
 
+## Workspace (#8)
+- **Routing:** `/sector/[id]` prerenders the 9 known ids through `generateStaticParams`. Next 16 doesn't allow `dynamicParams` with `cacheComponents`, and with partial prerendering a `notFound()` in the page would arrive after a 200 has already started streaming. So `proxy.ts` rewrites any unknown sector id (matched with `Object.hasOwn`, so `constructor` doesn't count as a sector) to `/_not-found` with a real **404**, gate or no gate.
+- **Layout:** on desktop (`lg`) a grid of `[320px | 1fr | 360px]` with a height of `100dvh − 15rem` and at least 520 px. On phones the columns stack, with the basket at 55 vh.
+- **Basket at scale:** filtering by subcategory and by name happens in the browser on the slim list. Cells use `content-visibility: auto` with `contain-intrinsic-size: 76px 88px`. A 3,500-company payload renders in under 3 s, and a subcategory switch takes under 1 s (e2e checks both).
+- **Profile panel:** it slides with a 300 ms ease (`cubic-bezier(.32,.72,0,1)`) and switches to a fade for users who prefer reduced motion. It enters and leaves along the same path. It stays mounted, made `inert` and `aria-hidden` while closed, so the exit can animate and nothing inside it can take focus.
+
 ## Database access in route handlers
 With `cacheComponents` on, Next.js starts running GET handlers at build time. So every route handler that reads the database calls `await connection()` (from `next/server`) first, which keeps the query at request time and means the build never needs `DATABASE_URL`.
 

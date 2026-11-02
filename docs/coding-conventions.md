@@ -8,7 +8,7 @@
 - **Server components by default.** Mark a component `"use client"` only if it needs state, effects or motion: the treemap, workspace, chat, basket, grid and panels.
 - **Accessibility.**
   - Anything clickable is a `<button>` or `<a>`, never a clickable `<div>`.
-  - Logos carry `alt="<name> logo"`.
+  - A logo always sits next to the company's name, so the image itself is decorative (`alt=""`), and the button or link takes its accessible name from the visible text. A logo shown without the name would need `alt="<name> logo"`.
   - Focus is visible everywhere.
   - Esc closes panels and modals.
   - Keyboard focus is held inside an open modal.
