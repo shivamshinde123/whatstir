@@ -59,6 +59,10 @@ Listed in the order they were made. Decisions 1–14 are recorded in §16 of [in
 37. **"Is AI central?" is asked as a Jev `noul` (yes/no probability) question rather than a yes/no `choice`.** The `noul` question type returns a calibrated probability directly, which is compared with the same `jev_min_confidence` threshold.
 38. **The TypeScript compile target is ES2022** (create-next-app's default is ES2017). This allows modern syntax such as the regex `s` flag. Next.js does its own compiling, so this only affects type-checking.
 
+39. **Sectors with fewer than 30 companies get only the fixed AI and Unclassified groups.**
+    - *Why:* 6–14 AI-suggested groups for Other's 18 companies would be groups of one or two, which is noise, not structure. Their companies stay findable through All and Unclassified.
+    - Regenerating replaces the problem groups instead of keeping old versions next to them. Old groups are deleted together with their assignments, and the sector's companies are reassigned on the next run.
+
 ## Open items
 
 - **A. Founder data.** Founders come from YC company pages. Check YC's terms before production use. Until then, the founder fetch can be switched off with `FOUNDERS_FETCH=off`.

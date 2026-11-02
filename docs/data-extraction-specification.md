@@ -54,11 +54,28 @@ If any step before 4 fails, the database is left untouched and the last good dat
 
 ## Subcategory generation
 
-This runs only from the `scripts/generate-subcategories.ts` script, never during a refresh. That keeps the groups stable between visits.
+This runs only from `npm run subcategories [-- --sector <id>]` (`scripts/generate-subcategories.mts` calls `lib/subcategories.ts`), never during a refresh. That keeps the groups stable between visits.
 
-- For each sector, `gpt-6-luna` reads every `one_liner` in that sector and proposes **6–14 problem groups**, each with a name and a one-sentence description. The groups are defined by the customer problem being solved, not by the technology used.
-- The script also inserts that sector's fixed `ai` and `unclassified` rows.
-- Rerunning it creates a new `version` and re-queues every company in that sector for assignment.
+- For each sector, `gpt-6-luna` reads the one-liners of that sector's present companies (in id order, capped at 2,000) and proposes **6–14 problem groups**, each with a name and a one-sentence description. The groups are defined by the customer problem being solved, not by the technology used. `cleanGroups` drops reserved and duplicate slugs.
+- A sector with fewer than **30** companies that have one-liners gets no problem groups, only the fixed ones, so its companies all go to Unclassified (decision 39). At present that means Other (18 companies).
+- Each sector is handled in its own transaction:
+  - The fixed `ai` and `unclassified` rows are created if they're missing; they keep their ids for ever.
+  - The old problem groups are deleted, which also deletes their assignments, and the new ones are inserted.
+  - Every row in the sector moves to `version + 1`.
+  - `assigned_hash` is cleared for the sector's companies.
+- Regenerating therefore re-runs only the Jev assignment on the next refresh or backfill. Embeddings and cards are kept (decision 36). Assignments to AI and Unclassified survive, including manual ones.
+- If one sector fails (for example a model error), that sector is left exactly as it was and reported, the other sectors still go through, and the script exits with code 1.
+
+## First-time setup order
+
+1. `npm run migrate`
+2. `npm run refresh -- --load-only`: loads about 6.4k companies in roughly 5 s, without enriching them.
+3. `npm run subcategories`: one `gpt-6-luna` call per sector.
+4. `npm run backfill`: refreshes, then enriches everything with no time limit, 8 companies at a time, and shows progress.
+   - It's safe to stop and run again, because finished steps are kept.
+   - The exit code is 1 if any company failed; run it again to retry them.
+
+After that, the daily cron keeps things up to date.
 
 ## Assignment (Jev)
 

@@ -50,7 +50,7 @@ Indexes: an HNSW index on `embedding` (`vector_cosine_ops`), plus indexes on `se
 | `sector_id` | text FK | |
 | `slug`, `name`, `description` | text | Unique on `(sector_id, slug)`. |
 | `kind` | text | `ai`, `problem` or `unclassified`. Each sector has exactly one `ai` row and one `unclassified` row. |
-| `version` | int | Increases when the problem groups are regenerated. |
+| `version` | int | Every row in a sector moves to the next version when its problem groups are regenerated. Old problem groups are deleted rather than kept, and the AI and Unclassified rows keep their ids. |
 
 ### `company_subcategories`
 `company_id`, `subcategory_id`, `confidence` real, `explanation` text, `assigned_by` (`jev` or `manual`), `assigned_at`. Primary key `(company_id, subcategory_id)`. A company has at most one problem group (or Unclassified) and, separately, may also be in AI.

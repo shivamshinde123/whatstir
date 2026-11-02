@@ -162,6 +162,9 @@ export async function run(opts: {
   /** Fetch used for YC company pages (founders). */
   pageFetchImpl?: typeof fetch;
   enrichDeps?: Partial<EnrichDeps>;
+  /** Companies enriched in parallel (default 4). */
+  concurrency?: number;
+  onProgress?: (s: Readonly<EnrichSummary>) => void;
 }): Promise<RunSummary> {
   const sql = opts.sql ?? db();
   const fetchImpl = opts.fetchImpl ?? fetch;
@@ -233,6 +236,8 @@ export async function run(opts: {
       timeBudgetMs: opts.timeBudgetMs ?? 240_000,
       fetchImpl: opts.pageFetchImpl,
       deps: opts.enrichDeps,
+      concurrency: opts.concurrency,
+      onProgress: opts.onProgress,
     });
     summary.enrichment = { ...e, errors: e.errors.length };
     if (e.errors.length) console.warn(`refresh ${runId}: ${e.errors.length} enrichment errors`, e.errors.slice(0, 5));

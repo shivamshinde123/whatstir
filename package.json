@@ -17,7 +17,9 @@
     "ci": "npm run typecheck && npm run lint && npm run test && npm run test:e2e",
     "migrate": "tsx --env-file=.env scripts/migrate.mts",
     "db:test:up": "docker start whatstir-test-db || docker run -d --name whatstir-test-db -e POSTGRES_PASSWORD=postgres -e POSTGRES_DB=whatstir_test -p 54329:5432 pgvector/pgvector:pg16",
-    "refresh": "tsx --env-file=.env scripts/refresh.mts"
+    "refresh": "tsx --env-file=.env scripts/refresh.mts",
+    "subcategories": "tsx --env-file=.env scripts/generate-subcategories.mts",
+    "backfill": "tsx --env-file=.env scripts/backfill.mts"
   },
   "dependencies": {
     "@typesafe-ai/sdk": "^0.7.0",
