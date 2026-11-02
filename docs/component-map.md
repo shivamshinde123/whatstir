@@ -6,7 +6,7 @@
 | `/` | `page.tsx` | Fetches `/api/sectors` and renders the treemap, the coverage line, and the Active-only toggle. |
 | `/sector/[id]` | `sector/[id]/page.tsx` | The workspace. Holds the selected subcategory, the selected companies, the open profile, and the session state. |
 | `/admin` | `admin/page.tsx` | Refresh status, Refresh now, Pause, the confidence threshold, and recent runs. |
-| `/login` | `login/page.tsx` | Password form. |
+| `/login` | `login/page.tsx` + `login-form.tsx` (client) | The password card. After signing in it goes to `safeNext(?next)`. The form takes a `navigate` prop so tests can swap out navigation. |
 
 ## UI components (`components/`)
 | Component | Props / role | Talks to |
@@ -25,6 +25,8 @@
 ## Server modules (`lib/`)
 | Module | Responsibility |
 |---|---|
+| `auth.ts` | The cookie name and lifetime, `authToken`, `isValidToken`, `isCorrectPassword` (constant-time), `isPublicPath`, `gatePassword`. Server only (`node:crypto`). |
+| `safe-next.ts` | `safeNext(next)`, the open-redirect guard. Safe in the browser. |
 | `db.ts` | `createSql(url)` (with `prepare: false`) and the lazily created shared `db()` client. |
 | `migrate.ts` | `migrate(sql, dir?)` applies the pending SQL migrations. Used by the CLI and the test helpers. |
 | `ai.ts` | `MODELS`, `companyText`, `embed(texts)`, `writeCard(company)` (Structured Outputs, then `verifyCard` drops any field whose evidence quote isn't in the text), `nameGroups(sector, oneLiners)` (then `cleanGroups`: 6–14 groups, with the reserved slugs ai, unclassified, none and all removed). Has fake versions for `AI_FAKE`, and `setOpenAIClient` lets tests swap the client. `answer()` arrives in #9. |

@@ -47,7 +47,13 @@ B2B has about 3.2k companies. The basket is a scrolling wrap of 40 px logos styl
 `d3-hierarchy`'s `treemap().tile(treemapSquarify)` lays out the sectors at the container's size, recalculated when the container resizes (`ResizeObserver`). The boxes are `<button>` elements positioned absolutely on the page. Boxes smaller than 80×40 px show only the count, with the full label in a tooltip and an `aria-label`. An `<ul>` list of the sectors sits underneath for screen readers and has a "Show as list" toggle.
 
 ## Password gate
-`proxy.ts` runs only when `APP_PASSWORD` is set. Every route except `/login`, `/api/login` and `/api/cron/*` needs a cookie equal to `HMAC(APP_PASSWORD, "whatstir")`, checked in constant time.
+`proxy.ts` (Next 16's replacement for middleware, which runs on the Node.js runtime) does nothing unless `APP_PASSWORD` is set. When it is:
+- **What's open:** `/login`, `/api/login` and `/api/cron/*` are always public, and so are static assets, which the matcher excludes so the login page can load its CSS and JS.
+- **The check:** every other request needs the `whatstir_auth` cookie, whose value is `HMAC-SHA256(key = APP_PASSWORD, "whatstir")`. It's compared in constant time: both sides are hashed first, so their lengths always match. Changing the password therefore invalidates every cookie at once.
+- **Without the cookie:** a page redirects (307) to `/login?next=<path+query>`, and an API call gets `401 { "error": "Unauthorized" }`.
+- **After signing in**, the page sends you back to `safeNext(next)` (`lib/safe-next.ts`, which has no dependency on Node's crypto, so it runs in the browser). It accepts only a path on this site and refuses `//host`, backslashes, other schemes and `/login` itself, which rules out open redirects.
+- **Wrong passwords** wait 500 ms before the answer (`FAILED_LOGIN_DELAY_MS`), to slow down guessing on the public URL.
+- **There's no logout button yet.** `POST /api/logout` exists; the button arrives with the header in #7.
 
 ## Failure handling
 - If the chat call fails, the user's message is saved, the reply is marked `status=error`, and a Retry button reposts the same text.

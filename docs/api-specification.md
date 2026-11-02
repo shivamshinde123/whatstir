@@ -74,5 +74,9 @@ Requires `Authorization: Bearer $CRON_SECRET`, otherwise it returns 401. It runs
 
 ## Login
 
-- `POST /api/login` takes `{ "password" }`. If it matches `APP_PASSWORD`, the server sets an httpOnly cookie containing an HMAC of the password, valid for 30 days.
-- `POST /api/logout` clears that cookie.
+- `POST /api/login` takes JSON `{ "password" }`. The responses are:
+  - **200** `{ ok: true }` when the password is right. It sets `whatstir_auth`: httpOnly, `SameSite=Lax`, `Path=/`, `Max-Age` 30 days, and `Secure` in production.
+  - **401** `{ error: "That password isn't right." }` when it's wrong, missing or not a string. The response waits 500 ms, and no cookie is set.
+  - **400** when the body isn't JSON.
+  - **200** with no cookie when the gate is off (`APP_PASSWORD` unset).
+- `POST /api/logout` clears the cookie (`Max-Age=0`). It returns **204** for `fetch`, or **303** to `/login` when the request accepts `text/html` (a plain form post).

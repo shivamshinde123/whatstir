@@ -11,6 +11,7 @@
   --separator: rgb(0 0 0 / 0.1);
   --accent: #0071e3;
   --link: #0066cc;
+  --danger: #d70015;
   --material: rgb(255 255 255 / 0.72);
   --shadow-card: 0 4px 24px rgb(0 0 0 / 0.06);
 }
@@ -25,6 +26,7 @@
     --separator: rgb(255 255 255 / 0.12);
     --accent: #2997ff;
     --link: #2997ff;
+    --danger: #ff453a;
     --material: rgb(22 22 23 / 0.72);
     --shadow-card: 0 4px 24px rgb(0 0 0 / 0.4);
   }
@@ -45,6 +47,7 @@
   --color-separator: var(--separator);
   --color-accent: var(--accent);
   --color-link: var(--link);
+  --color-danger: var(--danger);
   --color-material: var(--material);
   --font-sans: -apple-system, BlinkMacSystemFont, "SF Pro Text", "SF Pro Display",
     "Helvetica Neue", "Segoe UI", system-ui, sans-serif;
