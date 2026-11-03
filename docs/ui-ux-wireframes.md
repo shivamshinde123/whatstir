@@ -39,6 +39,7 @@
 │                  │                                 │ [New session]         │
 └──────────────────┴────────────────────────────────┴──────────────────────┘
 ```
+- **Layout:** the sector title is one compact line ("‹ All sectors  **B2B**  3,230 companies"). The group chips wrap onto as many lines as they need, never scrolling sideways. On desktop the page is exactly one screen tall (minimum 680 px): header, title, chips, then the basket, grid and chat columns take all the remaining height and scroll inside themselves, with the footer at the bottom. Phones keep the stacked layout.
 - A logo flies from the basket to the grid only for newly cited companies. Existing tiles never move.
 - Tile click opens the profile. A checkbox on hover or focus selects the tile. The website link sits inside the profile.
 - **Grid empty:** "Ask a question to start collecting companies."

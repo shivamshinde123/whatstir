@@ -10,6 +10,7 @@ import Chat from "./Chat";
 import CompareView from "./CompareView";
 import ProfilePanel from "./ProfilePanel";
 import ResultsGrid, { MAX_SELECTION } from "./ResultsGrid";
+import SiteFooter from "./SiteFooter";
 import SiteHeader from "./SiteHeader";
 import SubcategoryBar from "./SubcategoryBar";
 
@@ -172,16 +173,19 @@ export default function Workspace({ sectorId, sectorName }: { sectorId: string; 
   }, [profileOpen]);
 
   return (
-    <>
+    // Desktop: exactly one screen tall (with a floor), so the three columns get all the height.
+    <div className="flex flex-1 flex-col lg:h-dvh lg:min-h-[680px] lg:flex-none">
       <SiteHeader showSignOut={data?.gate} />
-      <main className="flex w-full flex-1 flex-col px-4 pb-8 pt-6 sm:px-6 lg:px-8">
-        <Link href="/" className="text-sm text-link hover:underline">
-          ‹ All sectors
-        </Link>
-        <h1 className="text-headline mt-2">{sectorName}</h1>
-        <p className="mt-1 text-text-secondary" aria-live="polite">
-          {data ? `${fmt.format(data.sector.total)} companies` : " "}
-        </p>
+      <main className="flex min-h-0 w-full flex-1 flex-col px-4 pb-4 pt-3 sm:px-6 lg:px-8">
+        <div className="flex flex-wrap items-baseline gap-x-3 gap-y-1">
+          <Link href="/" className="text-sm text-link hover:underline">
+            ‹ All sectors
+          </Link>
+          <h1 className="text-2xl font-semibold tracking-[-0.015em]">{sectorName}</h1>
+          <p className="text-sm text-text-secondary" aria-live="polite">
+            {data ? `${fmt.format(data.sector.total)} companies` : " "}
+          </p>
+        </div>
 
         {state.kind === "loading" && (
           <div role="status" aria-label="Loading sector" className="mt-6 h-[60vh] rounded-[var(--radius-card)] bg-surface motion-safe:animate-pulse" />
@@ -204,7 +208,7 @@ export default function Workspace({ sectorId, sectorName }: { sectorId: string; 
               selected={subcategory}
               onSelect={setSubcategory}
             />
-            <div className="mt-4 grid gap-4 lg:h-[calc(100dvh-18rem)] lg:min-h-[520px] lg:grid-cols-[minmax(300px,22%)_minmax(0,1fr)_minmax(340px,27%)]">
+            <div className="mt-3 grid gap-3 lg:min-h-0 lg:flex-1 lg:grid-cols-[minmax(300px,22%)_minmax(0,1fr)_minmax(340px,27%)] lg:grid-rows-[minmax(0,1fr)]">
               <section
                 aria-label="Company basket"
                 className="relative h-[55vh] overflow-hidden rounded-[var(--radius-card)] bg-surface lg:h-auto"
@@ -254,6 +258,7 @@ export default function Workspace({ sectorId, sectorName }: { sectorId: string; 
           </>
         )}
       </main>
-    </>
+      <SiteFooter />
+    </div>
   );
 }

@@ -6,10 +6,10 @@ export default function SiteHeader({ showSignOut = false }: { showSignOut?: bool
   return (
     <header className="material sticky top-0 z-20 border-b border-separator">
       <nav
-        className="flex h-12 w-full items-center justify-between px-4 sm:px-6 lg:px-8"
+        className="flex h-14 w-full items-center justify-between px-4 sm:px-6 lg:px-8"
         aria-label="Main"
       >
-        <Link href="/" className="text-sm font-semibold">
+        <Link href="/" className="text-xl font-semibold tracking-[-0.02em]">
           Whatstir
         </Link>
         <div className="flex items-center gap-4 sm:gap-5">

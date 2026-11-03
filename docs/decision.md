@@ -106,6 +106,8 @@ Listed in the order they were made. Decisions 1–14 are recorded in §16 of [in
 66. **Supabase's REST Data API is closed off** (migration `004_lock_down_data_api.sql`). Supabase exposes every `public` table through PostgREST to holders of the public anon key. Whatstir never uses it, because the server connects to Postgres as the tables' owner. So every table has row-level security with no policies, and the `anon` and `authenticated` roles lose all privileges, including future defaults. Supabase's advisor then reports only the expected "RLS enabled, no policy" (INFO) and "vector in public" (WARN, kept so local, test and production schemas match).
 67. **Production runs in Vercel's `iad1` (Washington, D.C.)**, next to the Supabase project in `us-east-1`, so each database round trip stays short.
 
+68. **The workspace is a one-screen app on desktop** (the owner's request): a compact title line, wrapping group chips, and the three columns filling the rest of the viewport (`lg:h-dvh`, columns `flex-1` with a `minmax(0,1fr)` row). This supersedes the fixed `calc(100dvh - 18rem)` column height, which wasted the top of the page. The header wordmark grows to 20 px, and every page has a "Made by Shivam" footer.
+
 ## Open items
 
 - **A. Founder data.** Founders come from YC company pages. Check YC's terms before production use. Until then, the founder fetch can be switched off with `FOUNDERS_FETCH=off`.

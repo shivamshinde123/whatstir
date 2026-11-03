@@ -5,6 +5,7 @@ import type { CompanyProfile, SectorWorkspace } from "@/lib/workspace";
 import Basket from "./Basket";
 import Logo, { initials } from "./Logo";
 import ProfilePanel from "./ProfilePanel";
+import SiteFooter from "./SiteFooter";
 import SubcategoryBar from "./SubcategoryBar";
 import CompareView from "./CompareView";
 import ResultsGrid, { CITED_CLASS, MAX_SELECTION, SELECTED_CLASS } from "./ResultsGrid";
@@ -167,7 +168,22 @@ describe("Logo", () => {
   });
 });
 
+describe("SiteFooter", () => {
+  it("credits the maker and keeps the YC attribution", () => {
+    render(<SiteFooter />);
+    expect(screen.getByRole("contentinfo")).toHaveTextContent("Made by Shivam");
+    expect(screen.getByText(/Not affiliated with Y Combinator/)).toBeInTheDocument();
+  });
+});
+
 describe("SubcategoryBar", () => {
+  it("wraps its chips onto more lines instead of scrolling sideways", () => {
+    render(<SubcategoryBar total={3} subcategories={SUBS} selected={null} onSelect={() => {}} />);
+    const group = screen.getByRole("group", { name: "Narrow by subcategory" });
+    expect(group).toHaveClass("flex-wrap");
+    expect(group.className).not.toMatch(/overflow-x/);
+  });
+
   it("shows All plus every group with counts, and marks the selected one", () => {
     const onSelect = vi.fn();
     render(<SubcategoryBar total={3} subcategories={SUBS} selected={3} onSelect={onSelect} />);
