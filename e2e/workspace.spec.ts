@@ -22,27 +22,27 @@ test.describe("sector workspace", () => {
     await expect(page.getByRole("heading", { level: 1, name: "B2B" })).toBeVisible();
     await expect(page.getByText("6 companies", { exact: true })).toBeVisible();
     await expect(basket(page).getByRole("button")).toHaveCount(6);
-    const chips = page.getByRole("group", { name: "Narrow by subcategory" }).getByRole("button");
-    await expect(chips.first()).toHaveText(/^All 6$/);
-    await expect(chips.nth(1)).toHaveText(/^AI \d+$/);
-    await expect(chips.last()).toHaveText(/^Unclassified \d+$/);
-    await expect(page.getByText(/AI-suggested, not official YC categories/)).toBeVisible();
+    const options = page.getByRole("combobox", { name: "Subcategory" }).locator("option");
+    await expect(options.first()).toHaveText(/^All · 6$/);
+    await expect(options.nth(1)).toHaveText(/^AI · \d+$/);
+    await expect(options.last()).toHaveText(/^Unclassified · \d+$/);
+    await expect(page.getByText(/AI-suggested groups, not official YC categories/)).toBeVisible();
     await expect(page.getByText("Ask a question to start collecting companies.")).toBeVisible();
   });
 
   test("selecting a group narrows the basket, and All restores it", async ({ page }) => {
     await page.goto("/sector/b2b");
     await expect(basket(page).getByRole("button")).toHaveCount(6);
-    const chips = page.getByRole("group", { name: "Narrow by subcategory" }).getByRole("button");
+    const select = page.getByRole("combobox", { name: "Subcategory" });
     // Pick the first problem group that has companies.
-    const texts = await chips.allTextContents();
+    const texts = await select.locator("option").allTextContents();
     const index = texts.findIndex((t, i) => i > 1 && !/^Unclassified/.test(t) && !/ 0$/.test(t));
     const count = Number(texts[index].match(/(\d+)$/)![1]);
-    await chips.nth(index).click();
-    await expect(chips.nth(index)).toHaveAttribute("aria-pressed", "true");
+    await select.selectOption({ label: texts[index] });
+    await expect(select.locator("option:checked")).toHaveText(texts[index]);
     await expect(basket(page).getByRole("button")).toHaveCount(count);
-    await expect(page.getByTestId("scope")).toContainText(texts[index].replace(/ \d+$/, ""));
-    await chips.first().click();
+    await expect(page.getByTestId("scope")).toContainText(texts[index].replace(/ · \d+$/, ""));
+    await select.selectOption({ index: 0 });
     await expect(basket(page).getByRole("button")).toHaveCount(6);
   });
 
@@ -131,7 +131,7 @@ test.describe("sector workspace", () => {
   test("the back link returns to the treemap", async ({ page }) => {
     await page.goto("/sector/b2b");
     await page.getByRole("link", { name: "‹ All sectors" }).click();
-    await expect(page.getByRole("heading", { level: 1, name: "Explore startups by sector" })).toBeVisible();
+    await expect(page.getByRole("heading", { level: 1, name: "Explore YC startups by sector" })).toBeVisible();
   });
 
   test("on a phone, the profile is a full-screen sheet and nothing scrolls sideways", async ({ page }) => {

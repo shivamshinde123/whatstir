@@ -53,10 +53,10 @@ test.describe("signed in", () => {
     await expect(page.getByRole("heading", { level: 1, name: big.name })).toBeVisible();
     await expect(page.getByText(`${big.total.toLocaleString("en-US")} companies`, { exact: true })).toBeVisible();
     await expect.poll(() => page.locator("[data-company-id]").count()).toBe(big.total);
-    const chips = page.getByRole("group", { name: "Narrow by subcategory" }).getByRole("button");
-    await expect(chips.first()).toHaveText(/^All /);
-    await expect(chips.nth(1)).toHaveText(/^AI /);
-    expect(await chips.count()).toBeGreaterThan(3); // All, AI, problem groups…, Unclassified
+    const options = page.getByRole("combobox", { name: "Subcategory" }).locator("option");
+    await expect(options.first()).toHaveText(/^All · /);
+    await expect(options.nth(1)).toHaveText(/^AI · /);
+    expect(await options.count()).toBeGreaterThan(3); // All, AI, problem groups…, Unclassified
   });
 
   test("a profile opens with its problem card, founders section and links", async ({ page }) => {

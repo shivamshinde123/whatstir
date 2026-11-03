@@ -202,7 +202,7 @@ export default function Workspace({ sectorId, sectorName }: { sectorId: string; 
     <div className="flex flex-1 flex-col lg:h-dvh lg:min-h-[680px] lg:flex-none">
       <SiteHeader showSignOut={data?.gate} />
       <main className="flex min-h-0 w-full flex-1 flex-col px-4 pb-4 pt-3 sm:px-6 lg:px-8">
-        <div className="flex flex-wrap items-baseline gap-x-3 gap-y-1">
+        <div className="flex flex-wrap items-center gap-x-3 gap-y-1">
           <Link href={batch ? `/?batch=${encodeURIComponent(batch)}` : "/"} className="text-sm text-link hover:underline">
             ‹ All sectors
           </Link>
@@ -223,6 +223,11 @@ export default function Workspace({ sectorId, sectorName }: { sectorId: string; 
               </button>
             </span>
           )}
+          {data && (
+            <div className="lg:ml-auto">
+              <SubcategoryBar total={inBatch.length} subcategories={subcategories} selected={subcategory} onSelect={setSubcategory} />
+            </div>
+          )}
         </div>
 
         {state.kind === "loading" && (
@@ -240,13 +245,8 @@ export default function Workspace({ sectorId, sectorName }: { sectorId: string; 
 
         {data && (
           <>
-            <SubcategoryBar
-              total={inBatch.length}
-              subcategories={subcategories}
-              selected={subcategory}
-              onSelect={setSubcategory}
-            />
-            <div className="mt-3 grid gap-3 lg:min-h-0 lg:flex-1 lg:grid-cols-[minmax(300px,22%)_minmax(0,1fr)_minmax(340px,27%)] lg:grid-rows-[minmax(0,1fr)]">
+            {/* Desktop: basket 30%, results 30%, chat 40%. */}
+            <div className="mt-3 grid gap-3 lg:min-h-0 lg:flex-1 lg:grid-cols-[minmax(0,3fr)_minmax(0,3fr)_minmax(0,4fr)] lg:grid-rows-[minmax(0,1fr)]">
               <section
                 aria-label="Company basket"
                 className="relative h-[55vh] overflow-hidden rounded-[var(--radius-card)] bg-surface lg:h-auto"

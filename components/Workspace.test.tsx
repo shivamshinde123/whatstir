@@ -168,6 +168,12 @@ describe("Logo", () => {
   });
 });
 
+/** Chooses a subcategory in the workspace's dropdown by its visible label, e.g. "Billing · 1". */
+function pick(label: string) {
+  const option = screen.getByRole("option", { name: label }) as HTMLOptionElement;
+  fireEvent.change(screen.getByRole("combobox", { name: "Subcategory" }), { target: { value: option.value } });
+}
+
 describe("SiteFooter", () => {
   it("credits the maker and keeps the YC attribution", () => {
     render(<SiteFooter />);
@@ -177,34 +183,41 @@ describe("SiteFooter", () => {
 });
 
 describe("SubcategoryBar", () => {
-  it("wraps its chips onto more lines instead of scrolling sideways", () => {
+  const options = () => within(screen.getByRole("combobox", { name: "Subcategory" })).getAllByRole("option");
+
+  it("is one dropdown, not a row of chips", () => {
     render(<SubcategoryBar total={3} subcategories={SUBS} selected={null} onSelect={() => {}} />);
-    const group = screen.getByRole("group", { name: "Narrow by subcategory" });
-    expect(group).toHaveClass("flex-wrap");
-    expect(group.className).not.toMatch(/overflow-x/);
+    expect(screen.getByRole("combobox", { name: "Subcategory" }).tagName).toBe("SELECT");
+    expect(screen.queryByRole("button")).toBeNull();
   });
 
-  it("shows All plus every group with counts, and marks the selected one", () => {
+  it("lists All plus every group with counts, in order, and shows the selected one", () => {
     const onSelect = vi.fn();
     render(<SubcategoryBar total={3} subcategories={SUBS} selected={3} onSelect={onSelect} />);
-    const chips = within(screen.getByRole("group", { name: "Narrow by subcategory" })).getAllByRole("button");
-    expect(chips.map((c) => c.textContent)).toEqual(["All 3", "AI 2", "Scheduling 2", "Billing 1", "Unclassified 0"]);
-    expect(screen.getByRole("button", { name: "Scheduling 2" })).toHaveAttribute("aria-pressed", "true");
-    fireEvent.click(screen.getByRole("button", { name: "All 3" }));
+    expect(options().map((o) => o.textContent)).toEqual(["All · 3", "AI · 2", "Scheduling · 2", "Billing · 1", "Unclassified · 0"]);
+    expect(screen.getByRole("combobox", { name: "Subcategory" })).toHaveDisplayValue("Scheduling · 2");
+    fireEvent.change(screen.getByRole("combobox", { name: "Subcategory" }), { target: { value: "" } });
     expect(onSelect).toHaveBeenCalledWith(null);
-    fireEvent.click(screen.getByRole("button", { name: "Billing 1" }));
+    fireEvent.change(screen.getByRole("combobox", { name: "Subcategory" }), { target: { value: "4" } });
     expect(onSelect).toHaveBeenCalledWith(4);
+  });
+
+  it("keeps each group's description as the option's tooltip", () => {
+    render(<SubcategoryBar total={3} subcategories={SUBS} selected={null} onSelect={() => {}} />);
+    const scheduling = options().find((o) => o.textContent === "Scheduling · 2")!;
+    expect(scheduling).toHaveAttribute("title", "Booking");
   });
 
   it("labels the groups as AI-suggested and overlapping", () => {
     render(<SubcategoryBar total={3} subcategories={SUBS} selected={null} onSelect={() => {}} />);
-    expect(screen.getByText(/AI-suggested, not official YC categories/)).toBeInTheDocument();
+    expect(screen.getByText(/AI-suggested groups, not official YC categories/)).toBeInTheDocument();
     expect(screen.getByText(/counts can overlap/)).toBeInTheDocument();
   });
 
   it("says when a sector has no groups yet", () => {
     render(<SubcategoryBar total={3} subcategories={[]} selected={null} onSelect={() => {}} />);
     expect(screen.getByText("Groups haven't been generated for this sector yet.")).toBeInTheDocument();
+    expect(options().map((o) => o.textContent)).toEqual(["All · 3"]);
   });
 });
 
@@ -358,26 +371,26 @@ describe("Workspace", () => {
   it("narrows the basket by subcategory, and All restores it", async () => {
     render(<Workspace sectorId="healthcare" sectorName="Healthcare" />);
     await screen.findByText("3 companies");
-    fireEvent.click(screen.getByRole("button", { name: "Billing 1" }));
+    pick("Billing · 1");
     expect(names()).toEqual(["Care AI"]);
     expect(screen.getByTestId("scope")).toHaveTextContent("Billing");
-    fireEvent.click(screen.getByRole("button", { name: "All 3" }));
+    pick("All · 3");
     expect(names()).toEqual(["Acme Health", "Bolt Clinic", "Care AI"]);
   });
 
   it("lists a company in two groups under both", async () => {
     render(<Workspace sectorId="healthcare" sectorName="Healthcare" />);
     await screen.findByText("3 companies");
-    fireEvent.click(screen.getByRole("button", { name: "AI 2" }));
+    pick("AI · 2");
     expect(names()).toContain("Acme Health");
-    fireEvent.click(screen.getByRole("button", { name: "Scheduling 2" }));
+    pick("Scheduling · 2");
     expect(names()).toContain("Acme Health");
   });
 
   it("filters by name within the current group", async () => {
     render(<Workspace sectorId="healthcare" sectorName="Healthcare" />);
     await screen.findByText("3 companies");
-    fireEvent.click(screen.getByRole("button", { name: "Scheduling 2" }));
+    pick("Scheduling · 2");
     fireEvent.change(screen.getByLabelText("Filter companies by name"), { target: { value: "BOLT" } });
     expect(names()).toEqual(["Bolt Clinic"]);
     expect(screen.getByText("1 of 2")).toBeInTheDocument();
@@ -562,7 +575,7 @@ describe("Workspace chat and results grid", () => {
   it("scopes the question to the selected subcategory and shows it in the scope chip", async () => {
     await renderReady();
     expect(screen.getByTestId("scope")).toHaveTextContent("Healthcare");
-    fireEvent.click(screen.getByRole("button", { name: "Scheduling 2" }));
+    pick("Scheduling · 2");
     expect(screen.getByTestId("scope")).toHaveTextContent("Scheduling");
     expect(screen.getByLabelText("Question")).toHaveAttribute("placeholder", "Ask about Scheduling companies…");
     await ask("who? [ids:10]");
@@ -915,7 +928,7 @@ describe("suggested questions", () => {
     await waitFor(() => expect(sent()).toHaveLength(1));
     expect(sent()[0].action).toBe("challenge");
 
-    fireEvent.click(screen.getByRole("button", { name: "Scheduling 2" }));
+    pick("Scheduling · 2");
     fireEvent.click(within(screen.getByRole("group", { name: "Action" })).getByRole("button", { name: "Ask" }));
     expect(suggestions()[0]).toHaveTextContent("Which Scheduling companies sell to small businesses?");
     fireEvent.click(suggestions()[0]);
@@ -971,14 +984,14 @@ describe("batch carried over from the home page", () => {
     render(<Workspace sectorId="healthcare" sectorName="Healthcare" />);
     expect(await screen.findByText("2 of 3 companies")).toBeInTheDocument();
     expect(basketNames()).toEqual(["Acme Health", "Care AI"]);
-    expect(screen.getByRole("button", { name: "All 2" })).toBeInTheDocument();
-    expect(screen.getByRole("button", { name: "Scheduling 1" })).toBeInTheDocument(); // Bolt Clinic is Winter 2020
+    expect(screen.getByRole("option", { name: "All · 2" })).toBeInTheDocument();
+    expect(screen.getByRole("option", { name: "Scheduling · 1" })).toBeInTheDocument(); // Bolt Clinic is Winter 2020
     expect(screen.getByRole("link", { name: "‹ All sectors" })).toHaveAttribute("href", "/?batch=Fall%202026");
 
     fireEvent.click(screen.getByRole("button", { name: "Show all batches, not just Fall 2026" }));
     expect(screen.getByText("3 companies")).toBeInTheDocument();
     expect(basketNames()).toEqual(["Acme Health", "Bolt Clinic", "Care AI"]);
-    expect(screen.getByRole("button", { name: "Scheduling 2" })).toBeInTheDocument();
+    expect(screen.getByRole("option", { name: "Scheduling · 2" })).toBeInTheDocument();
     expect(screen.getByRole("link", { name: "‹ All sectors" })).toHaveAttribute("href", "/");
     expect(window.location.search).toBe("");
   });
@@ -999,7 +1012,7 @@ describe("batch carried over from the home page", () => {
     expect(posts()[0]).toMatchObject({ batch: "Fall 2026", subcategoryId: null });
 
     // With a group too, both apply.
-    fireEvent.click(screen.getByRole("button", { name: "Scheduling 1" }));
+    pick("Scheduling · 1");
     expect(screen.getByTestId("scope")).toHaveTextContent("Fall 2026 Scheduling");
     fireEvent.change(screen.getByLabelText("Question"), { target: { value: "and here?" } });
     fireEvent.click(screen.getByRole("button", { name: "Send" }));

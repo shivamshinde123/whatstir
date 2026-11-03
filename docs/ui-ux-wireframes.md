@@ -3,7 +3,7 @@
 ## 1. Landing page: treemap
 ```
 ┌ Whatstir (translucent bar) ──────────────────────────── [Sign out]┐
-│ Explore startups by sector                                        │
+│ Explore YC startups by sector                                     │
 │ 6,362 companies from yc-oss · updated Nov 2, 2026                 │
 │ ( All companies | Active only )                     Show as list  │
 │ ┌───────────────────────────────┬──────────────┬────────────────┐ │
@@ -27,10 +27,9 @@
 
 ## 2. Workspace
 ```
-┌ ← Sectors  Healthcare · 708 ─────────────────────────────────────────────┐
-│ [All 708] [AI 210] [Clinical docs 64] [Scheduling 41] … [Unclassified 33] │
-│  AI-suggested groups · a company can be in more than one                 │
-├──────────────────┬────────────────────────────────┬──────────────────────┤
+┌ ‹ All sectors  Healthcare  708 companies    [Subcategory: All · 708 ▾] AI-suggested… ┐
+├──────────────────┬──────────────────┬───────────────────────────────────────────────┤
+│  (30%)           │  (30%)           │  (40%)                                        │
 │ BASKET  [filter] │ RESULTS · 12 companies          │ CHAT  scope: Healthcare│
 │ ▢▢▢▢▢▢▢▢         │ [Logo][Logo][Logo][Logo]        │ You: Which help small │
 │ ▢▢▢▢▢▢▢▢         │ Name  Name  Name  Name          │  clinics?             │
@@ -41,7 +40,7 @@
 │                  │                                 │ [New session]         │
 └──────────────────┴────────────────────────────────┴──────────────────────┘
 ```
-- **Layout:** the sector title is one compact line ("‹ All sectors  **B2B**  3,230 companies"). The group chips wrap onto as many lines as they need, never scrolling sideways. On desktop the page is exactly one screen tall (minimum 680 px): header, title, chips, then the basket, grid and chat columns take all the remaining height and scroll inside themselves, with the footer at the bottom. Phones keep the stacked layout.
+- **Layout:** the sector title is one compact line ("‹ All sectors  **B2B**  3,230 companies"). The subcategory filter is a native dropdown on the same line ("All · 708", "AI · 210", …, "Unclassified · 33"), with a one-line "AI-suggested groups, not official YC categories; counts can overlap" note; each option's tooltip is the group's description. On desktop the page is exactly one screen tall (minimum 680 px): header, the title line, then the basket, grid and chat columns take all the remaining height and scroll inside themselves, with the footer at the bottom. The columns split 30% / 30% / 40%, so the chat gets the most room. Phones keep the stacked layout.
 - A logo flies from the basket to the grid only for newly cited companies. Existing tiles never move.
 - Tile click opens the profile. A checkbox on hover or focus selects the tile. The website link sits inside the profile.
 - **Grid empty:** "Ask a question to start collecting companies."
@@ -119,7 +118,7 @@ Outbound links open in a new tab with `rel="noopener"`, so the research session 
             │ (        Continue        ) │   ← disabled until typed; "Checking…" while busy
             └────────────────────────────┘
 ```
-A centred card on a `surface` page in light mode. In dark mode the page is black and the card is `#1c1c1e`, because elevated surfaces are lighter in dark mode. A wrong password clears the field and keeps you on the page.
+A centred card on a `surface` page in light mode. In dark mode the page is black and the card is `#262628`, because elevated surfaces are lighter in dark mode. A wrong password clears the field and keeps you on the page.
 
 ## 5. Admin (`/admin`, linked from the header)
 ```
@@ -151,7 +150,7 @@ The interface should look clean and calm, the way apple.com does. The `apple-des
   - Hierarchy comes from weight plus size, never from colour alone.
 - **Colour.**
   - Light mode: white and `#f5f5f7` surfaces, `#1d1d1f` text, `#6e6e73` for secondary text, and a single accent, `#0071e3`. Errors use `--danger` (`#d70015` in light mode, `#ff453a` in dark).
-  - Dark mode: true black, `#1c1c1e` surfaces, and `#2997ff` as the accent.
+  - Dark mode: true black, `#262628` surfaces (lighter than Apple's `#1c1c1e`, for clearer separation), 20% white hairlines, secondary text `#aeaeb2`, and `#2997ff` as the accent.
   - **Light is the default, whatever the system setting.** Dark is the owner's choice: a moon/sun switch at the right of the header (`ThemeToggle`, `role="switch"`). The choice is saved in the browser and applied by an inline script before the first paint, so dark never flashes white.
   - Secondary text uses `text-secondary` so it stays readable. `text-tertiary` is only for decoration that carries no information.
 - **Space.** Pages use the full window width, with 16 / 24 / 32 px side gutters (phone / tablet / desktop) and generous whitespace between sections; there's no fixed-width centre column. The workspace's basket and chat columns grow with the window (`minmax(300px, 22%)` and `minmax(340px, 27%)`), and /notes lays notes out in 2–3 columns. No horizontal scrolling at 375 px.

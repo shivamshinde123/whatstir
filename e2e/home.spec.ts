@@ -12,7 +12,7 @@ test.describe("home page", () => {
     const res = await page.goto("/");
     expect(res?.status()).toBe(200);
     await expect(page).toHaveTitle(/Whatstir/);
-    await expect(page.getByRole("heading", { level: 1 })).toHaveText("Explore startups by sector");
+    await expect(page.getByRole("heading", { level: 1 })).toHaveText("Explore YC startups by sector");
     await expect(page.getByText("Not affiliated with Y Combinator.")).toBeVisible();
     expect(errors).toEqual([]);
   });

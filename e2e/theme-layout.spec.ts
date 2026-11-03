@@ -53,6 +53,18 @@ test.describe("theme", () => {
     expect(await page.evaluate(() => document.documentElement.dataset.theme)).toBe("dark");
     expect(await bodyBg(page)).toBe("rgb(0, 0, 0)");
   });
+
+  test("dark cards and hairlines stand out from the page", async ({ page }) => {
+    await page.goto("/sector/b2b");
+    await page.evaluate(() => localStorage.setItem("whatstir-theme", "dark"));
+    await page.reload();
+    await expect(page.getByLabel("Question")).toBeVisible();
+    // Computed colours, since the production CSS minifier rewrites the token spellings.
+    expect(await page.locator('section[aria-label="Chat"]').evaluate((e) => getComputedStyle(e).backgroundColor)).toBe("rgb(38, 38, 40)");
+    expect(await page.getByRole("combobox", { name: "Subcategory" }).evaluate((e) => getComputedStyle(e).borderTopColor)).toBe(
+      "rgba(255, 255, 255, 0.2)",
+    );
+  });
 });
 
 test.describe("full-width layout", () => {
@@ -95,20 +107,26 @@ test.describe("full-width layout", () => {
     expect(doc.sh).toBe(doc.ch); // no page scroll: the columns scroll inside themselves
     for (const name of ["Company basket", "Results", "Chat"]) {
       const box = (await page.locator(`section[aria-label="${name}"]`).boundingBox())!;
-      expect(box.y, name).toBeLessThan(260); // compact title and filters above
+      expect(box.y, name).toBeLessThan(150); // only the header and one title row above
       expect(box.y + box.height, name).toBeGreaterThan(1080 - 80); // down to the footer
     }
     await expect(page.getByRole("heading", { level: 1, name: "B2B" })).toBeInViewport();
     await expect(page.getByRole("contentinfo")).toBeInViewport();
   });
 
-  test("filter chips wrap, so none hides behind a scroll bar", async ({ page }) => {
-    await page.setViewportSize({ width: 1280, height: 800 });
+  test("columns split 30% / 30% / 40%, with the subcategory dropdown in the title row", async ({ page }) => {
     await page.goto("/sector/b2b");
-    const group = page.getByRole("group", { name: "Narrow by subcategory" });
-    await expect(group.getByRole("button").first()).toBeVisible();
-    expect(await group.evaluate((g) => g.scrollWidth - g.clientWidth)).toBe(0);
-    for (const chip of await group.getByRole("button").all()) await expect(chip).toBeInViewport();
+    await expect(page.getByLabel("Question")).toBeVisible();
+    const widths = await Promise.all(
+      ["Company basket", "Results", "Chat"].map(async (name) => (await page.locator(`section[aria-label="${name}"]`).boundingBox())!.width),
+    );
+    const sum = widths.reduce((a, b) => a + b, 0);
+    expect(widths[0] / sum).toBeCloseTo(0.3, 2);
+    expect(widths[1] / sum).toBeCloseTo(0.3, 2);
+    expect(widths[2] / sum).toBeCloseTo(0.4, 2);
+    const title = (await page.getByRole("heading", { level: 1, name: "B2B" }).boundingBox())!;
+    const select = (await page.getByRole("combobox", { name: "Subcategory" }).boundingBox())!;
+    expect(Math.abs(select.y + select.height / 2 - (title.y + title.height / 2))).toBeLessThan(12);
   });
 
   test("the logo is larger, and every page says who made it", async ({ page }) => {

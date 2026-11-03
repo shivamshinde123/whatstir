@@ -28,7 +28,7 @@ test("filter the treemap by batch, carry it into a sector, and back", async ({ p
   const basket = page.getByRole("list", { name: "Companies in this sector" });
   await expect(basket.getByRole("button")).toHaveCount(5);
   await expect(basket.getByRole("button", { name: /Proxino/ })).toHaveCount(0);
-  await expect(page.getByRole("group", { name: "Narrow by subcategory" }).getByRole("button").first()).toHaveText(/^All 5$/);
+  await expect(page.getByRole("combobox", { name: "Subcategory" }).locator("option").first()).toHaveText(/^All · 5$/);
 
   // Back to all sectors keeps the batch.
   await page.getByRole("link", { name: "‹ All sectors" }).click();
