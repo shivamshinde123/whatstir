@@ -85,10 +85,19 @@ Response:
 
 ## Notes
 
-- `GET /api/notes?companyId=` returns `{ "notes": [{ "id", "companyId", "body", "createdAt", "updatedAt" }] }`.
-- `POST /api/notes` takes `{ "companyId"?: number, "body": string }` and returns the created note. An empty `body` is rejected with a 400.
-- `PATCH /api/notes/:id` takes `{ "body": string }`.
-- `DELETE /api/notes/:id` returns 204.
+A note:
+```json
+{ "id": 7, "companyId": 5, "company": { "id": 5, "name": "CircuitHub", "sectorId": "industrials" },
+  "body": "…", "createdAt": "…", "updatedAt": "…" }
+```
+`companyId` and `company` are null for a general note. `company` gives the /notes page what it needs to link back to the profile.
+
+- `GET /api/notes` returns every note; `?companyId=5` returns that company's. The response is `{ "notes": [...], "gate": boolean }`, most recently edited first. `gate` drives the Sign out link, as on `/api/sectors`. A `companyId` that isn't a positive integer returns 400.
+- `POST /api/notes` takes `{ "body": string, "companyId"?: number | null }` and returns **201** with the note. The body is trimmed.
+  - **400:** a body that is empty or only whitespace ("Write something first."), over 10,000 characters, or not JSON; a `companyId` that isn't a positive integer; or a company that doesn't exist ("No such company.").
+- `PATCH /api/notes/:id` takes `{ "body": string }`, replaces the body, bumps `updatedAt` and returns the note. The same body rules give a 400.
+- `DELETE /api/notes/:id` returns **204** with no body.
+- An `:id` that isn't a positive integer, or doesn't exist, returns **404**. A database failure returns 500 with a plain message.
 
 ## Admin
 

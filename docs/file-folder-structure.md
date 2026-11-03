@@ -7,6 +7,7 @@ Whatstir/
 │  ├─ sector/[id]/page.tsx         workspace
 │  ├─ admin/page.tsx               refresh controls
 │  ├─ login/page.tsx
+│  ├─ notes/page.tsx               every note (NotesView)
 │  ├─ layout.tsx, globals.css
 │  └─ api/
 │     ├─ sectors/route.ts

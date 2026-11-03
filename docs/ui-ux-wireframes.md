@@ -61,11 +61,31 @@
 │  Name · CEO · [LinkedIn]             │
 │  Name · LinkedIn not available       │
 │ [Visit website ↗] [YC page ↗]        │
-│ Notes  [+ Add note]                  │
-│  "Interesting: …"   [edit][delete]   │
+│ Notes                                │
+│  [ Add a note about this company… ]  │
+│                          [Add note]  │
+│  "Interesting: …"                    │
+│  Added Nov 2 · Edited Nov 3 [Edit][Delete] │
 └──────────────────────────────────────┘
 ```
 Outbound links open in a new tab with `rel="noopener"`, so the research session isn't lost.
+
+## 3b. Notes page (`/notes`, linked from the header)
+```
+┌ Whatstir                                  Notes ┐
+│ Notes                                           │
+│ Everything you've saved, across all sectors.    │
+│ [ Write a note… ]                   [Add note]  │
+│ ┌ CircuitHub ───────────────────────────────┐   │
+│ │ Ask founders how customers order boards    │   │
+│ │ Added Nov 2 · Edited Nov 3   [Edit][Delete]│   │
+│ └────────────────────────────────────────────┘  │
+│ ┌ General note ─────────────────────────────┐   │
+└─────────────────────────────────────────────────┘
+```
+- Newest edited first. A company name links to its sector with that profile open.
+- Edit happens in place. Delete asks inline: "Delete this note? Cancel / Delete".
+- **Empty:** "No notes yet." **Error:** "Couldn't load notes. Try again."
 
 ## 4. Compare (modal)
 The modal is a table with one column per company (2–3 companies) and one row each for customer, problem, workaround, solution, batch, status and website. Unknown values show as a muted "Unknown".

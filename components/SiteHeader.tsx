@@ -11,13 +11,18 @@ export default function SiteHeader({ showSignOut = false, wide = false }: { show
         <Link href="/" className="text-sm font-semibold">
           Whatstir
         </Link>
-        {showSignOut && (
-          <form action="/api/logout" method="post">
-            <button type="submit" className="pressable text-sm text-link hover:underline">
-              Sign out
-            </button>
-          </form>
-        )}
+        <div className="flex items-center gap-5">
+          <Link href="/notes" className="text-sm text-link hover:underline">
+            Notes
+          </Link>
+          {showSignOut && (
+            <form action="/api/logout" method="post">
+              <button type="submit" className="pressable text-sm text-link hover:underline">
+                Sign out
+              </button>
+            </form>
+          )}
+        </div>
       </nav>
     </header>
   );
