@@ -10,6 +10,7 @@
 | Writing tasks | OpenAI `gpt-6-luna` | Names subcategories and writes problem cards. Luna is OpenAI's model for high-volume work. |
 | Assignment | Jev `jev-latest` through `@typesafe-ai/sdk` | Typed choice answers with probabilities, used to place companies in subcategories. |
 | Embeddings | OpenAI `text-embedding-3-small` (1536 dimensions) | Semantic search over company text. It comes from the same provider and key as the chat models, and embedding all the companies (about 1M tokens) costs a few cents. |
+| Answer formatting | `react-markdown` + `remark-gfm` | The answer model writes Markdown (bold, lists, tables). Rendered as React elements, with no raw HTML and no images; see decision 65. |
 | Animation | Web Animations API (`element.animate`), no library | A logo clone flies from the basket to its tile on a critically damped spring sampled into a CSS `linear()` easing; reduced motion gets a cross-fade. See decision 48. |
 | Treemap layout | `d3-hierarchy` (`treemap` with `squarify`) | A small library with a correct squarified layout. The boxes are drawn as HTML so they're easy to make keyboard-accessible. |
 | Styling | Tailwind CSS | The default for Next.js projects, and it avoids maintaining a CSS architecture. |

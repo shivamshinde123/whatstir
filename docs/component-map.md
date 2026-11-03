@@ -12,6 +12,7 @@
 | Component | Props / role | Talks to |
 |---|---|---|
 | `SiteHeader` | The full-width translucent top bar: a link home, Notes, Admin, the `ThemeToggle`, and a Sign out form (posting to `/api/logout`) when the gate is on. | — |
+| `Markdown` | Renders an assistant answer from Markdown (GitHub-flavoured: lists, bold, tables that scroll sideways). No raw HTML, no images, unsafe link protocols stripped, links open in a new tab. User messages are not passed through it. | — |
 | `ThemeToggle` | The light/dark switch (`role="switch"`, "Dark theme"). Sets `data-theme` on `<html>` through `lib/theme.ts` and saves the choice in `localStorage` (`whatstir-theme`); a `MutationObserver` keeps it in step with the page. | — |
 | `HomeView` (client) | The landing page: fetches the data, handles loading, error and empty states, the coverage line, the All/Active toggle, the map/list switch, and measures the container. | `GET /api/sectors` |
 | `Treemap` | Draws the laid-out `Tile[]` as absolutely positioned links with labels, the compact and tiny variants, and sector tints (`lib/sector-style.ts`). | — |

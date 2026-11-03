@@ -74,6 +74,19 @@ test("a suggested question asks itself with one click and fills the grid", async
   await expect(page.getByRole("group", { name: "Suggestions" }).getByRole("button")).toHaveCount(3);
 });
 
+test("answers written in Markdown render as formatting, not symbols", async ({ page }) => {
+  await open(page);
+  await ask(page, "summarise [md] [ids:6,17]");
+  const answer = page.locator("[data-markdown]").last();
+  await expect(answer.locator("strong")).toHaveText("2 companies");
+  await expect(answer.locator("ul li")).toHaveCount(2);
+  const table = answer.getByRole("table");
+  await expect(table.getByRole("columnheader")).toHaveText(["Company", "Scope"]);
+  await expect(table.getByRole("row")).toHaveCount(3);
+  await expect(answer).not.toContainText("**");
+  await expect(answer).not.toContainText("|---|");
+});
+
 test("a no-match answer shows the message and leaves the grid unchanged", async ({ page }) => {
   await open(page);
   await ask(page, "first [ids:6]");
