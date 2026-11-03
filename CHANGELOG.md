@@ -4,6 +4,14 @@ All notable changes to Whatstir are recorded here. The format follows [Keep a Ch
 
 ## [Unreleased]
 
+## [2.1.0] - 2026-11-03
+
+### Added
+- **Companies a web answer names now join the grid.** After a web search, companies from the current sector that the web text discusses are confirmed by a quick model check, added to the grid and ringed. The web block says how many were added (#54).
+
+### Changed
+- The e2e test servers never receive a real `OPENROUTER_API_KEY`, even when one is in the local `.env` (#54).
+
 ## [2.0.0] - 2026-11-03
 
 ### Added
@@ -54,6 +62,7 @@ The first public release.
 - The workspace fills one screen on desktop, with a compact header (#35).
 - `docs/intial_idea.md` was renamed `docs/initial_idea.md` (#46).
 
-[Unreleased]: https://github.com/shivamshinde123/whatstir/compare/v2.0.0...HEAD
+[Unreleased]: https://github.com/shivamshinde123/whatstir/compare/v2.1.0...HEAD
+[2.1.0]: https://github.com/shivamshinde123/whatstir/releases/tag/v2.1.0
 [2.0.0]: https://github.com/shivamshinde123/whatstir/releases/tag/v2.0.0
 [1.0.0]: https://github.com/shivamshinde123/whatstir/releases/tag/v1.0.0

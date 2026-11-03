@@ -96,6 +96,18 @@ describe("Chat bubbles", () => {
     expect(links[0]).toHaveAttribute("href", "https://news.example.com/acme");
     expect(web).toHaveTextContent("Web results aren't from the YC directory and can be wrong.");
     expect(screen.getByText("Cites 1 company")).toBeInTheDocument(); // database citations stay separate
+    expect(web).not.toHaveTextContent(/Added \d/);
+  });
+
+  it("says how many companies from the web results joined the grid", () => {
+    const m = {
+      ...msg(2, "assistant", "From the companies."),
+      companyIds: [7, 8, 9],
+      web: { query: "recent funding", text: "Acme and Beta raised.", sources: [], companyIds: [8, 9] },
+    };
+    render(<Chat {...props} messages={[m]} />);
+    expect(screen.getByText("Cites 3 companies")).toBeInTheDocument();
+    expect(screen.getByRole("region", { name: "From the web" })).toHaveTextContent("Added 2 companies from these results to the grid.");
   });
 
   it("says when the web search failed, and shows no block when none ran", () => {

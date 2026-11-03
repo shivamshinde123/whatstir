@@ -2,6 +2,7 @@ import type { Sql } from "postgres";
 import { searchWeb as defaultSearchWeb, webSearchEnabled, type WebResult } from "./ai";
 import { answer as defaultAnswer, filterIds, HISTORY_TURNS, type Action, type HistoryTurn } from "./answer";
 import { loadCompanies, MAX_SELECTED, retrieve as defaultRetrieve } from "./retrieval";
+import { webCompanies as defaultWebCompanies } from "./web-companies";
 import { appendTiles, listTiles, toMessage, type Message, type Tile } from "./session";
 
 export const MAX_QUESTION_CHARS = 2000;
@@ -54,6 +55,7 @@ export interface ChatDeps {
   answer: typeof defaultAnswer;
   retrieve: typeof defaultRetrieve;
   searchWeb: typeof defaultSearchWeb;
+  webCompanies: typeof defaultWebCompanies;
 }
 
 /** How many of the session's most recently added grid companies stay in context (decision 76). */
@@ -75,6 +77,7 @@ export async function postMessage(
   const answer = deps.answer ?? defaultAnswer;
   const retrieve = deps.retrieve ?? defaultRetrieve;
   const searchWeb = deps.searchWeb ?? defaultSearchWeb;
+  const webCompanies = deps.webCompanies ?? defaultWebCompanies;
 
   const [session] = await sql<{ id: string; sector_id: string; sector_name: string; ended_at: Date | null }[]>`
     select s.id, s.sector_id, x.name as sector_name, s.ended_at
@@ -155,6 +158,18 @@ export async function postMessage(
           // The database answer still stands; say the web part failed.
           console.error(`web search failed for session ${sessionId}`, e);
           web = { query: a.webQuery, text: null, sources: [], failed: true };
+        }
+        // Dataset companies the web answer discusses join the grid too (decision 78).
+        if (web.text) {
+          try {
+            const found = await webCompanies(sql, session.sector_id, web.text);
+            // Only the ones the database answer didn't already cite: what the web added.
+            web.companyIds = found.filter((id) => !companyIds.includes(id));
+            companyIds = [...companyIds, ...web.companyIds];
+          } catch (e) {
+            console.error(`matching web companies failed for session ${sessionId}`, e);
+            web.companyIds = [];
+          }
         }
       }
     }

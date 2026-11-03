@@ -32,6 +32,11 @@ function WebPart({ web }: { web: WebResult }) {
               ))}
             </ol>
           )}
+          {!!web.companyIds?.length && (
+            <p className="mt-1 text-caption text-text-secondary">
+              Added {web.companyIds.length} {web.companyIds.length === 1 ? "company" : "companies"} from these results to the grid.
+            </p>
+          )}
           <p className="mt-1 text-caption text-text-tertiary">Web results aren&apos;t from the YC directory and can be wrong.</p>
         </>
       )}
