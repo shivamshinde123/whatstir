@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import { Fragment_Mono, Inter, Newsreader } from "next/font/google";
 import Tooltips from "@/components/Tooltips";
 import "./globals.css";
-// Style trial: light only, so there is no theme script or switch.
+// Light only (decision 72), so there is no theme script or switch.
 
 // Self-hosted at build time by next/font, so no runtime requests to Google.
 const inter = Inter({ subsets: ["latin"], variable: "--font-inter" });

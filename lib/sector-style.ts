@@ -1,4 +1,4 @@
-/** Botanical specimen colours (style trial), one per sector, used as soft tints on the treemap. */
+/** Botanical specimen colours, one per sector, used as soft tints on the treemap. */
 const COLORS: Record<string, string> = {
   b2b: "#4a6d47", // Sage Leaf
   consumer: "#c27c93", // Rose Clay

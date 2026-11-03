@@ -65,7 +65,7 @@ describe("HomeView", () => {
     expect(other).toHaveAttribute("data-compact", "true");
     expect(other).toHaveTextContent(/^18$/);
     expect(other).toHaveAttribute("title", "Other / Unclassified, 18 companies");
-    expect(await tile(/^B2B/)).toHaveTextContent("B2B3,233");
+    expect(await tile(/^B2B/)).toHaveTextContent("B2B →3,233"); // a mono tag with an arrow, then the count
   });
 
   it("shows the coverage line from the data, never a claim of all YC companies", async () => {

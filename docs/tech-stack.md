@@ -19,7 +19,7 @@
 | E2E tests | Playwright (Chromium) | Drives the real production build through every user journey, including reduced motion, keyboard use and phone widths. |
 | CI | GitHub Actions, one `ci` job | Runs typecheck, lint, Vitest and Playwright against a `pgvector/pgvector:pg16` service container. It is a required check on `main`. |
 | Scripts | `tsx` | Runs the TypeScript scripts for backfill and subcategory generation. It gets added with the first script. |
-| Fonts | The system font stack (`-apple-system`, SF Pro, Segoe UI, `system-ui`) | Follows the Apple design direction, and there are no web fonts to download. |
+| Fonts | Inter, Newsreader (300) and Fragment Mono via `next/font/google` | The sage design's type (decision 72). `next/font` downloads them at build time and serves them from the app, so there are no runtime requests to Google. |
 
 Left out on purpose:
 - **No state-management library.** React state plus server data is enough.

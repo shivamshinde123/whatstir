@@ -42,7 +42,7 @@ export default function Treemap({ tiles, query = "" }: { tiles: Tile[]; query?: 
                   </span>
                   <span
                     className="font-medium tabular-nums leading-none tracking-[-0.03em]"
-                    // Mixed toward the text colour: darker in light mode, lighter in dark, for contrast.
+                    // Mixed toward the text colour, for contrast.
                     style={{
                       color: `color-mix(in srgb, ${color} 72%, var(--text))`,
                       fontSize: t.h > 160 && t.w > 220 ? "3.3rem" : "1.625rem",

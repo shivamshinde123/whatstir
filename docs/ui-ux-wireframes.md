@@ -139,25 +139,26 @@ Started | Trigger | Status | Took | Source | New | Changed | Enriched | Pending 
 - Status pills: OK green, Failed red, Skipped grey, Running blue. A run's error is shown in red, in its row and in the Last run card.
 - On phones the cards stack and the runs table scrolls sideways inside its own box.
 
-## Design language (Apple-style, the owner's requirement)
+## Design language (sage "specimen" style, the owner's choice)
 
-The interface should look clean and calm, the way apple.com does. The `apple-design` skill is the reference, and the tokens live in `app/globals.css`.
+A calm, botanical look, adapted from a style on styles.refero.design (decision 72). It replaced the earlier Apple-style design. The tokens live in `app/globals.css`.
 
 - **Type.**
-  - The system font stack (SF Pro on Apple devices, Segoe UI on Windows).
-  - Body text is 17 px with 1.47 line height.
-  - Large text gets tighter letter spacing and line height: `text-display` is −0.015em and 1.05, `text-headline` is −0.01em and 1.1.
-  - Hierarchy comes from weight plus size, never from colour alone.
-- **Colour.**
-  - Light mode: white and `#f5f5f7` surfaces, `#1d1d1f` text, `#6e6e73` for secondary text, and a single accent, `#0071e3`. Errors use `--danger` (`#d70015` in light mode, `#ff453a` in dark).
-  - Dark mode: true black, `#262628` surfaces (lighter than Apple's `#1c1c1e`, for clearer separation), 20% white hairlines, secondary text `#aeaeb2`, and `#2997ff` as the accent.
-  - **Light is the default, whatever the system setting.** Dark is the owner's choice: a moon/sun switch at the right of the header (`ThemeToggle`, `role="switch"`). The choice is saved in the browser and applied by an inline script before the first paint, so dark never flashes white.
-  - Secondary text uses `text-secondary` so it stays readable. `text-tertiary` is only for decoration that carries no information.
-- **Space.** Pages use the full window width, with 16 / 24 / 32 px side gutters (phone / tablet / desktop) and generous whitespace between sections; there's no fixed-width centre column. The workspace's basket and chat columns grow with the window (`minmax(300px, 22%)` and `minmax(340px, 27%)`), and /notes lays notes out in 2–3 columns. No horizontal scrolling at 375 px.
+  - **Inter** for body, navigation and headings (the style names Akkurat, which isn't freely licensed; Inter is its first fallback). Body text is 16 px with 1.44 line height.
+  - **Newsreader 300** (serif) for exactly one headline per page: the home hero, "Explore YC startups by sector" (`text-serif-display`, Olive Press `#2b390a`). Never pair it with sans headings elsewhere on the same page.
+  - **Fragment Mono** for uppercase, tracked tags (`text-tag`, 11 px): column titles (Companies, Results, Ask), the home count line, treemap sector names with "→". Never for running text.
+  - All three are self-hosted through `next/font`, so no request goes to Google at runtime.
+- **Colour.** Light only; there's no dark mode and no theme switch.
+  - Page Linen `#f8f9f5`, cards Bone `#eff2e8`, hairlines Mist `#e1e6df`.
+  - Text Forest Ink `#0a1d08`, secondary Sage Gray `#6b7860`, tertiary Sage Mist `#a5ac9f` (decoration only).
+  - Filled buttons are Forest Ink with white text; links are Sage Leaf `#4a6d47`; errors and the cited-tile ring are Crimson Specimen `#991e4b`.
+  - Treemap tiles and status badges use muted botanical colours (Sage Leaf, Rose Clay, Deep Teal, Sage Foam, Amber Pin, Crimson, Sand, Olive Press, Sage Gray). No bright blue, red or green.
+- **Space.** Pages use the full window width, with 16 / 24 / 32 px side gutters (phone / tablet / desktop). On desktop the workspace columns split 30% / 30% / 40%. No horizontal scrolling at 375 px.
 - **Surfaces.**
-  - Cards have an 18 px radius and a soft `shadow-card`, and no heavy borders.
-  - Navigation and toolbars use the translucent `material` class, with content scrolling underneath.
-  - Separators are hairlines in `--separator`.
+  - Cards have a 10 px radius, a tonal fill and a 1 px ring. There are **no drop shadows**: `shadow-card`, `shadow-sm` and `shadow-2xl` are all 1 px rings.
+  - The header is 64 px and translucent (`material`); Notes and Admin are text pills.
+  - The home hero is two columns: the serif headline and count on the left, a hazy landscape photo on the right ("Rolling green hills shrouded in morning fog" by Zetong Li, Unsplash License). It is stored in `public/landscape-hills.jpg`, never hot-linked.
+- **Tooltips.** One themed tooltip (`components/Tooltips.tsx`): a Forest Ink bubble with linen text, 13 px, 6 px radius, no shadow. It reads existing `title` attributes (moving them aside while shown, so the browser's tooltip never appears), shows after 350 ms on hover or at once on keyboard focus, flips below near the top edge, stays inside the window and hides on Escape, press or scroll. Touch never shows it. Native `<option>` tooltips can't be styled, so the subcategory dropdown shows the chosen group's description instead.
 - **Motion.**
   - Buttons respond the moment they're pressed (`pressable`, scale 0.97 over 100 ms).
   - Springs are critically damped (damping 1, response 0.4 s). The basket-to-grid flight is deliberately slower (response 0.8 s over 1.3 s, 70 ms between logos) so it reads as a trip from left to right; it samples the spring into a CSS `linear()` easing (`components/ResultsGrid.tsx`). A little bounce is allowed only where a gesture carried momentum.
@@ -166,7 +167,7 @@ The interface should look clean and calm, the way apple.com does. The `apple-des
 - **Accessibility.**
   - Respect the reduced-motion setting by replacing movement with cross-fades.
   - Respect the reduced-transparency setting with solid materials.
-  - Focus rings are visible (2 px, accent colour).
+  - Focus rings are visible (2 px, Sage Leaf).
   - Text contrast meets WCAG AA.
 - **Content.**
   - Every logo sits next to its company name.

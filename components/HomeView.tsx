@@ -88,7 +88,7 @@ export default function HomeView() {
     <>
       <SiteHeader showSignOut={data?.gate} />
       <main className="flex w-full flex-1 flex-col px-4 pb-12 pt-10 sm:px-6 sm:pt-14 lg:px-8">
-        {/* Style trial: a two-column hero, the serif headline beside a hazy landscape plate. */}
+        {/* A two-column hero: the serif headline beside a hazy landscape photo. */}
         <div className="grid items-end gap-6 lg:grid-cols-[minmax(0,1.1fr)_minmax(0,1fr)]">
           <div>
             <p className="text-tag text-text-secondary">YC directory · by sector →</p>

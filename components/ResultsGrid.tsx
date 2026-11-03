@@ -9,7 +9,7 @@ const fmt = new Intl.NumberFormat("en-US");
 export const MAX_SELECTION = 20;
 
 /** Cited and selected must read differently: cited is an accent ring, selected a tint plus a tick. */
-// Style trial: the "Crimson Specimen" status ring.
+// The "Crimson Specimen" status ring.
 export const CITED_CLASS = "ring-[1.5px] ring-danger";
 export const SELECTED_CLASS = "bg-accent/10 hover:bg-accent/15";
 const PLAIN_CLASS = "bg-surface hover:bg-bg";

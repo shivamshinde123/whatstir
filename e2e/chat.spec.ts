@@ -62,6 +62,8 @@ test("[A,B] then [B,C]: one grid of 3, only C is new and only C flies in from th
   expect((await anims(page)).filter((a) => a.flight)).toHaveLength(1);
   await expect(page.getByTestId("results-count")).toHaveText("3 companies");
   await expect(page.locator("[data-tile-id][data-cited]")).toHaveCount(2); // Couple and Mino Games
+  const ring = await page.locator("[data-tile-id][data-cited]").first().evaluate((e) => getComputedStyle(e).boxShadow);
+  expect(ring).toContain("rgb(153, 30, 75)"); // the crimson "specimen" ring
   await expect(page.locator("[data-flight]")).toHaveCount(0); // flights clean up after landing
 });
 

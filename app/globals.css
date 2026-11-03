@@ -1,10 +1,7 @@
 @import "tailwindcss";
 
-/* Light is the default; dark is the owner's explicit choice (ThemeToggle sets data-theme). */
-@custom-variant dark (&:where([data-theme="dark"], [data-theme="dark"] *));
-
-/* Style trial (branch style-trial-refero-sage): a botanical "specimen" look from
-   styles.refero.design. Linen canvas, bone cards, forest-ink CTAs, 1px rings instead of shadows. */
+/* A botanical "specimen" look (from styles.refero.design; decision 72). Light only: linen canvas,
+   bone cards, forest-ink CTAs, 1px rings instead of shadows. See docs/ui-ux-wireframes.md. */
 
 :root {
   --bg: #f8f9f5; /* Linen */
@@ -20,24 +17,8 @@
   --shadow-card: 0 0 0 1px var(--separator);
 }
 
-:root[data-theme="dark"] {
-  --bg: #141a14; /* deep forest, not pure black */
-  /* Slate Hollow bands, lifted bone-on-forest contrast. */
-  --surface: #2a332a;
-  --text: #eff2e8;
-  --text-secondary: #b3bda8;
-  --text-tertiary: #8a9481;
-  --separator: rgb(239 242 232 / 0.2);
-  --accent: #4a6d47; /* Sage Leaf CTA on dark, white text stays readable */
-  --link: #9cc39a;
-  --danger: #e07a9f;
-  --material: rgb(20 26 20 / 0.8);
-  --shadow-card: 0 0 0 1px var(--separator);
-}
-
 @media (prefers-reduced-transparency: reduce) {
-  :root,
-  :root[data-theme="dark"] {
+  :root {
     --material: var(--bg);
   }
 }
@@ -67,10 +48,6 @@
 html {
   color-scheme: light;
   -webkit-text-size-adjust: 100%;
-}
-
-html[data-theme="dark"] {
-  color-scheme: dark;
 }
 
 body {
@@ -112,9 +89,6 @@ body {
   line-height: 1.02;
   letter-spacing: -0.02em;
   color: #2b390a; /* Olive Press */
-}
-:root[data-theme="dark"] .text-serif-display {
-  color: var(--text);
 }
 
 /* Uppercase, tracked metadata tags (Fragment Mono). Never for running copy. */

@@ -114,6 +114,13 @@ Listed in the order they were made. Decisions 1–14 are recorded in §16 of [in
 
 71. **The basket-to-grid flight is slower**: spring response 0.4 s → 0.8 s, flight 600 ms → 1.3 s, stagger 35 → 70 ms (the owner's request). At 0.4 s most of the travel happened in the first ~150 ms, so logos seemed to jump rather than travel from left to right. It stays critically damped (no overshoot), tiles are still clickable mid-flight, and reduced motion keeps its 200 ms fade.
 
+72. **The sage "specimen" style is the default design, light only** (the owner tried it on the `style-trial-refero-sage` branch and preferred it). It supersedes the Apple-style colour, type and surface choices (and the dark-mode parts of decisions 62 and 70), while motion keeps the Apple rules.
+    - *Look:* linen page, bone cards, forest-ink buttons, Sage Leaf links, crimson cited ring, 1 px rings instead of shadows, 10 px card radius, muted botanical sector colours.
+    - *Type:* Inter, plus Newsreader for the one hero headline and Fragment Mono for uppercase tags. They're self-hosted by `next/font` at build time, so there are no runtime font requests and no new runtime dependency.
+    - *No dark mode:* the owner said it isn't needed. `ThemeToggle`, `lib/theme.ts`, the inline theme script, the dark tokens and all `dark:` classes are gone, so a saved `whatstir-theme` is ignored.
+    - *Hero photo:* stored in `public/` rather than linked, so it can't break.
+    - *Tooltips:* the browser's tooltips can't be styled, so one app-wide `Tooltips` component replaces them by reading the existing `title` attributes. That kept every call site unchanged and avoided a tooltip library. A native `<option>` can't show a custom tooltip at all, so the dropdown shows the chosen group's description on the select instead.
+
 ## Open items
 
 - **A. Founder data.** Founders come from YC company pages. Check YC's terms before production use. Until then, the founder fetch can be switched off with `FOUNDERS_FETCH=off`.

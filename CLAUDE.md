@@ -29,11 +29,13 @@ A personal tool for exploring YC startups by sector and the customer problem the
 - The ingestion fixture `test/fixtures/yc-sample.json` holds 37 real-shaped records covering all 9 sectors and every status. Expected counts are in `lib/refresh.test.ts`.
 
 ## Frontend design
-Follow the `apple-design` skill and the "Design language" section of `docs/ui-ux-wireframes.md`:
-- Use the system font and the colour tokens in `app/globals.css`, with generous whitespace.
-- Navigation and toolbars are translucent.
-- Springs have no overshoot by default.
-- Respect the user's reduced-motion and reduced-transparency settings.
+Follow the "Design language" section of `docs/ui-ux-wireframes.md` (the sage "specimen" style, decision 72). The motion rules still come from the `apple-design` skill.
+- Use the colour tokens in `app/globals.css`. The design is light only, so don't add `dark:` styles.
+- Inter for text. Newsreader serif for one hero headline per page only. Fragment Mono (`text-tag`) for uppercase tags only, never for running copy.
+- No drop shadows: use 1 px rings and tonal fills. No bright blue, red or green.
+- Tooltips come from `components/Tooltips.tsx` through plain `title` attributes. Don't build per-component tooltips.
+- Images are stored in `public/`, never hot-linked.
+- Springs have no overshoot by default. Respect the user's reduced-motion and reduced-transparency settings.
 
 ## Next.js 16
 Next 16 renamed `middleware.ts` to `proxy.ts`, and `cacheComponents` is switched on. Before using any Next API, check the docs bundled in `node_modules/next/dist/docs/`.

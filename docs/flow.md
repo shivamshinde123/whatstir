@@ -89,7 +89,8 @@ refresh.run(trigger, runId?)
 ## State ownership
 - **Server (Postgres):** companies, the grid (`session_tiles`), messages and notes. These are the source of truth, so a page reload restores the session exactly.
 - **Browser:** the selected subcategory, the companies selected for compare or a follow-up question, the open profile, and the basket name filter. None of these persist.
-- **Browser, persisted:** the theme (`localStorage["whatstir-theme"] = "dark"`, absent for light). `app/layout.tsx` inlines a script in `<head>` that applies it before the first paint; `ThemeToggle` changes it.
+- **Browser, persisted:** nothing for the look: the design is light only (decision 72), so an old `whatstir-theme` value is ignored.
+- **Tooltips:** `pointerover` / `focusin` on any `[title]` → `Tooltips` moves the title to `data-tip`, waits 350 ms (none for keyboard focus), then shows the bubble → `pointerout` / `focusout` / Escape / press / scroll → the title is put back and the bubble removed.
 
 ## Suggested questions
 `Chat` → `suggestionsFor(action, scopeName, selection)` (`lib/suggestions.ts`, pure) → 3 buttons → click → the same path as a typed question: `onAsk(text, action)` → `Workspace.ask` → `POST /api/sessions/:id/messages` with the current scope.
