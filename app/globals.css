@@ -126,6 +126,31 @@ body {
   text-transform: uppercase;
 }
 
+/* The app's one tooltip (components/Tooltips.tsx): forest ink with linen text, no shadow. */
+.app-tooltip {
+  position: fixed;
+  z-index: 100;
+  max-width: 18rem;
+  padding: 6px 10px;
+  border-radius: 6px;
+  background: var(--text);
+  color: var(--bg);
+  font-size: 0.8125rem;
+  line-height: 1.35;
+  letter-spacing: 0;
+  pointer-events: none;
+  transform: translateY(-100%);
+  animation: tooltip-in 120ms ease-out;
+}
+.app-tooltip[data-below] {
+  transform: none;
+}
+@keyframes tooltip-in {
+  from {
+    opacity: 0;
+  }
+}
+
 /* Translucent chrome that content scrolls beneath. */
 .material {
   background: var(--material);

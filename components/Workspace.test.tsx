@@ -202,10 +202,11 @@ describe("SubcategoryBar", () => {
     expect(onSelect).toHaveBeenCalledWith(4);
   });
 
-  it("keeps each group's description as the option's tooltip", () => {
-    render(<SubcategoryBar total={3} subcategories={SUBS} selected={null} onSelect={() => {}} />);
-    const scheduling = options().find((o) => o.textContent === "Scheduling · 2")!;
-    expect(scheduling).toHaveAttribute("title", "Booking");
+  it("shows the chosen group's description as the dropdown's tooltip", () => {
+    const { rerender } = render(<SubcategoryBar total={3} subcategories={SUBS} selected={null} onSelect={() => {}} />);
+    expect(screen.getByRole("combobox", { name: "Subcategory" })).not.toHaveAttribute("title");
+    rerender(<SubcategoryBar total={3} subcategories={SUBS} selected={3} onSelect={() => {}} />);
+    expect(screen.getByRole("combobox", { name: "Subcategory" })).toHaveAttribute("title", "Booking");
   });
 
   it("labels the groups as AI-suggested and overlapping", () => {

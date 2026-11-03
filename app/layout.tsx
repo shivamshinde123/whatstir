@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { Fragment_Mono, Inter, Newsreader } from "next/font/google";
+import Tooltips from "@/components/Tooltips";
 import "./globals.css";
 // Style trial: light only, so there is no theme script or switch.
 
@@ -16,7 +17,10 @@ export const metadata: Metadata = {
 export default function RootLayout({ children }: LayoutProps<"/">) {
   return (
     <html lang="en" className={`h-full ${inter.variable} ${newsreader.variable} ${fragmentMono.variable}`}>
-      <body className="flex min-h-full flex-col">{children}</body>
+      <body className="flex min-h-full flex-col">
+        {children}
+        <Tooltips />
+      </body>
     </html>
   );
 }
