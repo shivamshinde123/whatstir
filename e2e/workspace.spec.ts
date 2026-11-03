@@ -41,7 +41,7 @@ test.describe("sector workspace", () => {
     await chips.nth(index).click();
     await expect(chips.nth(index)).toHaveAttribute("aria-pressed", "true");
     await expect(basket(page).getByRole("button")).toHaveCount(count);
-    await expect(page.getByText(/^Scope:/)).toContainText(texts[index].replace(/ \d+$/, ""));
+    await expect(page.getByTestId("scope")).toContainText(texts[index].replace(/ \d+$/, ""));
     await chips.first().click();
     await expect(basket(page).getByRole("button")).toHaveCount(6);
   });

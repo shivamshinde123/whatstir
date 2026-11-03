@@ -5,6 +5,8 @@ export interface Tile {
   companyId: number;
   position: number;
   addedBy: number | null;
+  name: string;
+  logoUrl: string | null;
 }
 
 export interface Message {
@@ -47,9 +49,17 @@ export const toMessage = (r: MessageRow): Message => ({
 });
 
 export async function listTiles(sql: Sql, sessionId: string): Promise<Tile[]> {
-  const rows = await sql<{ company_id: number; position: number; added_by: string | null }[]>`
-    select company_id, position, added_by from session_tiles where session_id = ${sessionId} order by position`;
-  return rows.map((r) => ({ companyId: r.company_id, position: r.position, addedBy: r.added_by === null ? null : Number(r.added_by) }));
+  const rows = await sql<{ company_id: number; position: number; added_by: string | null; name: string; logo_url: string | null }[]>`
+    select t.company_id, t.position, t.added_by, c.name, c.logo_url
+    from session_tiles t join companies c on c.id = t.company_id
+    where t.session_id = ${sessionId} order by t.position`;
+  return rows.map((r) => ({
+    companyId: r.company_id,
+    position: r.position,
+    addedBy: r.added_by === null ? null : Number(r.added_by),
+    name: r.name,
+    logoUrl: r.logo_url,
+  }));
 }
 
 async function load(sql: Sql, s: { id: string; sector_id: string; created_at: Date }): Promise<SessionState> {

@@ -49,11 +49,11 @@ The full profile. Missing fields come back as `null`, never left out.
 Returns the sector's active session, creating one if none exists. If several requests arrive at once, they all get the same session.
 ```json
 { "session": { "id": "uuid", "sectorId": "healthcare", "createdAt": "…" },
-  "tiles": [{ "companyId": 5, "position": 0, "addedBy": 41 }],
+  "tiles": [{ "companyId": 5, "position": 0, "addedBy": 41, "name": "CircuitHub", "logoUrl": "https://…" }],
   "messages": [{ "id": 41, "role": "assistant", "action": "ask", "content": "…", "scope": { "subcategoryId": null, "selectedCompanyIds": [] },
                  "companyIds": [5, 9], "status": "ok", "createdAt": "…" }] }
 ```
-Tiles come in `position` order and messages in `id` order. An unknown sector returns 404, and a database failure returns 500.
+Tiles come in `position` order and carry the company's name and logo, so the grid can draw them even if the company has left the basket. Messages come in `id` order. An unknown sector returns 404, and a database failure returns 500.
 
 ### `POST /api/sectors/:id/session/reset`
 Ends the active session and starts a new one. Returns the same shape as the GET above, with empty tiles and messages.

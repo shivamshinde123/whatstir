@@ -113,9 +113,13 @@ export function filterIds(ids: unknown, candidates: { id: number }[]): number[] 
 /**
  * Deterministic stand-in (AI_FAKE). Tests script it from the question:
  * "[ids:1,2]" cites exactly those ids, "[fail]" throws; otherwise it cites the first 3 candidates.
+ * "[fail-once]" throws unless the same question is already in the history, i.e. on its retry.
  */
 function fakeAnswer(req: AnswerRequest): Answer {
   if (req.question.includes("[fail]")) throw new Error("fake model failure");
+  if (req.question.includes("[fail-once]") && !req.history.some((h) => h.role === "user" && h.content === req.question)) {
+    throw new Error("fake model failure");
+  }
   const scripted = req.question.match(/\[ids:([\d,\s]*)\]/);
   const companyIds = scripted
     ? scripted[1].split(",").filter((s) => s.trim()).map(Number)

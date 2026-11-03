@@ -8,7 +8,7 @@ Listed in the order they were made. Decisions 1–14 are recorded in §16 of [in
 16. **Data comes from the yc-oss mirror** (`https://yc-oss.github.io/api/companies/all.json`).
     - *Why:* it's free and open, refreshed daily, and has a stable numeric `id` plus `industry`, `batch`, `status`, logo and website for every company.
     - *Trade-off:* it has no founder data, so founders are fetched from each company's YC page (`url` field). Whether YC's terms allow that is still open; see open item A.
-17. **The stack is Next.js, Supabase Postgres with pgvector, Vercel, and Framer Motion.**
+17. **The stack is Next.js, Supabase Postgres with pgvector, Vercel, and Framer Motion.** (Animation is now the Web Animations API; see decision 48.)
     - *Why:* it's one TypeScript codebase, the database does vector search itself, and Vercel Cron covers the scheduled refresh.
 18. **The database is used as plain Postgres through the `postgres` driver, not supabase-js.**
     - *Why:* there's no auth and no client-side database access, and a refresh needs real transactions so counts are never published half-updated. supabase-js can't wrap several statements in one transaction.
@@ -76,6 +76,13 @@ Listed in the order they were made. Decisions 1–14 are recorded in §16 of [in
 45. **Explore and Challenge are rejected with a 400 until #12.** `ACTIONS` in `lib/chat.ts` lists what the API accepts, and the prompt rules for both are already written in `lib/answer.ts`.
 46. **An answer that fails keeps the user's message and stores an assistant message with `status: "error"`.** Failed replies are left out of the history sent to the model. Retrying sends the question again as a new message, so there's no "edit and replace" flow.
 47. **Positions in the grid are consecutive.** Only companies new to the grid get positions, under a row lock on the session. This supersedes the earlier `ON CONFLICT` approach, which left gaps and, without a lock, could silently drop a tile if two answers chose the same position.
+
+48. **The basket-to-grid flight uses the Web Animations API, not Motion's shared `layoutId`.** This supersedes the Framer Motion part of decision 17 and the `layoutId` plan in the technical design.
+    - *Why:* a shared `layoutId` would register every basket logo (thousands in B2B) with Motion's layout tracking. The flight also has to leave the grid's scroll container, which clips layout animations. A fixed-position clone animated with `element.animate()` does both with no new dependency.
+    - *How it stays Apple-like:* a critically damped spring is sampled into a CSS `linear()` easing. Reduced motion becomes a plain cross-fade. Tiles are clickable mid-flight.
+49. **Tiles carry the company's name and logo** (joined in `listTiles`). The grid then doesn't depend on the basket's list, which leaves out companies that have gone missing from the source.
+50. **New session asks inline ("Clear the grid?" Cancel / Start over)** rather than with a browser `confirm()` dialog. It's only offered once the session has messages.
+51. **One question at a time.** The Ask button is disabled while an answer is pending, so answers and their animations never overlap.
 
 ## Open items
 

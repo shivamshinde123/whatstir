@@ -67,7 +67,7 @@ describe("POST /api/sessions/:id/messages", () => {
     const body = await res.json();
     expect(body.message.companyIds).toEqual([1]);
     expect(body.newTileIds).toEqual([1]);
-    expect(body.tiles).toEqual([{ companyId: 1, position: 0, addedBy: body.message.id }]);
+    expect(body.tiles).toEqual([{ companyId: 1, position: 0, addedBy: body.message.id, name: "Company 1", logoUrl: null }]);
   });
 
   it("returns 502 with retryable and the saved question when the answer fails", async () => {

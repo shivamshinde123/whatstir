@@ -4,6 +4,7 @@ import type { BasketCompany } from "@/lib/workspace";
 import Logo from "./Logo";
 
 const fmt = new Intl.NumberFormat("en-US");
+const NONE: ReadonlySet<number> = new Set();
 
 /**
  * The sector's companies as a scrolling wall of logos. `content-visibility: auto` lets the
@@ -11,6 +12,7 @@ const fmt = new Intl.NumberFormat("en-US");
  */
 export default function Basket({
   companies,
+  collected = NONE,
   inScope,
   query,
   onQuery,
@@ -18,6 +20,8 @@ export default function Basket({
   onOpen,
 }: {
   companies: BasketCompany[];
+  /** Companies already in the results grid; their logos stay behind as faded ghosts. */
+  collected?: ReadonlySet<number>;
   /** How many are in the current subcategory scope, before the name filter. */
   inScope: number;
   query: string;
@@ -55,9 +59,10 @@ export default function Basket({
                 type="button"
                 data-company-id={c.id}
                 aria-current={selectedId === c.id || undefined}
+                data-collected={collected.has(c.id) || undefined}
                 title={c.name}
                 onClick={(e) => onOpen(c.id, e.currentTarget)}
-                className="pressable flex h-[88px] w-full flex-col items-center gap-1.5 rounded-xl px-1 pt-2 text-center transition-colors hover:bg-bg aria-[current]:bg-bg aria-[current]:ring-2 aria-[current]:ring-accent"
+                className="pressable flex h-[88px] w-full flex-col items-center gap-1.5 rounded-xl px-1 pt-2 text-center transition-colors hover:bg-bg aria-[current]:bg-bg aria-[current]:ring-2 aria-[current]:ring-accent [&[data-collected]>:first-child]:opacity-35"
               >
                 <Logo id={c.id} name={c.name} url={c.logoUrl} />
                 <span className="line-clamp-2 w-full text-[11px] leading-tight">{c.name}</span>

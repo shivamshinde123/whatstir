@@ -48,8 +48,8 @@ describe("getOrCreateSession", () => {
     await appendTiles(sql, session.id, Number(m.id), [2, 1]);
     const state = (await getOrCreateSession(sql, "healthcare"))!;
     expect(state.tiles).toEqual([
-      { companyId: 2, position: 0, addedBy: Number(m.id) },
-      { companyId: 1, position: 1, addedBy: Number(m.id) },
+      { companyId: 2, position: 0, addedBy: Number(m.id), name: "Company 2", logoUrl: null },
+      { companyId: 1, position: 1, addedBy: Number(m.id), name: "Company 1", logoUrl: null },
     ]);
     expect(state.messages[0]).toMatchObject({ id: Number(m.id), role: "assistant", content: "hi", companyIds: [2, 1], status: "ok" });
   });

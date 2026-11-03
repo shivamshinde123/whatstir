@@ -35,13 +35,17 @@ The checks live in `lib/session.test.ts` and `lib/chat.test.ts`:
 - Four answers appended at once still give 5 unique tiles at positions 0–4.
 
 ## Animation
-- Each basket logo and its grid tile share `layoutId={"co-" + id}`.
-- When a company appears in `newTileIds`:
-  - If its basket logo is visible (checked with an IntersectionObserver), motion animates it from the basket to the grid automatically through the shared `layoutId`.
-  - If it isn't visible, the tile is drawn starting from the centre of the basket.
-- The basket keeps a placeholder ghost where the logo was, so the company stays clickable from the basket.
-- Tiles are interactive the moment they appear, without waiting for the animation to finish.
-- `MotionConfig reducedMotion="user"` turns the flight into a plain appearance for users who prefer reduced motion.
+`fly()` in `components/ResultsGrid.tsx` runs in a layout effect whenever an answer adds tiles (`newTileIds`), using the Web Animations API:
+1. It scrolls the first new tile into view, then measures each new tile's logo.
+2. The start point is that company's logo in the basket, if it's rendered and inside the basket's visible area. Otherwise (filtered out or scrolled away) it's the centre of the basket.
+3. A clone of the logo is placed `position: fixed` on the tile and animated from the start point with `translate + scale`, using a critically damped spring (damping 1, response 0.4 s) sampled into a CSS `linear()` easing over 600 ms. Tiles are staggered by 35 ms. The clone removes itself when it lands.
+4. The tile's own logo stays transparent until the clone lands.
+
+- The real tile is in place and clickable from the first frame, so it can be opened mid-flight. The clone has `pointer-events: none`.
+- The clone lives outside the grid's scroll container, so the grid's `overflow` doesn't clip the flight.
+- Reduced motion: no clone and no transform, just a 200 ms opacity fade on the new tiles.
+- The basket keeps every company. The logos of companies already in the grid stay behind as faded ghosts (`data-collected`), still clickable.
+- Restoring a session on load animates nothing.
 - Tiles cited by the latest answer get an accent ring. Tiles that are selected for compare or a follow-up question get a checkmark. These two looks are deliberately different.
 
 ## Basket at scale

@@ -5,13 +5,13 @@
 ## Entry points
 1. `proxy.ts` runs on every request and enforces the password gate when `APP_PASSWORD` is set.
 2. `app/page.tsx` → `<HomeView>` (client) → `GET /api/sectors` → `getSectorOverview` (the `sector_counts` view plus the last successful run) → `layoutTreemap` at the measured size → `<Treemap>`. The Active-only toggle and the list view reuse the data already loaded.
-3. `proxy.ts` sends unknown `/sector/:id` to a 404 → `app/sector/[id]/page.tsx` (`generateStaticParams` with the 9 ids, with `SECTOR_NAMES` giving the title) → `<Workspace>` (client) → `GET /api/sectors/:id` → `getSectorWorkspace`. The session and chat (#9 and #10) will plug in here.
+3. `proxy.ts` sends unknown `/sector/:id` to a 404 → `app/sector/[id]/page.tsx` (`generateStaticParams` with the 9 ids, with `SECTOR_NAMES` giving the title) → `<Workspace>` (client) → `GET /api/sectors/:id` → `getSectorWorkspace`, in parallel with `GET /api/sectors/:id/session` (`getOrCreateSession`), which restores the grid and conversation.
 4. `GET /api/cron/refresh` (Vercel Cron) → `lib/refresh.run({ trigger: "cron" })`.
 5. `scripts/*.mts` (local, via `tsx`) → the same `lib/` modules.
 
 ## Asking a question
 ```
-Chat.submit(text, action)
+Chat.submit(text) → Workspace.ask(text, scope)
  └─ POST /api/sessions/:id/messages
      ├─ parseMessageInput(body)          → 400 if invalid
      └─ chat.postMessage(sql, sid, input)
@@ -28,15 +28,23 @@ Chat.submit(text, action)
           ├─ session.appendTiles(sid, mid, ids) → newTileIds
           └─ return { userMessage, message, newTileIds, tiles, skipped }
 Workspace state update
- ├─ tiles appended  → ResultsGrid renders new tiles; motion animates them via layoutId
- └─ citations set   → cited tiles get the accent ring
+ ├─ 200: messages += [user, answer]; tiles = response.tiles; fresh = newTileIds
+ │    ├─ ResultsGrid renders the new tiles (existing ones keep their DOM nodes)
+ │    ├─ useLayoutEffect → fly(fresh): a fixed-position logo clone flies from the basket
+ │    │    (or the basket's centre) to each new tile; cross-fade only under reduced motion
+ │    └─ the ring moves to the latest ok answer's companyIds
+ ├─ 502: messages += [user, failed reply] → the failed bubble offers Retry (same text and scope)
+ ├─ 409: reload the active session, offer the question for Retry
+ └─ network / other: the question is shown as "Couldn't send that." with Retry
+
+New session → inline confirm → POST /api/sectors/:id/session/reset → empty grid and conversation
 ```
 
 ## Selecting a subcategory
 `SubcategoryBar.onChange(id)` → `Workspace.subcategoryId` changes → the basket is filtered in the browser using each company's `subcategoryIds` → the scope chip updates. Nothing is sent to the server, and the grid is not touched.
 
 ## Opening a profile
-`Basket` (or later a `CompanyTile`) click → `Workspace.openProfile(id, element)` remembers what opened it → `<ProfilePanel open>` fetches `/api/companies/:id` (`getCompanyProfile`), slides over the basket and focuses the company name. Esc or × sets `open = false`, after which an effect returns focus to the element that opened it. The panel stays mounted but `inert` and `aria-hidden`, so it can slide out the same way it came in.
+`Basket` or `ResultsGrid` tile click → `Workspace.openProfile(id, element)` remembers what opened it → `<ProfilePanel open>` fetches `/api/companies/:id` (`getCompanyProfile`), slides over the basket and focuses the company name. Esc or × sets `open = false`, after which an effect returns focus to the element that opened it. The panel stays mounted but `inert` and `aria-hidden`, so it can slide out the same way it came in.
 
 ## Refresh
 ```

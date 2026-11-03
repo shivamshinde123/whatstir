@@ -2,14 +2,19 @@
 
 import Link from "next/link";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import type { Message, SessionState } from "@/lib/session";
 import type { SectorWorkspace } from "@/lib/workspace";
 import Basket from "./Basket";
+import Chat from "./Chat";
 import ProfilePanel from "./ProfilePanel";
+import ResultsGrid from "./ResultsGrid";
 import SiteHeader from "./SiteHeader";
 import SubcategoryBar from "./SubcategoryBar";
 
 type Data = SectorWorkspace & { gate: boolean };
 type State = { kind: "loading" } | { kind: "error" } | { kind: "ready"; data: Data };
+
+const NONE: ReadonlySet<number> = new Set();
 
 const fmt = new Intl.NumberFormat("en-US");
 
@@ -21,13 +26,21 @@ export default function Workspace({ sectorId, sectorName }: { sectorId: string; 
   const [profileId, setProfileId] = useState<number | null>(null);
   const [profileOpen, setProfileOpen] = useState(false);
   const opener = useRef<HTMLElement | null>(null);
+  const [session, setSession] = useState<SessionState | null>(null);
+  const [fresh, setFresh] = useState<ReadonlySet<number>>(NONE);
+  const [pending, setPending] = useState<string | null>(null);
+  const [sendError, setSendError] = useState<string | null>(null);
+  const [notice, setNotice] = useState<string | null>(null);
 
   const load = useCallback(async () => {
     setState({ kind: "loading" });
     try {
-      const res = await fetch(`/api/sectors/${sectorId}`);
-      if (!res.ok) throw new Error(String(res.status));
-      setState({ kind: "ready", data: (await res.json()) as Data });
+      const [res, sres] = await Promise.all([fetch(`/api/sectors/${sectorId}`), fetch(`/api/sectors/${sectorId}/session`)]);
+      if (!res.ok || !sres.ok) throw new Error(`${res.status}/${sres.status}`);
+      const [data, s] = await Promise.all([res.json() as Promise<Data>, sres.json() as Promise<SessionState>]);
+      setSession(s);
+      setFresh(NONE);
+      setState({ kind: "ready", data });
     } catch {
       setState({ kind: "error" });
     }
@@ -49,6 +62,63 @@ export default function Workspace({ sectorId, sectorName }: { sectorId: string; 
   }, [inScope, query]);
   const scopeName =
     subcategory === null ? sectorName : (data?.subcategories.find((s) => s.id === subcategory)?.name ?? sectorName);
+
+  const ask = useCallback(
+    async (text: string, scope: Message["scope"] = { subcategoryId: subcategory, selectedCompanyIds: [] }) => {
+      if (!session) return;
+      setPending(text);
+      setSendError(null);
+      try {
+        const res = await fetch(`/api/sessions/${session.session.id}/messages`, {
+          method: "POST",
+          headers: { "content-type": "application/json" },
+          body: JSON.stringify({ text, subcategoryId: scope.subcategoryId ?? null, selectedCompanyIds: scope.selectedCompanyIds ?? [] }),
+        });
+        const body = await res.json().catch(() => null);
+        if (res.ok) {
+          setSession((s) => s && { ...s, messages: [...s.messages, body.userMessage, body.message], tiles: body.tiles });
+          setFresh(new Set<number>(body.newTileIds));
+        } else if (res.status === 502 && body?.userMessage) {
+          // The question and a failed reply were saved; the reply offers Retry.
+          setSession((s) => s && { ...s, messages: [...s.messages, body.userMessage, body.message] });
+        } else if (res.status === 409) {
+          // The session ended elsewhere (another tab started over): pick up the new one.
+          const s = await fetch(`/api/sectors/${sectorId}/session`);
+          if (!s.ok) throw new Error(String(s.status));
+          setSession(await s.json());
+          setFresh(NONE);
+          setSendError(text);
+        } else {
+          throw new Error(String(res.status));
+        }
+      } catch {
+        setSendError(text);
+      } finally {
+        setPending(null);
+      }
+    },
+    [session, sectorId, subcategory],
+  );
+
+  const reset = useCallback(async () => {
+    setSendError(null);
+    setNotice(null);
+    try {
+      const res = await fetch(`/api/sectors/${sectorId}/session/reset`, { method: "POST" });
+      if (!res.ok) throw new Error(String(res.status));
+      setSession(await res.json());
+      setFresh(NONE);
+    } catch {
+      setNotice("Couldn't start a new session. Try again.");
+    }
+  }, [sectorId]);
+
+  // The ring follows the latest successful answer only.
+  const cited = useMemo<ReadonlySet<number>>(() => {
+    const last = session?.messages.findLast((m) => m.role === "assistant" && m.status === "ok");
+    return last ? new Set(last.companyIds) : NONE;
+  }, [session]);
+  const collected = useMemo<ReadonlySet<number>>(() => new Set(session?.tiles.map((t) => t.companyId)), [session]);
 
   const openProfile = useCallback((id: number, from: HTMLElement) => {
     opener.current = from;
@@ -97,13 +167,14 @@ export default function Workspace({ sectorId, sectorName }: { sectorId: string; 
               selected={subcategory}
               onSelect={setSubcategory}
             />
-            <div className="mt-4 grid gap-4 lg:h-[calc(100dvh-15rem)] lg:min-h-[520px] lg:grid-cols-[320px_minmax(0,1fr)_360px]">
+            <div className="mt-4 grid gap-4 lg:h-[calc(100dvh-18rem)] lg:min-h-[520px] lg:grid-cols-[320px_minmax(0,1fr)_360px]">
               <section
                 aria-label="Company basket"
                 className="relative h-[55vh] overflow-hidden rounded-[var(--radius-card)] bg-surface lg:h-auto"
               >
                 <Basket
                   companies={shown}
+                  collected={collected}
                   inScope={inScope.length}
                   query={query}
                   onQuery={setQuery}
@@ -113,30 +184,21 @@ export default function Workspace({ sectorId, sectorName }: { sectorId: string; 
                 <ProfilePanel companyId={profileId} open={profileOpen} onClose={closeProfile} />
               </section>
 
-              <section
-                aria-label="Results"
-                className="flex min-h-64 flex-col items-center justify-center rounded-[var(--radius-card)] border border-dashed border-separator p-6 text-center"
-              >
-                <p className="font-medium">Ask a question to start collecting companies.</p>
-                <p className="mt-1 max-w-sm text-sm text-text-secondary">
-                  Companies an answer relies on will gather here, and stay as you keep asking.
-                </p>
+              <section aria-label="Results" className="min-h-0">
+                <ResultsGrid tiles={session?.tiles ?? []} cited={cited} fresh={fresh} onOpen={openProfile} />
               </section>
 
-              <section aria-label="Chat" className="flex flex-col rounded-[var(--radius-card)] bg-surface p-4">
-                <h2 className="font-semibold">Ask</h2>
-                <p className="mt-1 text-sm text-text-secondary">
-                  Scope: <span className="font-medium text-text">{scopeName}</span>
-                </p>
-                <div className="flex-1" />
-                <textarea
-                  disabled
-                  rows={3}
-                  placeholder={`Ask about ${scopeName} companies…`}
-                  aria-label="Question"
-                  className="mt-4 w-full resize-none rounded-xl border border-separator bg-bg p-3 text-sm disabled:opacity-60"
+              <section aria-label="Chat" className="h-[70vh] min-h-0 rounded-[var(--radius-card)] bg-surface lg:h-auto">
+                <Chat
+                  messages={session?.messages ?? []}
+                  pending={pending}
+                  sendError={sendError}
+                  notice={notice}
+                  scopeName={scopeName}
+                  onAsk={ask}
+                  onRetry={ask}
+                  onReset={reset}
                 />
-                <p className="mt-2 text-caption text-text-secondary">Chat is coming soon.</p>
               </section>
             </div>
           </>
