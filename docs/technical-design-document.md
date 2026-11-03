@@ -38,7 +38,7 @@ The checks live in `lib/session.test.ts` and `lib/chat.test.ts`:
 `fly()` in `components/ResultsGrid.tsx` runs in a layout effect whenever an answer adds tiles (`newTileIds`), using the Web Animations API:
 1. It scrolls the first new tile into view, then measures each new tile's logo.
 2. The start point is that company's logo in the basket, if it's rendered and inside the basket's visible area. Otherwise (filtered out or scrolled away) it's the centre of the basket.
-3. A clone of the logo is placed `position: fixed` on the tile and animated from the start point with `translate + scale`, using a critically damped spring (damping 1, response 0.4 s) sampled into a CSS `linear()` easing over 600 ms. Tiles are staggered by 35 ms. The clone removes itself when it lands.
+3. A clone of the logo is placed `position: fixed` on the tile and animated from the start point with `translate + scale`, using a critically damped spring (damping 1, response 0.8 s) sampled into a CSS `linear()` easing over 1.3 s. Tiles are staggered by 70 ms (capped at 12 steps). The slower timing is the owner's choice, so the trip from the basket on the left to the grid reads clearly (decision 71). The clone removes itself when it lands.
 4. The tile's own logo stays transparent until the clone lands.
 
 - The real tile is in place and clickable from the first frame, so it can be opened mid-flight. The clone has `pointer-events: none`.

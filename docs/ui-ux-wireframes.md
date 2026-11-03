@@ -160,7 +160,7 @@ The interface should look clean and calm, the way apple.com does. The `apple-des
   - Separators are hairlines in `--separator`.
 - **Motion.**
   - Buttons respond the moment they're pressed (`pressable`, scale 0.97 over 100 ms).
-  - Springs are critically damped (damping 1, response 0.4 s). The basket-to-grid flight samples one into a CSS `linear()` easing (`components/ResultsGrid.tsx`). A little bounce is allowed only where a gesture carried momentum.
+  - Springs are critically damped (damping 1, response 0.4 s). The basket-to-grid flight is deliberately slower (response 0.8 s over 1.3 s, 70 ms between logos) so it reads as a trip from left to right; it samples the spring into a CSS `linear()` easing (`components/ResultsGrid.tsx`). A little bounce is allowed only where a gesture carried momentum.
   - Panels enter and leave along the same path. The profile slides in from the left and leaves to the left.
   - Every animation can be interrupted.
 - **Accessibility.**
