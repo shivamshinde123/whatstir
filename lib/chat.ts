@@ -4,8 +4,8 @@ import { MAX_SELECTED, retrieve as defaultRetrieve } from "./retrieval";
 import { appendTiles, listTiles, toMessage, type Message, type Tile } from "./session";
 
 export const MAX_QUESTION_CHARS = 2000;
-/** Actions this build accepts; Explore and Challenge arrive with #12. */
-export const ACTIONS: readonly Action[] = ["ask"];
+/** Ask answers a question; Explore and Challenge use their own prompt rules (see instructionsFor). */
+export const ACTIONS: readonly Action[] = ["ask", "explore", "challenge"];
 
 export interface MessageInput {
   text: string;

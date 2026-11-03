@@ -46,7 +46,13 @@ The checks live in `lib/session.test.ts` and `lib/chat.test.ts`:
 - Reduced motion: no clone and no transform, just a 200 ms opacity fade on the new tiles.
 - The basket keeps every company. The logos of companies already in the grid stay behind as faded ghosts (`data-collected`), still clickable.
 - Restoring a session on load animates nothing.
-- Tiles cited by the latest answer get an accent ring. Tiles that are selected for compare or a follow-up question get a checkmark. These two looks are deliberately different.
+- Tiles cited by the latest answer get an accent ring (`CITED_CLASS`). Selected tiles get an accent tint and a ticked checkbox (`SELECTED_CLASS`). The two looks are deliberately different, and a tile can have both.
+
+## Selection, Compare and actions
+- **Selection** lives in `Workspace` as an ordered list of ids (at most 20, the server's `MAX_SELECTED`). It isn't saved: a reload or New session clears it.
+- **Ask about these** turns on selection scope: questions send `selectedCompanyIds` (and no subcategory), and the chip reads "N selected". The server then retrieves exactly those companies, so the answer can only cite them. Scope returns to the sector or group with the chip's ×, Clear, or unticking everything.
+- **Compare** fetches each selected profile and shows a native modal `<dialog>`. Compare needs 2–3 companies; with any other count the button is disabled and says why.
+- **Actions:** Ask, Explore and Challenge are a switch above the question box. The action is sent with the question, saved on both messages, and reused by Retry. Explore labels its scenario "Hypothetical:"; Challenge lists assumptions and past-behaviour interview questions and never gives a score or verdict.
 
 ## Basket at scale
 B2B has about 3.2k companies. The basket is a scrolling wrap of 40 px logos styled with `content-visibility: auto`. Images use `loading="lazy"`, and a missing or broken logo falls back to the company's initials on a colour derived from its id. A filter box above the basket narrows it by name.

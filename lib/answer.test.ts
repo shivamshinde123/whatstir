@@ -57,9 +57,14 @@ describe("instructions", () => {
   });
 
   it("gives explore and challenge their own task, labelling hypotheticals and refusing scores", () => {
-    expect(instructionsFor("explore")).toMatch(/Hypothetical/);
+    expect(instructionsFor("explore")).toMatch(/label it 'Hypothetical:'/);
+    expect(instructionsFor("explore")).toMatch(/labelled as suggestions/);
+    expect(instructionsFor("challenge")).toMatch(/Label hypothetical content/);
     expect(instructionsFor("challenge")).toMatch(/past behaviour/);
-    expect(instructionsFor("challenge")).toMatch(/Never give a score/);
+    expect(instructionsFor("challenge")).toMatch(/Never give a score or a verdict on success/);
+    expect(instructionsFor("ask")).not.toMatch(/Hypothetical|Challenge the user/);
+    // Every action keeps the grounding rules.
+    for (const a of ["ask", "explore", "challenge"] as const) expect(instructionsFor(a)).toMatch(/only the companies listed/i);
   });
 });
 

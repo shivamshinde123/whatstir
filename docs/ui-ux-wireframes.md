@@ -88,7 +88,21 @@ Outbound links open in a new tab with `rel="noopener"`, so the research session 
 - **Empty:** "No notes yet." **Error:** "Couldn't load notes. Try again."
 
 ## 4. Compare (modal)
-The modal is a table with one column per company (2–3 companies) and one row each for customer, problem, workaround, solution, batch, status and website. Unknown values show as a muted "Unknown".
+```
+┌ Compare 2 companies ─────────────────────── × ┐
+│ Problem cards are AI-generated …               │
+│             [Logo] PlanGrid   [Logo] RentHop   │
+│ Customer    Unknown           Unknown          │
+│ Problem     Mobile apps for … Apartment rental │
+│ …                                              │
+│ Website     plangrid.com ↗    renthop.com ↗    │
+└────────────────────────────────────────────────┘
+```
+- A native modal dialog over a dimmed, blurred backdrop. It fades and scales in slightly (no movement under reduced motion). Esc, × or a backdrop click closes it, and focus returns to Compare.
+- One column per company (2–3), in the order they were selected. Rows: customer, problem, workaround, solution, batch, status and website. Unknown values show as a muted "Unknown".
+- **Selection bar** (above the grid, once something is ticked): "N selected · [Compare] [Ask about these] Clear". With 1 or 4+ selected, Compare is disabled and the reason shows underneath.
+- **Tiles:** the checkbox sits in the top-left corner, shown on hover or focus, when ticked, and always on touch screens. Selected tiles are tinted; cited tiles are ringed.
+- **Chat:** an Ask / Explore / Challenge switch sits above the question box, and the placeholder changes with it. Explore and Challenge bubbles carry a small uppercase tag. While asking about a selection, the scope chip reads "2 selected ×"
 
 ## 4b. Login (only when `APP_PASSWORD` is set)
 ```

@@ -66,7 +66,7 @@ Ends the active session and starts a new one. Returns the same shape as the GET 
 `subcategoryId` and `selectedCompanyIds` can be left out. A non-empty `selectedCompanyIds` limits the question to those companies.
 - **Validation (400):**
   - `text` must be 1–2,000 characters after trimming.
-  - `action` must be `ask`; `explore` and `challenge` are accepted from #12.
+  - `action` is `ask` (the default), `explore` or `challenge`. Anything else is a 400. Each uses its own prompt rules (`instructionsFor`), and the action is saved on both messages.
   - `subcategoryId` must be a positive integer belonging to this session's sector.
   - `selectedCompanyIds` can hold at most 20 positive integers; duplicates are removed.
 - **Other errors:** an id that isn't a UUID, or an unknown session, returns 404. An ended session returns 409, telling the client to reload into the new one.

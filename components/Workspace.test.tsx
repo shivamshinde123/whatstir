@@ -6,6 +6,8 @@ import Basket from "./Basket";
 import Logo, { initials } from "./Logo";
 import ProfilePanel from "./ProfilePanel";
 import SubcategoryBar from "./SubcategoryBar";
+import CompareView from "./CompareView";
+import ResultsGrid, { CITED_CLASS, MAX_SELECTION, SELECTED_CLASS } from "./ResultsGrid";
 import Workspace from "./Workspace";
 
 const SUBS: SectorWorkspace["subcategories"] = [
@@ -53,10 +55,11 @@ const json = (body: unknown, status = 200) => new Response(JSON.stringify(body),
 function sessionApi() {
   let n = 100;
   let state: SessionState = { session: { id: "s1", sectorId: "healthcare", createdAt: "" }, tiles: [], messages: [] };
+  let action: Message["action"] = "ask";
   const msg = (role: Message["role"], content: string, companyIds: number[] = [], status: Message["status"] = "ok"): Message => ({
     id: n++,
     role,
-    action: "ask",
+    action,
     content,
     scope: { subcategoryId: null, selectedCompanyIds: [] },
     companyIds,
@@ -86,7 +89,8 @@ function sessionApi() {
         state = { session: { id: `s${n++}`, sectorId: "healthcare", createdAt: "" }, tiles: [], messages: [] };
         return json({ error: "ended" }, 409);
       }
-      const { text } = JSON.parse(String(init!.body));
+      const { text, action: requested = "ask" } = JSON.parse(String(init!.body));
+      action = requested;
       const user = msg("user", text);
       if (failure === "502") {
         const err = msg("assistant", "Couldn't answer that. Try again.", [], "error");
@@ -424,7 +428,7 @@ describe("Workspace chat and results grid", () => {
   };
   const ask = async (text: string) => {
     fireEvent.change(screen.getByLabelText("Question"), { target: { value: text } });
-    fireEvent.click(screen.getByRole("button", { name: "Ask" }));
+    fireEvent.click(screen.getByRole("button", { name: "Send" }));
     await waitFor(() => expect(screen.queryByText(/^Thinking/)).toBeNull());
   };
   const tiles = () => [...document.querySelectorAll<HTMLElement>("[data-tile-id]")];
@@ -514,12 +518,12 @@ describe("Workspace chat and results grid", () => {
       return original(url, init);
     });
     fireEvent.change(screen.getByLabelText("Question"), { target: { value: "slow [ids:10]" } });
-    fireEvent.click(screen.getByRole("button", { name: "Ask" }));
+    fireEvent.click(screen.getByRole("button", { name: "Send" }));
     expect(await screen.findByRole("status")).toHaveTextContent("Thinking");
     expect(screen.getByText("slow [ids:10]")).toBeInTheDocument();
     expect(screen.getByLabelText("Question")).toHaveValue("");
     fireEvent.change(screen.getByLabelText("Question"), { target: { value: "another" } });
-    expect(screen.getByRole("button", { name: "Ask" })).toBeDisabled();
+    expect(screen.getByRole("button", { name: "Send" })).toBeDisabled();
     release();
     await waitFor(() => expect(tileIds()).toEqual([10]));
     expect(screen.queryByRole("status")).toBeNull();
@@ -535,7 +539,7 @@ describe("Workspace chat and results grid", () => {
     expect(posts()).toEqual([]);
     fireEvent.keyDown(box, { key: "Enter" });
     await waitFor(() => expect(posts()).toHaveLength(1));
-    expect(posts()[0]).toEqual({ text: "line one", subcategoryId: null, selectedCompanyIds: [] });
+    expect(posts()[0]).toEqual({ text: "line one", action: "ask", subcategoryId: null, selectedCompanyIds: [] });
   });
 
   it("scopes the question to the selected subcategory and shows it in the scope chip", async () => {
@@ -619,4 +623,241 @@ describe("Workspace chat and results grid", () => {
     fireEvent.click(await screen.findByRole("button", { name: "Try again" }));
     expect(await screen.findByText("3 companies")).toBeInTheDocument();
   });
+});
+
+describe("selection, compare, and actions", () => {
+  // jsdom has no modal dialogs; this is enough for open/close and the close event.
+  beforeEach(() => {
+    HTMLDialogElement.prototype.showModal = function (this: HTMLDialogElement) {
+      this.setAttribute("open", "");
+    };
+    HTMLDialogElement.prototype.close = function (this: HTMLDialogElement) {
+      this.removeAttribute("open");
+      this.dispatchEvent(new Event("close"));
+    };
+  });
+
+  const PROFILES: Record<number, CompanyProfile> = {
+    10: PROFILE,
+    11: { ...PROFILE, id: 11, name: "Bolt Clinic", batch: null, status: null, website: null, problemCard: null },
+    12: { ...PROFILE, id: 12, name: "Care AI", batch: "Summer 2024", problemCard: { ...PROFILE.problemCard!, customer: "Insurers", workaround: null } },
+  };
+  beforeEach(() => {
+    const original = fetchMock.getMockImplementation() as (url: string, init?: RequestInit) => Promise<Response>;
+    fetchMock.mockImplementation(async (url: string, init?: RequestInit) => {
+      const m = String(url).match(/^\/api\/companies\/(\d+)$/);
+      return m ? json(PROFILES[Number(m[1])]) : original(url, init);
+    });
+  });
+
+  const renderWithTiles = async (ids = [10, 11, 12]) => {
+    render(<Workspace sectorId="healthcare" sectorName="Healthcare" />);
+    await screen.findByText("3 companies");
+    fireEvent.change(screen.getByLabelText("Question"), { target: { value: `seed [ids:${ids.join(",")}]` } });
+    fireEvent.click(screen.getByRole("button", { name: "Send" }));
+    await waitFor(() => expect(document.querySelectorAll("[data-tile-id]")).toHaveLength(ids.length));
+  };
+  const tick = (name: string) => fireEvent.click(screen.getByRole("checkbox", { name: `Select ${name}` }));
+  const compare = () => screen.getByRole("button", { name: "Compare" });
+  const lastPost = () => JSON.parse(fetchMock.mock.calls.filter(([u]) => String(u).startsWith("/api/sessions/")).at(-1)![1].body);
+
+  it("every tile has a labelled checkbox; selecting shows the bar with a count", async () => {
+    await renderWithTiles();
+    expect(screen.getAllByRole("checkbox").map((c) => c.getAttribute("aria-label"))).toEqual([
+      "Select Acme Health",
+      "Select Bolt Clinic",
+      "Select Care AI",
+    ]);
+    expect(screen.queryByRole("toolbar", { name: "Selection" })).toBeNull();
+    tick("Bolt Clinic");
+    expect(screen.getByRole("toolbar", { name: "Selection" })).toHaveTextContent("1 selected");
+    expect(document.querySelector('[data-tile-id="11"]')).toHaveAttribute("data-selected");
+  });
+
+  it("Compare is disabled with a reason for 1 company, enabled for 2 and 3", async () => {
+    await renderWithTiles();
+    tick("Acme Health");
+    expect(compare()).toBeDisabled();
+    expect(compare()).toHaveAccessibleDescription("Select 2 or 3 companies to compare.");
+    tick("Bolt Clinic");
+    expect(compare()).toBeEnabled();
+    expect(screen.queryByText(/Select 2 or 3/)).toBeNull();
+    tick("Care AI");
+    expect(compare()).toBeEnabled();
+    expect(screen.getByRole("toolbar", { name: "Selection" })).toHaveTextContent("3 selected");
+  });
+
+  it("Compare is disabled with a reason for 4 companies", () => {
+    const tiles = [10, 11, 12, 13].map((companyId, position) => ({ companyId, position, addedBy: 1, name: `Co ${companyId}`, logoUrl: null }));
+    const props = { tiles, cited: new Set<number>(), fresh: new Set<number>(), onOpen: () => {}, onToggle: () => {}, onCompare: () => {}, onAskSelected: () => {}, onClear: () => {} };
+    render(<ResultsGrid {...props} selected={[10, 11, 12, 13]} />);
+    expect(compare()).toBeDisabled();
+    expect(compare()).toHaveAccessibleDescription("Compare works with up to 3 companies.");
+  });
+
+  it("caps the selection at the Ask-about-these limit", () => {
+    const tiles = Array.from({ length: MAX_SELECTION + 1 }, (_, i) => ({ companyId: i + 1, position: i, addedBy: 1, name: `Co ${i + 1}`, logoUrl: null }));
+    const props = { tiles, cited: new Set<number>(), fresh: new Set<number>(), onOpen: () => {}, onToggle: () => {}, onCompare: () => {}, onAskSelected: () => {}, onClear: () => {} };
+    render(<ResultsGrid {...props} selected={tiles.slice(0, MAX_SELECTION).map((t) => t.companyId)} />);
+    expect(screen.getByRole("checkbox", { name: `Select Co ${MAX_SELECTION + 1}` })).toBeDisabled();
+    expect(screen.getByRole("checkbox", { name: "Select Co 1" })).toBeEnabled(); // can still untick
+  });
+
+  it("selected and cited tiles look different", async () => {
+    await renderWithTiles();
+    fireEvent.change(screen.getByLabelText("Question"), { target: { value: "cite one [ids:10]" } });
+    fireEvent.click(screen.getByRole("button", { name: "Send" }));
+    await waitFor(() => expect(document.querySelector('[data-tile-id="10"]')).toHaveAttribute("data-cited"));
+    tick("Bolt Clinic");
+    const cited = document.querySelector('[data-tile-id="10"]')!.className;
+    const chosen = document.querySelector('[data-tile-id="11"]')!.className;
+    expect(cited).not.toBe(chosen);
+    for (const c of CITED_CLASS.split(" ")) {
+      expect(cited).toContain(c);
+      expect(chosen).not.toContain(c);
+    }
+    for (const c of SELECTED_CLASS.split(" ")) {
+      expect(chosen).toContain(c);
+      expect(cited).not.toContain(c);
+    }
+    expect(screen.getByRole("checkbox", { name: "Select Bolt Clinic" })).toBeChecked();
+  });
+
+  it("Clear empties the selection", async () => {
+    await renderWithTiles();
+    tick("Acme Health");
+    tick("Care AI");
+    fireEvent.click(screen.getByRole("button", { name: "Clear" }));
+    expect(screen.queryByRole("toolbar", { name: "Selection" })).toBeNull();
+    expect(screen.getAllByRole("checkbox").some((c) => (c as HTMLInputElement).checked)).toBe(false);
+    expect(document.querySelectorAll("[data-selected]")).toHaveLength(0);
+  });
+
+  it("Compare shows each company's card in selection order, marking unknown fields", async () => {
+    await renderWithTiles();
+    tick("Care AI");
+    tick("Bolt Clinic");
+    fireEvent.click(compare());
+    const dialog = await screen.findByRole("dialog", { name: "Compare 2 companies" });
+    const table = await within(dialog).findByRole("table");
+    expect(within(table).getAllByRole("columnheader").map((h) => h.querySelector("span > span:last-child")?.textContent ?? h.textContent)).toEqual(["Field", "Care AI", "Bolt Clinic"]);
+    const row = (label: string) => within(table).getByRole("rowheader", { name: label }).closest("tr")!;
+    expect(within(row("Customer")).getAllByRole("cell").map((c) => c.textContent)).toEqual(["Insurers", "Unknown"]);
+    expect(within(row("Problem")).getAllByRole("cell").map((c) => c.textContent)).toEqual(["Phone booking wastes hours", "Unknown"]);
+    expect(within(row("Workaround")).getAllByRole("cell").map((c) => c.textContent)).toEqual(["Unknown", "Unknown"]);
+    expect(within(row("Batch")).getAllByRole("cell").map((c) => c.textContent)).toEqual(["Summer 2024", "Unknown"]);
+    expect(within(row("Status")).getAllByRole("cell").map((c) => c.textContent)).toEqual(["Active", "Unknown"]);
+    expect(within(row("Website")).getByRole("link")).toHaveAttribute("href", "https://acme.example");
+    // Bolt Clinic has nothing but its name: customer, problem, workaround, solution, batch, status, website.
+    const bolt = [...table.querySelectorAll("tbody tr")].map((r) => r.querySelectorAll("td")[1]);
+    expect(bolt.every((c) => c.querySelector("[data-unknown]"))).toBe(true);
+    expect(fetchMock).toHaveBeenCalledWith("/api/companies/12");
+    expect(fetchMock).toHaveBeenCalledWith("/api/companies/11");
+
+    fireEvent.click(within(dialog).getByRole("button", { name: "Close compare" }));
+    await waitFor(() => expect(screen.queryByRole("dialog")).toBeNull());
+    expect(screen.getByRole("toolbar", { name: "Selection" })).toHaveTextContent("2 selected"); // selection kept
+  });
+
+  it("Compare shows an error with Try again", async () => {
+    let fail = true;
+    fetchMock.mockImplementation(async (url: string) => (fail ? json({}, 500) : json(PROFILES[Number(String(url).split("/").pop())])));
+    const onClose = vi.fn();
+    render(<CompareView ids={[10, 11]} onClose={onClose} />);
+    fail = false;
+    fireEvent.click(await screen.findByRole("button", { name: "Try again" }));
+    expect(await screen.findByRole("table")).toBeInTheDocument();
+    fireEvent.click(screen.getByRole("dialog")); // the backdrop
+    expect(onClose).toHaveBeenCalled();
+  });
+
+  it("Ask about these scopes questions to the selection and says so in the chip", async () => {
+    await renderWithTiles();
+    tick("Care AI");
+    tick("Acme Health");
+    fireEvent.click(screen.getByRole("button", { name: "Ask about these" }));
+    expect(screen.getByTestId("scope")).toHaveTextContent("2 selected");
+    expect(screen.getByLabelText("Question")).toHaveFocus();
+    fireEvent.change(screen.getByLabelText("Question"), { target: { value: "how do these differ?" } });
+    fireEvent.click(screen.getByRole("button", { name: "Send" }));
+    await waitFor(() => expect(lastPost().text).toBe("how do these differ?"));
+    expect(lastPost()).toMatchObject({ selectedCompanyIds: [12, 10], subcategoryId: null });
+
+    tick("Bolt Clinic");
+    expect(screen.getByTestId("scope")).toHaveTextContent("3 selected");
+    fireEvent.click(screen.getByRole("button", { name: "Stop asking about the selection" }));
+    expect(screen.getByTestId("scope")).toHaveTextContent("Healthcare");
+    fireEvent.change(screen.getByLabelText("Question"), { target: { value: "and the sector?" } });
+    fireEvent.click(screen.getByRole("button", { name: "Send" }));
+    await waitFor(() => expect(lastPost().text).toBe("and the sector?"));
+    expect(lastPost().selectedCompanyIds).toEqual([]);
+  });
+
+  it("clearing the selection ends selection scope", async () => {
+    await renderWithTiles();
+    tick("Care AI");
+    fireEvent.click(screen.getByRole("button", { name: "Ask about these" }));
+    expect(screen.getByTestId("scope")).toHaveTextContent("1 selected");
+    tick("Care AI");
+    expect(screen.getByTestId("scope")).toHaveTextContent("Healthcare");
+    tick("Care AI"); // selecting again doesn't silently re-scope
+    expect(screen.getByTestId("scope")).toHaveTextContent("1 selected"); // still opted in until Clear or ×
+    fireEvent.click(screen.getByRole("button", { name: "Clear" }));
+    expect(screen.getByTestId("scope")).toHaveTextContent("Healthcare");
+  });
+
+  it("Ask, Explore and Challenge set the action, the placeholder and the reply's tag", async () => {
+    await renderWithTiles([10]);
+    const group = screen.getByRole("group", { name: "Action" });
+    expect(within(group).getByRole("button", { name: "Ask" })).toHaveAttribute("aria-pressed", "true");
+
+    fireEvent.click(within(group).getByRole("button", { name: "Explore" }));
+    expect(within(group).getByRole("button", { name: "Explore" })).toHaveAttribute("aria-pressed", "true");
+    expect(screen.getByLabelText("Question")).toHaveAttribute("placeholder", "Describe a problem to explore…");
+    fireEvent.change(screen.getByLabelText("Question"), { target: { value: "no-shows [ids:10]" } });
+    fireEvent.click(screen.getByRole("button", { name: "Send" }));
+    await waitFor(() => expect(lastPost()).toMatchObject({ text: "no-shows [ids:10]", action: "explore" }));
+    await waitFor(() => expect(document.querySelectorAll('li[data-action="explore"]')).toHaveLength(2));
+    expect(screen.getAllByTestId("action-tag").map((t) => t.textContent)).toEqual(["Explore", "Explore"]);
+
+    fireEvent.click(within(group).getByRole("button", { name: "Challenge" }));
+    expect(screen.getByLabelText("Question")).toHaveAttribute("placeholder", "Describe your idea to challenge…");
+    fireEvent.change(screen.getByLabelText("Question"), { target: { value: "my idea [ids:10]" } });
+    fireEvent.click(screen.getByRole("button", { name: "Send" }));
+    await waitFor(() => expect(lastPost().action).toBe("challenge"));
+    await waitFor(() => expect(document.querySelectorAll('li[data-action="challenge"]')).toHaveLength(2));
+
+    fireEvent.click(within(group).getByRole("button", { name: "Ask" }));
+    expect(screen.getByLabelText("Question")).toHaveAttribute("placeholder", "Ask about Healthcare companies…");
+    // Plain questions carry no tag.
+    expect(document.querySelectorAll('li[data-action="ask"] [data-testid="action-tag"]')).toHaveLength(0);
+  });
+
+  it("Retry resends with the failed message's action and scope", async () => {
+    await renderWithTiles();
+    tick("Acme Health");
+    tick("Bolt Clinic");
+    fireEvent.click(screen.getByRole("button", { name: "Ask about these" }));
+    fireEvent.click(within(screen.getByRole("group", { name: "Action" })).getByRole("button", { name: "Challenge" }));
+    api.failures.push("502");
+    fireEvent.change(screen.getByLabelText("Question"), { target: { value: "risky idea" } });
+    fireEvent.click(screen.getByRole("button", { name: "Send" }));
+    const failed = await screen.findByRole("group", { name: "Failed answer" });
+    fireEvent.click(screen.getByRole("button", { name: "Clear" })); // the scope changes before retrying
+    fireEvent.click(within(failed).getByRole("button", { name: "Retry" }));
+    await waitFor(() => expect(posts().length).toBe(3));
+    expect(lastPost()).toMatchObject({ text: "risky idea", action: "challenge" });
+  });
+
+  it("New session clears the selection", async () => {
+    await renderWithTiles();
+    tick("Acme Health");
+    fireEvent.click(screen.getByRole("button", { name: "New session" }));
+    fireEvent.click(screen.getByRole("button", { name: "Start over" }));
+    await screen.findByText("Ask a question to start collecting companies.");
+    expect(screen.getByTestId("scope")).toHaveTextContent("Healthcare");
+    expect(screen.queryByRole("toolbar", { name: "Selection" })).toBeNull();
+  });
+
+  const posts = () => fetchMock.mock.calls.filter(([u]) => String(u).startsWith("/api/sessions/"));
 });

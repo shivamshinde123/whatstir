@@ -2,12 +2,14 @@
 
 import Link from "next/link";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import type { Action } from "@/lib/answer";
 import type { Message, SessionState } from "@/lib/session";
 import type { SectorWorkspace } from "@/lib/workspace";
 import Basket from "./Basket";
 import Chat from "./Chat";
+import CompareView from "./CompareView";
 import ProfilePanel from "./ProfilePanel";
-import ResultsGrid from "./ResultsGrid";
+import ResultsGrid, { MAX_SELECTION } from "./ResultsGrid";
 import SiteHeader from "./SiteHeader";
 import SubcategoryBar from "./SubcategoryBar";
 
@@ -31,6 +33,11 @@ export default function Workspace({ sectorId, sectorName }: { sectorId: string; 
   const [pending, setPending] = useState<string | null>(null);
   const [sendError, setSendError] = useState<string | null>(null);
   const [notice, setNotice] = useState<string | null>(null);
+  const [selected, setSelected] = useState<number[]>([]);
+  const [askSelected, setAskSelected] = useState(false);
+  const [comparing, setComparing] = useState(false);
+  // Questions go to the selection only while "Ask about these" is on and something is selected.
+  const selectionScope = askSelected && selected.length > 0;
 
   const load = useCallback(async () => {
     setState({ kind: "loading" });
@@ -65,11 +72,20 @@ export default function Workspace({ sectorId, sectorName }: { sectorId: string; 
     const q = query.trim().toLowerCase();
     return q ? inScope.filter((c) => c.name.toLowerCase().includes(q)) : inScope;
   }, [inScope, query]);
-  const scopeName =
-    subcategory === null ? sectorName : (data?.subcategories.find((s) => s.id === subcategory)?.name ?? sectorName);
+  const scopeName = selectionScope
+    ? `${selected.length} selected`
+    : subcategory === null
+      ? sectorName
+      : (data?.subcategories.find((s) => s.id === subcategory)?.name ?? sectorName);
 
   const ask = useCallback(
-    async (text: string, scope: Message["scope"] = { subcategoryId: subcategory, selectedCompanyIds: [] }) => {
+    async (
+      text: string,
+      action: Action = "ask",
+      scope: Message["scope"] = selectionScope
+        ? { subcategoryId: null, selectedCompanyIds: selected }
+        : { subcategoryId: subcategory, selectedCompanyIds: [] },
+    ) => {
       if (!session) return;
       setPending(text);
       setSendError(null);
@@ -77,7 +93,7 @@ export default function Workspace({ sectorId, sectorName }: { sectorId: string; 
         const res = await fetch(`/api/sessions/${session.session.id}/messages`, {
           method: "POST",
           headers: { "content-type": "application/json" },
-          body: JSON.stringify({ text, subcategoryId: scope.subcategoryId ?? null, selectedCompanyIds: scope.selectedCompanyIds ?? [] }),
+          body: JSON.stringify({ text, action, subcategoryId: scope.subcategoryId ?? null, selectedCompanyIds: scope.selectedCompanyIds ?? [] }),
         });
         const body = await res.json().catch(() => null);
         if (res.ok) {
@@ -102,8 +118,23 @@ export default function Workspace({ sectorId, sectorName }: { sectorId: string; 
         setPending(null);
       }
     },
-    [session, sectorId, subcategory],
+    [session, sectorId, subcategory, selectionScope, selected],
   );
+  const retry = useCallback((text: string, action: Action, scope: Message["scope"]) => ask(text, action, scope), [ask]);
+
+  const toggle = useCallback(
+    (id: number) =>
+      setSelected((s) => (s.includes(id) ? s.filter((x) => x !== id) : s.length < MAX_SELECTION ? [...s, id] : s)),
+    [],
+  );
+  const clearSelection = useCallback(() => {
+    setSelected([]);
+    setAskSelected(false);
+  }, []);
+  const askAboutSelected = useCallback(() => {
+    setAskSelected(true);
+    document.getElementById("question")?.focus();
+  }, []);
 
   const reset = useCallback(async () => {
     setSendError(null);
@@ -113,10 +144,11 @@ export default function Workspace({ sectorId, sectorName }: { sectorId: string; 
       if (!res.ok) throw new Error(String(res.status));
       setSession(await res.json());
       setFresh(NONE);
+      clearSelection();
     } catch {
       setNotice("Couldn't start a new session. Try again.");
     }
-  }, [sectorId]);
+  }, [sectorId, clearSelection]);
 
   // The ring follows the latest successful answer only.
   const cited = useMemo<ReadonlySet<number>>(() => {
@@ -190,7 +222,18 @@ export default function Workspace({ sectorId, sectorName }: { sectorId: string; 
               </section>
 
               <section aria-label="Results" className="min-h-0">
-                <ResultsGrid tiles={session?.tiles ?? []} cited={cited} fresh={fresh} onOpen={openProfile} />
+                <ResultsGrid
+                  tiles={session?.tiles ?? []}
+                  cited={cited}
+                  fresh={fresh}
+                  onOpen={openProfile}
+                  selected={selected}
+                  onToggle={toggle}
+                  onCompare={() => setComparing(true)}
+                  onAskSelected={askAboutSelected}
+                  onClear={clearSelection}
+                />
+                {comparing && <CompareView ids={selected} onClose={() => setComparing(false)} />}
               </section>
 
               <section aria-label="Chat" className="h-[70vh] min-h-0 rounded-[var(--radius-card)] bg-surface lg:h-auto">
@@ -200,8 +243,9 @@ export default function Workspace({ sectorId, sectorName }: { sectorId: string; 
                   sendError={sendError}
                   notice={notice}
                   scopeName={scopeName}
+                  onClearScope={selectionScope ? () => setAskSelected(false) : undefined}
                   onAsk={ask}
-                  onRetry={ask}
+                  onRetry={retry}
                   onReset={reset}
                 />
               </section>

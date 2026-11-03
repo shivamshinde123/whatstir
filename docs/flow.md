@@ -40,6 +40,18 @@ Workspace state update
 New session → inline confirm → POST /api/sectors/:id/session/reset → empty grid and conversation
 ```
 
+## Selection, Compare, Ask about these
+```
+tile checkbox → Workspace.toggle(id) → selected: number[] (ordered, ≤ 20)
+ ├─ Compare (2–3) → <CompareView ids> → showModal() → GET /api/companies/:id ×N → table
+ │                   Esc / × / backdrop → dialog close event → onClose
+ ├─ Ask about these → askSelected = true → chip "N selected", focus the question box
+ │    └─ Chat.submit → ask(text, action, { selectedCompanyIds: selected }) → POST messages
+ │         └─ retrieval: exactly the selected ids, so citations ⊆ selection
+ └─ Clear / New session → selected = [], askSelected = false
+```
+The Ask / Explore / Challenge switch sets `action` on the next POST. Retry reuses the failed message's action and scope.
+
 ## Selecting a subcategory
 `SubcategoryBar.onChange(id)` → `Workspace.subcategoryId` changes → the basket is filtered in the browser using each company's `subcategoryIds` → the scope chip updates. Nothing is sent to the server, and the grid is not touched.
 

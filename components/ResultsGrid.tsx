@@ -5,6 +5,19 @@ import type { Tile } from "@/lib/session";
 import Logo from "./Logo";
 
 const fmt = new Intl.NumberFormat("en-US");
+/** Ask about these sends at most this many companies (MAX_SELECTED in lib/retrieval.ts). */
+export const MAX_SELECTION = 20;
+
+/** Cited and selected must read differently: cited is an accent ring, selected a tint plus a tick. */
+export const CITED_CLASS = "ring-2 ring-accent";
+export const SELECTED_CLASS = "bg-accent/10 hover:bg-accent/15";
+const PLAIN_CLASS = "bg-surface hover:bg-bg";
+
+function compareHint(n: number): string | null {
+  if (n < 2) return "Select 2 or 3 companies to compare.";
+  if (n > 3) return "Compare works with up to 3 companies.";
+  return null;
+}
 
 const FLIGHT_MS = 600;
 /** Critically damped spring (Apple: damping 1, response 0.4 s), sampled into a CSS easing. */
@@ -87,6 +100,11 @@ export default function ResultsGrid({
   cited,
   fresh,
   onOpen,
+  selected,
+  onToggle,
+  onCompare,
+  onAskSelected,
+  onClear,
 }: {
   tiles: Tile[];
   /** Companies cited by the latest answer; ringed. */
@@ -94,7 +112,15 @@ export default function ResultsGrid({
   /** Companies the latest answer added; these fly in. */
   fresh: ReadonlySet<number>;
   onOpen: (id: number, opener: HTMLElement) => void;
+  /** Selected companies, in the order they were picked. */
+  selected: number[];
+  onToggle: (id: number) => void;
+  onCompare: () => void;
+  onAskSelected: () => void;
+  onClear: () => void;
 }) {
+  const picked = new Set(selected);
+  const hint = compareHint(selected.length);
   const grid = useRef<HTMLUListElement>(null);
 
   useLayoutEffect(() => {
@@ -120,6 +146,34 @@ export default function ResultsGrid({
           {fmt.format(tiles.length)} {tiles.length === 1 ? "company" : "companies"}
         </span>
       </div>
+      {selected.length > 0 && (
+        <div role="toolbar" aria-label="Selection" className="mx-3 mt-2 flex flex-wrap items-center gap-x-2 gap-y-1 rounded-xl bg-surface px-3 py-2 text-sm">
+          <span className="font-medium tabular-nums" aria-live="polite">
+            {selected.length} selected
+          </span>
+          <span className="flex-1" />
+          <button
+            type="button"
+            onClick={onCompare}
+            disabled={hint !== null}
+            aria-describedby={hint ? "compare-hint" : undefined}
+            className="pressable rounded-full bg-accent px-3 py-1 font-medium text-white disabled:opacity-40"
+          >
+            Compare
+          </button>
+          <button type="button" onClick={onAskSelected} className="pressable rounded-full bg-bg px-3 py-1 font-medium">
+            Ask about these
+          </button>
+          <button type="button" onClick={onClear} className="pressable rounded-full px-2 py-1 text-link hover:bg-bg">
+            Clear
+          </button>
+          {hint && (
+            <p id="compare-hint" className="basis-full text-caption text-text-secondary">
+              {hint}
+            </p>
+          )}
+        </div>
+      )}
       {cited.size > 0 && (
         <p className="px-4 pt-1 text-caption text-text-secondary">
           <span aria-hidden="true" className="mr-1 inline-block size-2 rounded-full bg-accent align-middle" />
@@ -132,22 +186,33 @@ export default function ResultsGrid({
         className="grid min-h-0 flex-1 auto-rows-max grid-cols-[repeat(auto-fill,minmax(104px,1fr))] gap-2 overflow-y-auto p-3"
       >
         {tiles.map((t) => (
-          <li key={t.companyId}>
+          <li key={t.companyId} className="group relative">
             <button
               type="button"
               data-tile-id={t.companyId}
               data-new={fresh.has(t.companyId) || undefined}
               data-cited={cited.has(t.companyId) || undefined}
+              data-selected={picked.has(t.companyId) || undefined}
               aria-label={cited.has(t.companyId) ? `${t.name}, cited by the latest answer` : t.name}
               title={t.name}
               onClick={(e) => onOpen(t.companyId, e.currentTarget)}
-              className="pressable flex h-[112px] w-full flex-col items-center gap-2 rounded-2xl bg-surface px-2 pt-3 text-center transition-shadow hover:bg-bg data-[cited]:ring-2 data-[cited]:ring-accent"
+              className={`pressable flex h-[112px] w-full flex-col items-center gap-2 rounded-2xl px-2 pt-3 text-center transition-colors ${
+                picked.has(t.companyId) ? SELECTED_CLASS : PLAIN_CLASS
+              } ${cited.has(t.companyId) ? CITED_CLASS : ""}`}
             >
               <span data-logo className="inline-flex">
                 <Logo id={t.companyId} name={t.name} url={t.logoUrl} size={48} />
               </span>
               <span className="line-clamp-2 w-full text-xs leading-tight">{t.name}</span>
             </button>
+            <input
+              type="checkbox"
+              checked={picked.has(t.companyId)}
+              disabled={!picked.has(t.companyId) && selected.length >= MAX_SELECTION}
+              onChange={() => onToggle(t.companyId)}
+              aria-label={`Select ${t.name}`}
+              className="absolute left-2 top-2 size-4 cursor-pointer accent-[var(--accent)] opacity-0 transition-opacity checked:opacity-100 focus-visible:opacity-100 group-hover:opacity-100 pointer-coarse:opacity-100"
+            />
           </li>
         ))}
       </ul>
