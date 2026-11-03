@@ -1,9 +1,13 @@
 import type { Metadata } from "next";
+import { Fragment_Mono, Inter, Newsreader } from "next/font/google";
+import Tooltips from "@/components/Tooltips";
 import "./globals.css";
-import { THEME_KEY } from "@/lib/theme";
+// Light only (decision 72), so there is no theme script or switch.
 
-// Runs before first paint, so a saved dark choice never flashes the light theme.
-const applySavedTheme = `try{if(localStorage.getItem(${JSON.stringify(THEME_KEY)})==="dark")document.documentElement.dataset.theme="dark"}catch(e){}`;
+// Self-hosted at build time by next/font, so no runtime requests to Google.
+const inter = Inter({ subsets: ["latin"], variable: "--font-inter" });
+const newsreader = Newsreader({ subsets: ["latin"], weight: ["300"], variable: "--font-newsreader" });
+const fragmentMono = Fragment_Mono({ subsets: ["latin"], weight: "400", variable: "--font-fragment-mono" });
 
 export const metadata: Metadata = {
   title: "Whatstir",
@@ -12,12 +16,11 @@ export const metadata: Metadata = {
 
 export default function RootLayout({ children }: LayoutProps<"/">) {
   return (
-    // The script above may set data-theme before React hydrates.
-    <html lang="en" className="h-full" suppressHydrationWarning>
-      <head>
-        <script dangerouslySetInnerHTML={{ __html: applySavedTheme }} />
-      </head>
-      <body className="flex min-h-full flex-col">{children}</body>
+    <html lang="en" className={`h-full ${inter.variable} ${newsreader.variable} ${fragmentMono.variable}`}>
+      <body className="flex min-h-full flex-col">
+        {children}
+        <Tooltips />
+      </body>
     </html>
   );
 }

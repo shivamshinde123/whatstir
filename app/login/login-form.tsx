@@ -51,7 +51,7 @@ export default function LoginForm({ navigate = goTo }: { navigate?: (url: string
         aria-invalid={!!error}
         aria-describedby={error ? "login-error" : undefined}
         placeholder="Password"
-        className="h-12 rounded-xl border border-separator bg-surface px-4 text-base outline-none transition-colors focus:border-accent dark:bg-bg"
+        className="h-12 rounded-xl border border-separator bg-surface px-4 text-base outline-none transition-colors focus:border-accent"
       />
       {error && (
         <p id="login-error" role="alert" className="text-sm text-danger">

@@ -1,8 +1,8 @@
 const COLORS: Record<string, string> = {
-  Active: "#34c759",
-  Acquired: "#007aff",
-  Public: "#af52de",
-  Inactive: "#8e8e93",
+  Active: "#4a6d47",
+  Acquired: "#2b6b5e",
+  Public: "#991e4b",
+  Inactive: "#a5ac9f",
 };
 
 export default function StatusBadge({ status }: { status: string | null }) {

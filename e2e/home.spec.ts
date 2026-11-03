@@ -17,12 +17,6 @@ test.describe("home page", () => {
     expect(errors).toEqual([]);
   });
 
-  test("uses the system font stack", async ({ page }) => {
-    await page.goto("/");
-    const font = await page.evaluate(() => getComputedStyle(document.body).fontFamily);
-    expect(font).toContain("-apple-system");
-  });
-
   test("has no horizontal scroll at phone width", async ({ page }) => {
     await page.setViewportSize({ width: 375, height: 800 });
     await page.goto("/");
@@ -32,11 +26,11 @@ test.describe("home page", () => {
     expect(overflow).toBe(0);
   });
 
-  test("stays light when the system prefers dark (dark is a choice: see theme-layout.spec)", async ({ page }) => {
+  test("stays light when the system prefers dark (the design is light only)", async ({ page }) => {
     await page.emulateMedia({ colorScheme: "dark" });
     await page.goto("/");
     const bg = await page.evaluate(() => getComputedStyle(document.body).backgroundColor);
-    expect(bg).toBe("rgb(255, 255, 255)");
+    expect(bg).toBe("rgb(248, 249, 245)");
   });
 
   test("shows a visible focus ring for keyboard users", async ({ page }) => {

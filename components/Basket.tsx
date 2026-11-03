@@ -32,7 +32,7 @@ export default function Basket({
   return (
     <div className="flex h-full min-h-0 flex-col">
       <div className="flex items-baseline justify-between gap-2 px-4 pt-4">
-        <h2 className="font-semibold">Companies</h2>
+        <h2 className="text-tag text-text-secondary">Companies</h2>
         <span className="text-sm tabular-nums text-text-secondary" aria-live="polite">
           {companies.length === inScope ? fmt.format(inScope) : `${fmt.format(companies.length)} of ${fmt.format(inScope)}`}
         </span>

@@ -9,61 +9,61 @@ test.beforeEach(async ({ page }) => {
 });
 
 const bodyBg = (page: Page) => page.evaluate(() => getComputedStyle(document.body).backgroundColor);
-const toggle = (page: Page) => page.getByRole("switch", { name: "Dark theme" });
-
-test.describe("theme", () => {
-  test("is light by default, even when the system prefers dark", async ({ page }) => {
+test.describe("design", () => {
+  test("is the light sage design everywhere, with no theme switch, whatever was saved or preferred", async ({ page }) => {
     await page.emulateMedia({ colorScheme: "dark" });
     await page.goto("/");
-    expect(await bodyBg(page)).toBe("rgb(255, 255, 255)");
-    await expect(toggle(page)).toHaveAttribute("aria-checked", "false");
+    await page.evaluate(() => localStorage.setItem("whatstir-theme", "dark")); // a choice saved by the old switch
+    for (const path of ["/", "/sector/b2b", "/notes", "/admin"]) {
+      await page.goto(path);
+      await expect(page.getByRole("heading", { level: 1 })).toBeVisible();
+      expect(await bodyBg(page), path).toBe("rgb(248, 249, 245)"); // Linen
+      expect(await page.evaluate(() => document.documentElement.dataset.theme), path).toBeUndefined();
+      await expect(page.getByRole("switch")).toHaveCount(0);
+    }
   });
 
-  test("the header switch turns dark on, and the choice carries to other pages", async ({ page }) => {
+  test("the fonts come from the app itself: Inter for text, Newsreader for the hero, Fragment Mono for tags", async ({ page }) => {
+    const external: string[] = [];
+    page.on("request", (r) => {
+      const host = new URL(r.url()).hostname;
+      if (host !== "localhost" && !host.endsWith("bookface-images.s3.amazonaws.com")) external.push(r.url());
+    });
     await page.goto("/");
-    await toggle(page).click();
-    await expect(toggle(page)).toHaveAttribute("aria-checked", "true");
-    expect(await bodyBg(page)).toBe("rgb(0, 0, 0)");
+    await expect(page.getByRole("link", { name: /^B2B,/ })).toBeVisible();
+    const font = (selector: string) => page.locator(selector).first().evaluate((e) => getComputedStyle(e).fontFamily);
+    expect(await font("body")).toMatch(/Inter/);
+    expect(await font("h1")).toMatch(/Newsreader/);
+    expect(await font(".text-tag")).toMatch(/Fragment Mono/);
+    expect(external).toEqual([]);
+  });
 
+  test("the hero photo is stored in the app, and cards use rings, not shadows", async ({ page, request }) => {
+    const photo = await request.get("/landscape-hills.jpg");
+    expect(photo.ok()).toBe(true);
+    expect(photo.headers()["content-type"]).toBe("image/jpeg");
+    await page.goto("/");
+    await expect(page.getByRole("link", { name: /^B2B,/ })).toBeVisible();
+    expect(await page.locator('[style*="landscape-hills.jpg"]').count()).toBe(1);
     await page.goto("/sector/b2b");
-    await expect(toggle(page)).toHaveAttribute("aria-checked", "true");
-    expect(await bodyBg(page)).toBe("rgb(0, 0, 0)");
-  });
-
-  test("switching back to light is remembered too", async ({ page }) => {
-    await page.goto("/");
-    await page.evaluate(() => localStorage.setItem("whatstir-theme", "dark")); // as if chosen earlier
-    await page.reload();
-    await expect(toggle(page)).toHaveAttribute("aria-checked", "true");
-    await toggle(page).click();
-    await expect(toggle(page)).toHaveAttribute("aria-checked", "false");
-    expect(await bodyBg(page)).toBe("rgb(255, 255, 255)");
-    await page.reload();
-    expect(await bodyBg(page)).toBe("rgb(255, 255, 255)");
-    await expect(toggle(page)).toHaveAttribute("aria-checked", "false");
-  });
-
-  test("a saved dark theme applies before any app JavaScript runs (no light flash)", async ({ page }) => {
-    await page.goto("/");
-    await toggle(page).click();
-    await expect(toggle(page)).toHaveAttribute("aria-checked", "true");
-    // Block every script bundle: only the server HTML and the inline head script run.
-    await page.route("**/_next/static/**/*.js", (r) => r.abort());
-    await page.reload();
-    expect(await page.evaluate(() => document.documentElement.dataset.theme)).toBe("dark");
-    expect(await bodyBg(page)).toBe("rgb(0, 0, 0)");
-  });
-
-  test("dark cards and hairlines stand out from the page", async ({ page }) => {
-    await page.goto("/sector/b2b");
-    await page.evaluate(() => localStorage.setItem("whatstir-theme", "dark"));
-    await page.reload();
     await expect(page.getByLabel("Question")).toBeVisible();
-    // Computed colours, since the production CSS minifier rewrites the token spellings.
-    expect(await page.locator('section[aria-label="Chat"]').evaluate((e) => getComputedStyle(e).backgroundColor)).toBe("rgb(38, 38, 40)");
-    expect(await page.getByRole("combobox", { name: "Subcategory" }).evaluate((e) => getComputedStyle(e).borderTopColor)).toBe(
-      "rgba(255, 255, 255, 0.2)",
-    );
+    const chat = page.locator('section[aria-label="Chat"]');
+    expect(await chat.evaluate((e) => getComputedStyle(e).backgroundColor)).toBe("rgb(239, 242, 232)"); // Bone
+    // Either no shadow or a 1px ring (no offset, no blur), never a soft drop shadow.
+    expect(await chat.evaluate((e) => getComputedStyle(e).boxShadow)).toMatch(/^(none|.*0px 0px 0px 1px)$/);
+  });
+
+  test("tooltips are the app's own, not the browser's", async ({ page }) => {
+    await page.goto("/");
+    const tile = page.getByRole("link", { name: /^Fintech,/ });
+    await tile.hover();
+    const tip = page.getByRole("tooltip");
+    await expect(tip).toHaveText("Fintech, 3 companies");
+    expect(await tile.getAttribute("title")).toBeNull(); // moved aside while shown, so no native tooltip
+    expect(await tip.evaluate((e) => getComputedStyle(e).backgroundColor)).toBe("rgb(10, 29, 8)"); // Forest Ink
+    await page.mouse.move(5, 5);
+    await expect(tip).toHaveCount(0);
+    expect(await tile.getAttribute("title")).toBe("Fintech, 3 companies");
   });
 });
 
