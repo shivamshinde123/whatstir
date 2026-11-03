@@ -19,22 +19,28 @@ test.describe("theme", () => {
     await expect(toggle(page)).toHaveAttribute("aria-checked", "false");
   });
 
-  test("the header switch turns dark on and off, and the choice survives a reload", async ({ page }) => {
+  test("the header switch turns dark on, and the choice carries to other pages", async ({ page }) => {
     await page.goto("/");
     await toggle(page).click();
     await expect(toggle(page)).toHaveAttribute("aria-checked", "true");
     expect(await bodyBg(page)).toBe("rgb(0, 0, 0)");
 
-    await page.goto("/sector/b2b"); // and on every page
+    await page.goto("/sector/b2b");
     await expect(toggle(page)).toHaveAttribute("aria-checked", "true");
     expect(await bodyBg(page)).toBe("rgb(0, 0, 0)");
+  });
 
+  test("switching back to light is remembered too", async ({ page }) => {
+    await page.goto("/");
+    await page.evaluate(() => localStorage.setItem("whatstir-theme", "dark")); // as if chosen earlier
     await page.reload();
-    expect(await bodyBg(page)).toBe("rgb(0, 0, 0)");
+    await expect(toggle(page)).toHaveAttribute("aria-checked", "true");
     await toggle(page).click();
     await expect(toggle(page)).toHaveAttribute("aria-checked", "false");
+    expect(await bodyBg(page)).toBe("rgb(255, 255, 255)");
     await page.reload();
     expect(await bodyBg(page)).toBe("rgb(255, 255, 255)");
+    await expect(toggle(page)).toHaveAttribute("aria-checked", "false");
   });
 
   test("a saved dark theme applies before any app JavaScript runs (no light flash)", async ({ page }) => {
