@@ -24,8 +24,10 @@ Whatstir/
 ├─ lib/                            server-only modules plus *.test.ts beside them
 ├─ db/migrations/                  001_init.sql, …
 ├─ scripts/                        migrate.mts, refresh.mts, generate-subcategories.mts, backfill.mts
-├─ README.md                       setup and commands
+├─ README.md                       overview, screenshots, run-your-own setup and deploy guide
 ├─ docs/                           this documentation; intial_idea.md is the requirements source
+│  └─ images/                      README screenshots
+├─ public/                         static files served as-is (landscape-hills.jpg, the home hero photo)
 ├─ e2e/                            Playwright specs (*.spec.ts), global-setup.ts (e2e DB + feed server), feed-server.ts, db-urls.ts
 ├─ test/                           shared test helpers, fixtures, harness checks
 ├─ .github/workflows/ci.yml        the required `ci` check
@@ -35,6 +37,7 @@ Whatstir/
 ├─ vitest.config.mts, vitest.setup.ts, playwright.config.ts
 ├─ CLAUDE.md, AGENTS.md            agent instructions (workflow, design, Next 16 notes)
 ├─ .env                            local secrets (gitignored)
+├─ .env.example                    placeholders for every variable; copied to .env (lib/env-example.test.ts keeps it complete)
 └─ package.json
 ```
 

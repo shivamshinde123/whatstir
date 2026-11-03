@@ -1,6 +1,6 @@
 # Environment and configuration
 
-All variables live in `.env` at the repository root. That file is listed in `.gitignore` and must never be committed. On Vercel, set the same variables under Project → Settings → Environment Variables.
+All variables live in `.env` at the repository root. Start from `.env.example` (`cp .env.example .env`), which lists every variable with placeholders only; `lib/env-example.test.ts` fails if the code reads a variable it doesn't list, or if a real-looking secret appears in it. `.env` is listed in `.gitignore` and must never be committed. On Vercel, set the same variables under Project → Settings → Environment Variables.
 
 | Variable | Required | Used by | Notes |
 |---|---|---|---|
