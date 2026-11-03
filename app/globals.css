@@ -21,11 +21,12 @@
 
 :root[data-theme="dark"] {
   --bg: #000000;
-  --surface: #1c1c1e;
+  /* Cards are clearly lifted off the black page, and hairlines read (the owner found #1c1c1e too close to black). */
+  --surface: #262628;
   --text: #f5f5f7;
-  --text-secondary: #a1a1a6;
-  --text-tertiary: #6e6e73;
-  --separator: rgb(255 255 255 / 0.12);
+  --text-secondary: #aeaeb2;
+  --text-tertiary: #8e8e93;
+  --separator: rgb(255 255 255 / 0.2);
   --accent: #2997ff;
   --link: #2997ff;
   --danger: #ff453a;

@@ -88,7 +88,7 @@ export default function HomeView() {
     <>
       <SiteHeader showSignOut={data?.gate} />
       <main className="flex w-full flex-1 flex-col px-4 pb-12 pt-10 sm:px-6 sm:pt-14 lg:px-8">
-        <h1 className="text-headline">Explore startups by sector</h1>
+        <h1 className="text-headline">Explore YC startups by sector</h1>
         <p className="mt-2 text-text-secondary" aria-live="polite">
           {data && !empty
             ? `${fmt.format(shown)} ${activeOnly ? "active " : ""}${shown === 1 ? "company" : "companies"} ${chosen ? `in ${chosen.name}` : "from yc-oss"}` +

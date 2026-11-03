@@ -27,7 +27,7 @@ test.describe("password gate", () => {
     await page.getByLabel("Password").fill(E2E_PASSWORD);
     await page.keyboard.press("Enter");
     await expect(page).toHaveURL(/\/\?from=test$/);
-    await expect(page.getByRole("heading", { level: 1 })).toHaveText("Explore startups by sector");
+    await expect(page.getByRole("heading", { level: 1 })).toHaveText("Explore YC startups by sector");
 
     const cookie = (await page.context().cookies()).find((c) => c.name === "whatstir_auth");
     expect(cookie?.httpOnly).toBe(true);

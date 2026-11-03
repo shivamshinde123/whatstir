@@ -95,9 +95,10 @@ test("a no-match answer shows the message and leaves the grid unchanged", async 
   await expect(page.getByText("(ask) None of the companies in Consumer match.")).toBeVisible();
 
   // A scope with no companies at all answers without the model.
-  const empty = page.getByRole("group", { name: "Narrow by subcategory" }).getByRole("button", { name: / 0$/ }).first();
-  const group = (await empty.textContent())!.replace(/ 0$/, "");
-  await empty.click();
+  const select = page.getByRole("combobox", { name: "Subcategory" });
+  const empty = (await select.locator("option").allTextContents()).find((t) => / · 0$/.test(t))!;
+  const group = empty.replace(/ · 0$/, "");
+  await select.selectOption({ label: empty });
   await ask(page, "anyone?");
   await expect(page.getByText(`No companies in Consumer › ${group} match yet.`)).toBeVisible();
   expect(await tileIds(page)).toEqual([6]);
