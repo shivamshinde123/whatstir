@@ -101,14 +101,30 @@ A note:
 
 ## Admin
 
-- `GET /api/admin/refresh` returns `{ "paused", "schedule": "0 11 * * * UTC", "lastRun", "lastSuccess", "pending" }`. `lastRun` is a row from `refresh_runs`, and `pending` is the number of companies still waiting for enrichment.
-- `POST /api/admin/refresh` starts a manual run and returns 202 with the run id. It returns 409 if a run is already in progress.
-- `PATCH /api/admin/settings` takes `{ "refresh_paused"?: boolean, "jev_min_confidence"?: number }`.
+### `GET /api/admin/refresh`
+```json
+{ "paused": false, "minConfidence": 0.5, "schedule": "0 11 * * *", "nextRun": "2026-11-03T11:00:00.000Z",
+  "running": false, "pending": 0, "gate": false,
+  "lastRun":     { "id": 12, "trigger": "manual", "status": "failed", "startedAt": "…", "finishedAt": "…",
+                   "sourceCount": 0, "added": 0, "updated": 0, "enriched": 0, "pending": 0, "error": "Source returned HTTP 500" },
+  "lastSuccess": { …a run with status "ok"… },
+  "runs": [ …the 20 most recent runs, newest first… ] }
+```
+- `pending` counts companies whose embedding, group assignment, problem card or founders aren't up to date with their source data.
+- `nextRun` is the next 11:00 UTC. It's shown even while paused, because the cron still fires and records a skip.
+- `gate` drives the Sign out link.
+
+### `POST /api/admin/refresh`
+Claims the single refresh slot, then returns **202** `{ "runId" }`. The run itself continues after the response through `after()`, within `maxDuration = 300` (240 s for enrichment). Returns **409** `{ "error": "A refresh is already running." }` if a run holds the slot; a run left `running` for 15 minutes is taken over. Manual runs go ahead even while scheduled runs are paused.
+
+### `PATCH /api/admin/settings`
+Takes `{ "paused"?: boolean, "minConfidence"?: number }` and returns the saved `{ paused, minConfidence }`. These are stored in `app_settings` as `refresh_paused` and `jev_min_confidence`, as JSON booleans and numbers.
+- **400:** `paused` that isn't a boolean; `minConfidence` that isn't a finite number from 0 to 1 (both ends allowed); an unknown key; an empty object; or a body that isn't a JSON object.
 
 ## Cron
 
 ### `GET /api/cron/refresh`
-Requires `Authorization: Bearer $CRON_SECRET`, otherwise it returns 401. It runs the refresh with `trigger=cron`, does nothing if refreshes are paused, and returns the run summary. `maxDuration = 300`.
+Requires exactly `Authorization: Bearer $CRON_SECRET` (compared in constant time), otherwise it returns 401 without running. If `CRON_SECRET` isn't set, every request gets 401. It runs the refresh with `trigger=cron` and a 240 s enrichment budget, and returns the run summary (`{ runId, status, sourceCount, added, updated, missing, invalid, enrichment?, error? }`). While paused, or while another run holds the slot, it records a `skipped` run and returns that. `maxDuration = 300`. The path is public in `proxy.ts`, since Vercel's request carries no cookie.
 
 ## Login
 

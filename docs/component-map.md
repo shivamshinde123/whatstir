@@ -5,7 +5,7 @@
 |---|---|---|
 | `/` | `page.tsx` | Fetches `/api/sectors` and renders the treemap, the coverage line, and the Active-only toggle. |
 | `/sector/[id]` | `sector/[id]/page.tsx` | The workspace. Holds the selected subcategory, the selected companies, the open profile, and the session state. |
-| `/admin` | `admin/page.tsx` | Refresh status, Refresh now, Pause, the confidence threshold, and recent runs. |
+| `/admin` | `admin/page.tsx` → `AdminView` | Data refresh: state (Active/Paused, next run), last run (with its error), last success, companies waiting for enrichment; Refresh now, Pause/Resume, the Jev confidence threshold; the 20 most recent runs. Polls while a run is in progress. Linked from the header. |
 | `/login` | `login/page.tsx` + `login-form.tsx` (client) | The password card. After signing in it goes to `safeNext(?next)`. The form takes a `navigate` prop so tests can swap out navigation. |
 
 ## UI components (`components/`)

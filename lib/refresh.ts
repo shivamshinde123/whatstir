@@ -5,6 +5,8 @@ import { enrich, type EnrichDeps, type EnrichSummary } from "./enrich";
 import { industryToSector } from "./sector";
 
 export const SOURCE_URL = "https://yc-oss.github.io/api/companies/all.json";
+/** The feed to read; YC_SOURCE_URL overrides it (e2e tests point it at a local fixture server). */
+export const sourceUrl = (): string => process.env.YC_SOURCE_URL || SOURCE_URL;
 /** A feed with fewer records than this share of the stored ones is treated as truncated. */
 export const MIN_SOURCE_RATIO = 0.9;
 /** A 'running' row older than this is assumed to belong to a crashed run. */
@@ -104,7 +106,7 @@ async function fetchSource(fetchImpl: typeof fetch, retryDelaysMs: number[]): Pr
   let res: Response | undefined;
   for (let attempt = 0; ; attempt++) {
     try {
-      res = await fetchImpl(SOURCE_URL, { cache: "no-store" });
+      res = await fetchImpl(sourceUrl(), { cache: "no-store" });
       if (res.status < 500) break;
       if (attempt >= retryDelaysMs.length) break;
     } catch (e) {
@@ -128,8 +130,11 @@ async function settings(sql: Sql): Promise<{ paused: boolean }> {
   return { paused: row?.value === true };
 }
 
-/** Claims the single 'running' slot. Returns the run id, or null if another run holds it. */
-async function claimRun(sql: Sql, trigger: Trigger): Promise<number | null> {
+/**
+ * Claims the single 'running' slot (taking over one left stale for 15 minutes). Returns the
+ * run id, or null if another run holds it.
+ */
+export async function claimRun(sql: Sql, trigger: Trigger): Promise<number | null> {
   await sql`update refresh_runs set status = 'failed', finished_at = now(), error = 'stale: no finish recorded'
     where status = 'running' and started_at < now() - make_interval(mins => ${STALE_RUN_MINUTES})`;
   try {
@@ -165,15 +170,20 @@ export async function run(opts: {
   /** Companies enriched in parallel (default 4). */
   concurrency?: number;
   onProgress?: (s: Readonly<EnrichSummary>) => void;
+  /** A run already claimed with claimRun (the admin API claims first so it can answer 409 or 202). */
+  runId?: number;
 }): Promise<RunSummary> {
   const sql = opts.sql ?? db();
   const fetchImpl = opts.fetchImpl ?? fetch;
 
-  if (opts.trigger === "cron" && (await settings(sql)).paused) {
-    return recordSkip(sql, opts.trigger, "refresh is paused");
+  let runId = opts.runId ?? null;
+  if (runId === null) {
+    if (opts.trigger === "cron" && (await settings(sql)).paused) {
+      return recordSkip(sql, opts.trigger, "refresh is paused");
+    }
+    runId = await claimRun(sql, opts.trigger);
+    if (runId === null) return recordSkip(sql, opts.trigger, "another refresh is already running");
   }
-  const runId = await claimRun(sql, opts.trigger);
-  if (runId === null) return recordSkip(sql, opts.trigger, "another refresh is already running");
 
   const summary: RunSummary = { runId, status: "ok", sourceCount: 0, added: 0, updated: 0, missing: 0, invalid: 0 };
   let applied = false;
