@@ -9,7 +9,8 @@ const fmt = new Intl.NumberFormat("en-US");
 export const MAX_SELECTION = 20;
 
 /** Cited and selected must read differently: cited is an accent ring, selected a tint plus a tick. */
-export const CITED_CLASS = "ring-2 ring-accent";
+// Style trial: the "Crimson Specimen" status ring.
+export const CITED_CLASS = "ring-[1.5px] ring-danger";
 export const SELECTED_CLASS = "bg-accent/10 hover:bg-accent/15";
 const PLAIN_CLASS = "bg-surface hover:bg-bg";
 
@@ -144,7 +145,7 @@ export default function ResultsGrid({
   return (
     <div className="flex max-h-[60vh] min-h-48 flex-col rounded-[var(--radius-card)] border border-separator lg:h-full lg:max-h-none">
       <div className="flex items-baseline justify-between gap-2 px-4 pt-4">
-        <h2 className="font-semibold">Results</h2>
+        <h2 className="text-tag text-text-secondary">Results</h2>
         <span className="text-sm tabular-nums text-text-secondary" aria-live="polite" data-testid="results-count">
           {fmt.format(tiles.length)} {tiles.length === 1 ? "company" : "companies"}
         </span>
@@ -179,7 +180,7 @@ export default function ResultsGrid({
       )}
       {cited.size > 0 && (
         <p className="px-4 pt-1 text-caption text-text-secondary">
-          <span aria-hidden="true" className="mr-1 inline-block size-2 rounded-full bg-accent align-middle" />
+          <span aria-hidden="true" className="mr-1 inline-block size-2 rounded-full bg-danger align-middle" />
           Ringed: cited by the latest answer
         </p>
       )}

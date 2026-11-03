@@ -80,7 +80,7 @@ export default function Chat({
   return (
     <div className="flex h-full min-h-0 flex-col">
       <div className="flex items-center justify-between gap-2 px-4 pt-4">
-        <h2 className="font-semibold">Ask</h2>
+        <h2 className="text-tag text-text-secondary">Ask</h2>
         {confirming ? (
           <span className="flex items-center gap-1 text-sm">
             <span className="text-text-secondary">Clear the grid?</span>

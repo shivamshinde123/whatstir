@@ -25,7 +25,7 @@ export default function Treemap({ tiles, query = "" }: { tiles: Tile[]; query?: 
               aria-label={tileLabel(t)}
               title={tileLabel(t)}
               data-compact={compact || undefined}
-              className={`pressable flex h-full w-full flex-col justify-between overflow-hidden bg-[var(--tile-bg)] transition-[background-color] duration-200 hover:bg-[var(--tile-hover)] ${tiny ? "rounded-md p-0" : "rounded-xl p-3"}`}
+              className={`pressable flex h-full w-full flex-col justify-between overflow-hidden border border-separator bg-[var(--tile-bg)] transition-[background-color] duration-200 hover:bg-[var(--tile-hover)] ${tiny ? "rounded-[4px] p-0" : "rounded-[10px] p-4"}`}
               style={{
                 ["--tile-bg" as string]: `color-mix(in srgb, ${color} 14%, var(--bg))`,
                 ["--tile-hover" as string]: `color-mix(in srgb, ${color} 24%, var(--bg))`,
@@ -37,13 +37,15 @@ export default function Treemap({ tiles, query = "" }: { tiles: Tile[]; query?: 
                 </span>
               ) : (
                 <>
-                  <span className="truncate text-[15px] font-semibold leading-tight">{t.name}</span>
+                  <span className="text-tag truncate">
+                    {t.name} <span aria-hidden="true">→</span>
+                  </span>
                   <span
-                    className="font-semibold tabular-nums leading-none tracking-tight"
+                    className="font-medium tabular-nums leading-none tracking-[-0.03em]"
                     // Mixed toward the text colour: darker in light mode, lighter in dark, for contrast.
                     style={{
                       color: `color-mix(in srgb, ${color} 72%, var(--text))`,
-                      fontSize: t.h > 160 && t.w > 220 ? "2.5rem" : "1.5rem",
+                      fontSize: t.h > 160 && t.w > 220 ? "3.3rem" : "1.625rem",
                     }}
                   >
                     {fmt.format(t.count)}

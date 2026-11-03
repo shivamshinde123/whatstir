@@ -88,15 +88,26 @@ export default function HomeView() {
     <>
       <SiteHeader showSignOut={data?.gate} />
       <main className="flex w-full flex-1 flex-col px-4 pb-12 pt-10 sm:px-6 sm:pt-14 lg:px-8">
-        <h1 className="text-headline">Explore YC startups by sector</h1>
-        <p className="mt-2 text-text-secondary" aria-live="polite">
-          {data && !empty
-            ? `${fmt.format(shown)} ${activeOnly ? "active " : ""}${shown === 1 ? "company" : "companies"} ${chosen ? `in ${chosen.name}` : "from yc-oss"}` +
-              (data.lastRefreshAt ? ` · updated ${dateFmt.format(new Date(data.lastRefreshAt))}` : "")
-            : " "}
-        </p>
+        {/* Style trial: a two-column hero, the serif headline beside a hazy landscape plate. */}
+        <div className="grid items-end gap-6 lg:grid-cols-[minmax(0,1.1fr)_minmax(0,1fr)]">
+          <div>
+            <p className="text-tag text-text-secondary">YC directory · by sector →</p>
+            <h1 className="text-serif-display mt-3">Explore YC startups by sector</h1>
+            <p className="text-tag mt-4 text-text-secondary" aria-live="polite">
+              {data && !empty
+                ? `${fmt.format(shown)} ${activeOnly ? "active " : ""}${shown === 1 ? "company" : "companies"} ${chosen ? `in ${chosen.name}` : "from yc-oss"}` +
+                  (data.lastRefreshAt ? ` · updated ${dateFmt.format(new Date(data.lastRefreshAt))}` : "")
+                : " "}
+            </p>
+          </div>
+          <div
+            aria-hidden="true"
+            className="hidden h-56 rounded-[var(--radius-card)] border border-separator bg-cover bg-center lg:block dark:brightness-[0.5] dark:saturate-[0.85]"
+            style={{ backgroundImage: "url(/landscape-plate.svg)" }}
+          />
+        </div>
 
-        <div className="mt-6 flex flex-wrap items-center justify-between gap-3">
+        <div className="mt-10 flex flex-wrap items-center justify-between gap-3">
           <div className="flex flex-wrap items-center gap-2">
           <div role="group" aria-label="Which companies to count" className="inline-flex rounded-full bg-surface p-0.5 text-sm">
             {[
