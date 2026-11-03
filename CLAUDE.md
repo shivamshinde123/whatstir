@@ -10,7 +10,7 @@ A personal tool for exploring YC startups by sector and the customer problem the
 2. Create a branch from the latest `main`, named `issue-<n>-<slug>`.
 3. Implement the issue, and write tests for **every** item in its test plan: unit, integration, component and e2e as the issue lists. Check UI features by hand in the browser too.
 4. `npm run ci` must pass locally. Database tests need Docker running.
-5. Push the branch and open a PR whose description says `Closes #<n>`, using `.github/pull_request_template.md`. Add a line to `CHANGELOG.md` under **Unreleased** for anything user-visible. Wait for the `ci` check to pass, then squash-merge. `main` requires the code owner's approval (decision 73). The owner can't approve their own PR, so the owner's PRs merge with `gh pr merge --squash --admin --delete-branch`. Never use `--admin` for anyone else's PR.
+5. Push the branch and open a PR whose description says `Closes #<n>`, using `.github/pull_request_template.md`. Add a line to `CHANGELOG.md` under **Unreleased** for anything user-visible. Wait for the `ci` check to pass and confirm the PR is mergeable, then **hand it to the owner**. `main` requires the code owner's review (decision 73), and the owner reviews every change: they merge it, or say explicitly to merge it. An agent never merges with `--admin` on its own.
 6. An issue isn't done until its tests pass.
 
 ## Testing

@@ -1,7 +1,8 @@
 import { choice, noul, TypeSafeClient } from "@typesafe-ai/sdk";
 import { companyText, isFake, type CompanyText } from "./ai";
 
-export const JEV_MODEL = "jev-latest";
+/** JEV_MODEL overrides TypeSafe's model, e.g. a pinned version instead of the latest. */
+export const jevModel = () => process.env.JEV_MODEL?.trim() || "jev-latest";
 
 export interface Group {
   id: number;
@@ -24,7 +25,7 @@ export interface AssignmentRow {
 
 type Client = Pick<TypeSafeClient, "systemOne">;
 let client: Client | undefined;
-const jev = () => (client ??= new TypeSafeClient({ defaultModel: JEV_MODEL }));
+const jev = () => (client ??= new TypeSafeClient({ defaultModel: jevModel() }));
 /** Test seam: replace the Jev client. */
 export function setJevClient(c: Client | undefined) {
   client = c;

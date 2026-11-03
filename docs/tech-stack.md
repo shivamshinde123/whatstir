@@ -6,8 +6,9 @@
 | Framework | Next.js 16.4 (App Router, Turbopack, `cacheComponents`) with TypeScript 5 | Pages and API route handlers in one codebase, and it deploys to Vercel. TypeScript 7 (the Go rewrite) is skipped until Next.js supports it. |
 | Database | Supabase Postgres with the `pgvector` extension | Hosted Postgres that does vector search and full-text search itself. |
 | Database client | [`postgres`](https://github.com/porsager/postgres) | Plain SQL with transactions. supabase-js isn't needed because there is no auth and no database access from the browser. |
-| Chat answers | OpenAI `gpt-6.1-sol` through the `openai` SDK | Answers grounded in the companies retrieved for the question. Sol is OpenAI's balanced model, close to the flagship Astra at lower cost. |
-| Writing tasks | OpenAI `gpt-6-luna` | Names subcategories and writes problem cards. Luna is OpenAI's model for high-volume work. |
+| AI provider | OpenAI directly, or [OpenRouter](https://openrouter.ai) through the same `openai` SDK (`AI_PROVIDER`) | One code path, and OpenRouter opens hundreds of models from many vendors behind one key (decision 74). |
+| Chat answers | OpenAI `gpt-6.1-sol` by default (`AI_MODEL_ANSWER`) through the `openai` SDK | Answers grounded in the companies retrieved for the question. Sol is OpenAI's balanced model, close to the flagship Astra at lower cost. |
+| Writing tasks | OpenAI `gpt-6-luna` by default (`AI_MODEL_WRITE`) | Names subcategories and writes problem cards. Luna is OpenAI's model for high-volume work. |
 | Assignment | Jev `jev-latest` through `@typesafe-ai/sdk` | Typed choice answers with probabilities, used to place companies in subcategories. |
 | Embeddings | OpenAI `text-embedding-3-small` (1536 dimensions) | Semantic search over company text. It comes from the same provider and key as the chat models, and embedding all the companies (about 1M tokens) costs a few cents. |
 | Answer formatting | `react-markdown` + `remark-gfm` | The answer model writes Markdown (bold, lists, tables). Rendered as React elements, with no raw HTML and no images; see decision 65. |

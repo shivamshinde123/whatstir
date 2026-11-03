@@ -9,6 +9,7 @@ All notable changes to Whatstir are recorded here. The format follows [Keep a Ch
 The first public release.
 
 ### Added
+- **Choose your AI provider and models:** `AI_PROVIDER=openrouter` routes answers, writing and embeddings through [OpenRouter](https://openrouter.ai), one key for models from many vendors. `AI_MODEL_ANSWER`, `AI_MODEL_WRITE`, `AI_MODEL_EMBED` and `JEV_MODEL` override the defaults, and `/admin` shows what's in use (#48).
 - **Open-source essentials:** the MIT licence, a contributing guide, a code of conduct, a security policy, issue forms, a pull request template and this changelog (#46).
 - **README** with screenshots, how it works, and a step-by-step guide to running and deploying your own copy with your own keys. `.env.example` lists every variable, with placeholders only (#45).
 - **Themed tooltips** replace the browser's native ones across the app (#43).
