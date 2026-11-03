@@ -31,6 +31,7 @@ Whatstir/
 ├─ .github/workflows/ci.yml        the required `ci` check
 ├─ proxy.ts                        password gate (Next 16 name for middleware)
 ├─ vercel.json                     cron schedule
+├─ smoke/, playwright.smoke.config.ts  read-only checks against a deployment (npm run test:e2e:smoke)
 ├─ vitest.config.mts, vitest.setup.ts, playwright.config.ts
 ├─ CLAUDE.md, AGENTS.md            agent instructions (workflow, design, Next 16 notes)
 ├─ .env                            local secrets (gitignored)

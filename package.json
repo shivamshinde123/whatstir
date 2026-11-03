@@ -14,6 +14,7 @@
     "test": "vitest run",
     "test:watch": "vitest",
     "test:e2e": "playwright test",
+    "test:e2e:smoke": "playwright test -c playwright.smoke.config.ts",
     "ci": "npm run typecheck && npm run lint && npm run test && npm run test:e2e",
     "migrate": "tsx --env-file=.env scripts/migrate.mts",
     "db:test:up": "docker start whatstir-test-db || docker run -d --name whatstir-test-db -e POSTGRES_PASSWORD=postgres -e POSTGRES_DB=whatstir_test -p 54329:5432 pgvector/pgvector:pg16",
