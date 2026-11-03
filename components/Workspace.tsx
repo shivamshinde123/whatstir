@@ -285,7 +285,6 @@ export default function Workspace({ sectorId, sectorName }: { sectorId: string; 
                   sendError={sendError}
                   notice={notice}
                   scopeName={scopeName}
-                  selection={selectionScope}
                   onClearScope={selectionScope ? () => setAskSelected(false) : undefined}
                   onAsk={ask}
                   onRetry={retry}

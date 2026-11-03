@@ -19,12 +19,7 @@ describe("suggestionsFor", () => {
     expect(suggestionsFor("ask", "Scheduling")[0]).toBe("Which Scheduling companies sell to small businesses?");
   });
 
-  it("switches to comparison questions for a selection, without the '2 selected' label in the text", () => {
-    for (const action of ["ask", "explore", "challenge"] as const) {
-      const s = suggestionsFor(action, "2 selected", true);
-      expect(s).toHaveLength(3);
-      expect(s.join(" ")).toMatch(/these/);
-      expect(s.join(" ")).not.toContain("2 selected");
-    }
+  it("has no selection mode: a selection needs a grid, so the conversation has already started", () => {
+    expect(suggestionsFor.length).toBe(2);
   });
 });
