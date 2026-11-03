@@ -4,6 +4,9 @@ All notable changes to Whatstir are recorded here. The format follows [Keep a Ch
 
 ## [Unreleased]
 
+### Changed
+- **Suggested questions show only in an empty conversation.** The row of suggestion chips above Ask / Explore / Challenge no longer appears once you've asked something (#56).
+
 ## [2.1.0] - 2026-11-03
 
 ### Added

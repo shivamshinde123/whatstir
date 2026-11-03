@@ -1,29 +1,10 @@
 import type { Action } from "./answer";
 
 /**
- * One-click starter questions for the chat, worded for the current action and scope.
- * `scope` is what the chip shows: a sector, a group, or "N selected" (then `selection` is true).
+ * One-click starter questions for an empty conversation (decision 79), worded for the current
+ * action and scope (a sector or a group).
  */
-export function suggestionsFor(action: Action, scope: string, selection = false): string[] {
-  if (selection) {
-    return {
-      ask: [
-        "How do these companies differ in who they sell to?",
-        "Which customer problem does each of these solve?",
-        "What do these companies have in common?",
-      ],
-      explore: [
-        "What problem do all of these companies circle around?",
-        "Where do these companies leave customers without a good option?",
-        "What would a customer have done before these companies existed?",
-      ],
-      challenge: [
-        "My idea: combine what these companies do into one product for small teams.",
-        "My idea: serve the customers these companies ignore.",
-        "My idea: a cheaper, self-serve version of these for smaller customers.",
-      ],
-    }[action];
-  }
+export function suggestionsFor(action: Action, scope: string): string[] {
   return {
     ask: [
       `Which ${scope} companies sell to small businesses?`,

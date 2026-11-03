@@ -69,7 +69,6 @@ export default function Chat({
   sendError,
   notice,
   scopeName,
-  selection = false,
   onClearScope,
   onAsk,
   onRetry,
@@ -83,8 +82,6 @@ export default function Chat({
   /** A one-off problem to report, such as a failed New session. */
   notice?: string | null;
   scopeName: string;
-  /** True while questions are about selected companies (changes the suggestions). */
-  selection?: boolean;
   /** Shown as × on the scope chip when the scope is a selection: back to the sector or group. */
   onClearScope?: () => void;
   onAsk: (text: string, action: Action) => void;
@@ -112,7 +109,7 @@ export default function Chat({
     setDraft("");
     send(text);
   };
-  const suggestions = suggestionsFor(action, scopeName, selection);
+  const suggestions = suggestionsFor(action, scopeName);
   const empty = !messages.length && !pending && !sendError;
 
   return (
@@ -245,26 +242,7 @@ export default function Chat({
         )}
       </ol>
 
-      {!empty && (
-        <div
-          role="group"
-          aria-label="Suggestions"
-          className="flex gap-1.5 overflow-x-auto px-3 pb-2 pt-1 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
-        >
-          {suggestions.map((s) => (
-            <button
-              key={s}
-              type="button"
-              disabled={!!pending}
-              onClick={() => send(s)}
-              title={s}
-              className="pressable max-w-64 shrink-0 truncate rounded-full border border-separator bg-bg px-3 py-1 text-caption transition-colors hover:bg-accent/10 disabled:opacity-40"
-            >
-              {s}
-            </button>
-          ))}
-        </div>
-      )}
+      {/* Suggestions appear only in an empty conversation (decision 79). */}
       <div role="group" aria-label="Action" className="mx-3 mt-1 flex rounded-full bg-bg p-0.5 text-sm">
         {ACTIONS.map((a) => (
           <button

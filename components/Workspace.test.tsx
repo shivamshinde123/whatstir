@@ -926,26 +926,16 @@ describe("suggested questions", () => {
     await renderReady();
     fireEvent.click(within(screen.getByRole("group", { name: "Action" })).getByRole("button", { name: "Challenge" }));
     expect(suggestions()[0]).toHaveTextContent(/^My idea: an AI assistant that does routine Healthcare paperwork/);
-    fireEvent.click(suggestions()[0]);
-    await waitFor(() => expect(sent()).toHaveLength(1));
-    expect(sent()[0].action).toBe("challenge");
-
-    pick("Scheduling · 2");
     fireEvent.click(within(screen.getByRole("group", { name: "Action" })).getByRole("button", { name: "Ask" }));
+    pick("Scheduling · 2");
     expect(suggestions()[0]).toHaveTextContent("Which Scheduling companies sell to small businesses?");
     fireEvent.click(suggestions()[0]);
-    await waitFor(() => expect(sent()).toHaveLength(2));
-    expect(sent()[1].subcategoryId).toBe(3);
+    await waitFor(() => expect(sent()).toHaveLength(1));
+    expect(sent()[0]).toMatchObject({ action: "ask", subcategoryId: 3 });
   });
 
-  it("stay available as chips once the conversation has started, and pause while an answer is pending", async () => {
+  it("disappear once the first question is asked, and stay away while it's pending (decision 79)", async () => {
     await renderReady();
-    fireEvent.click(suggestions()[0]);
-    await screen.findByText("Answer to Which Healthcare companies sell to small businesses?");
-    // Still offered, now as a compact row (only one suggestion group at a time).
-    expect(screen.getAllByRole("group", { name: "Suggestions" })).toHaveLength(1);
-    expect(suggestions()).toHaveLength(3);
-
     let release!: () => void;
     const gate = new Promise<void>((r) => (release = r));
     const original = fetchMock.getMockImplementation() as (url: string, init?: RequestInit) => Promise<Response>;
@@ -953,15 +943,19 @@ describe("suggested questions", () => {
       if (String(url).startsWith("/api/sessions/")) await gate;
       return original(url, init);
     });
-    fireEvent.click(suggestions()[2]);
+    fireEvent.click(suggestions()[0]);
     await screen.findByRole("status");
-    expect(suggestions().every((b) => (b as HTMLButtonElement).disabled)).toBe(true);
+    expect(screen.queryByRole("group", { name: "Suggestions" })).toBeNull();
     release();
-    await waitFor(() => expect(screen.queryByRole("status")).toBeNull());
-    expect(suggestions().some((b) => (b as HTMLButtonElement).disabled)).toBe(false);
+    await screen.findByText("Answer to Which Healthcare companies sell to small businesses?");
+    expect(screen.queryByRole("group", { name: "Suggestions" })).toBeNull();
+    // Switching action or scope doesn't bring them back mid-conversation.
+    fireEvent.click(within(screen.getByRole("group", { name: "Action" })).getByRole("button", { name: "Explore" }));
+    pick("Billing · 1");
+    expect(screen.queryByRole("group", { name: "Suggestions" })).toBeNull();
   });
 
-  it("switch to comparison questions while asking about a selection", async () => {
+  it("are not offered when asking about a selection (the conversation has already started)", async () => {
     await renderReady();
     fireEvent.change(screen.getByLabelText("Question"), { target: { value: "seed [ids:10,11]" } });
     fireEvent.click(screen.getByRole("button", { name: "Send" }));
@@ -969,33 +963,18 @@ describe("suggested questions", () => {
     fireEvent.click(screen.getByRole("checkbox", { name: "Select Acme Health" }));
     fireEvent.click(screen.getByRole("checkbox", { name: "Select Bolt Clinic" }));
     fireEvent.click(screen.getByRole("button", { name: "Ask about these" }));
-    expect(suggestions()[0]).toHaveTextContent("How do these companies differ in who they sell to?");
-    fireEvent.click(suggestions()[0]);
-    await waitFor(() => expect(sent()).toHaveLength(2));
-    expect(sent()[1]).toMatchObject({ selectedCompanyIds: [10, 11], action: "ask" });
+    expect(screen.queryByRole("group", { name: "Suggestions" })).toBeNull();
   });
-});
 
-describe("batch carried over from the home page", () => {
-  afterEach(() => window.history.replaceState(null, "", "/"));
-  const basketNames = () =>
-    within(screen.getByRole("list", { name: "Companies in this sector" })).getAllByRole("button").map((b) => b.getAttribute("title"));
-
-  it("narrows the basket and the group counts to the batch, with a removable chip", async () => {
-    window.history.replaceState(null, "", "/sector/healthcare?batch=Fall+2026");
-    render(<Workspace sectorId="healthcare" sectorName="Healthcare" />);
-    expect(await screen.findByText("2 of 3 companies")).toBeInTheDocument();
-    expect(basketNames()).toEqual(["Acme Health", "Care AI"]);
-    expect(screen.getByRole("option", { name: "All · 2" })).toBeInTheDocument();
-    expect(screen.getByRole("option", { name: "Scheduling · 1" })).toBeInTheDocument(); // Bolt Clinic is Winter 2020
-    expect(screen.getByRole("link", { name: "‹ All sectors" })).toHaveAttribute("href", "/?batch=Fall%202026");
-
-    fireEvent.click(screen.getByRole("button", { name: "Show all batches, not just Fall 2026" }));
-    expect(screen.getByText("3 companies")).toBeInTheDocument();
-    expect(basketNames()).toEqual(["Acme Health", "Bolt Clinic", "Care AI"]);
-    expect(screen.getByRole("option", { name: "Scheduling · 2" })).toBeInTheDocument();
-    expect(screen.getByRole("link", { name: "‹ All sectors" })).toHaveAttribute("href", "/");
-    expect(window.location.search).toBe("");
+  it("come back after New session", async () => {
+    await renderReady();
+    fireEvent.click(suggestions()[0]);
+    await screen.findByText("Answer to Which Healthcare companies sell to small businesses?");
+    expect(screen.queryByRole("group", { name: "Suggestions" })).toBeNull();
+    fireEvent.click(screen.getByRole("button", { name: "New session" }));
+    fireEvent.click(screen.getByRole("button", { name: "Start over" }));
+    await screen.findByText("Ask a question to start collecting companies.");
+    expect(suggestions()).toHaveLength(3);
   });
 
   it("questions follow the batch (chip, suggestions, request) until it's cleared", async () => {

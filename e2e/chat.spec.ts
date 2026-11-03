@@ -91,8 +91,8 @@ test("a suggested question asks itself with one click and fills the grid", async
   await expect(conversation.getByText("Which Consumer companies sell to small businesses?", { exact: true })).toBeVisible();
   await expect(page.getByText(/^\(ask\) In Consumer: /)).toBeVisible();
   await expect(tiles(page)).toHaveCount(3); // the fake cites its first 3 candidates
-  // Still offered as chips once the conversation has started.
-  await expect(page.getByRole("group", { name: "Suggestions" }).getByRole("button")).toHaveCount(3);
+  // Suggestions are only for an empty conversation (decision 79).
+  await expect(page.getByRole("group", { name: "Suggestions" })).toHaveCount(0);
 });
 
 test("answers written in Markdown render as formatting, not symbols", async ({ page }) => {

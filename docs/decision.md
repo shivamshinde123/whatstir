@@ -166,6 +166,8 @@ Listed in the order they were made. Decisions 1–14 are recorded in §16 of [in
     - *Grounding still holds:* only real companies from this sector of the dataset can reach the grid. Web-only companies, and companies in other sectors, stay text and links. A matching failure keeps the answer and the web part.
     - *Cost:* one extra small call per web search that names any sector company.
 
+79. **Suggested questions appear only before the first question** (the owner's request: the chip row above Ask / Explore / Challenge was clutter once a conversation had started). The compact row is gone, and New session brings the starters back. The selection-specific comparison suggestions were removed with it: a selection needs grid tiles, which only exist after a question, so they could never show.
+
 ## Open items
 
 - **A. Founder data.** Founders come from YC company pages. YC's terms of use forbid scraping, so the fetch is now off by default (decision 73); `FOUNDERS_FETCH=on` opts in for private use.
