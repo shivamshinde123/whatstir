@@ -102,8 +102,10 @@ export default function HomeView() {
           </div>
           <div
             aria-hidden="true"
-            className="hidden h-56 rounded-[var(--radius-card)] border border-separator bg-cover bg-center lg:block dark:brightness-[0.5] dark:saturate-[0.85]"
-            style={{ backgroundImage: "url(/landscape-plate.svg)" }}
+            // "Rolling green hills shrouded in morning fog" by Zetong Li, Unsplash License (unsplash.com/photos/tCU_rbybwMg).
+            // Stored in public/ so the page never depends on an external image link.
+            className="hidden h-56 rounded-[var(--radius-card)] border border-separator bg-cover bg-[position:50%_42%] lg:block"
+            style={{ backgroundImage: "url(/landscape-hills.jpg)" }}
           />
         </div>
 
