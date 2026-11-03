@@ -40,7 +40,8 @@ export function parseFounders(html: string): Founder[] {
   return out;
 }
 
-export const foundersEnabled = () => process.env.FOUNDERS_FETCH !== "off";
+// Off unless opted in: scraping YC company pages conflicts with YC's terms of use (decision 73).
+export const foundersEnabled = () => process.env.FOUNDERS_FETCH === "on";
 
 /** Fetches and parses a YC company page. A 404 means no page (no founders); other errors throw. */
 export async function fetchFounders(ycUrl: string, fetchImpl: typeof fetch = fetch): Promise<Founder[]> {

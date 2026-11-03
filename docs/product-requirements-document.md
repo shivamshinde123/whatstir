@@ -1,6 +1,6 @@
 # Product requirements
 
-The full requirements live in [intial_idea.md](intial_idea.md) (v1.2, 2026-11-01). This file records only how its open (TBD) items were resolved and what the MVP contains. If the two conflict, the decisions here win, because they were made later. See [decision.md](decision.md).
+The full requirements live in [initial_idea.md](initial_idea.md) (v1.2, 2026-11-01). This file records only how its open (TBD) items were resolved and what the MVP contains. If the two conflict, the decisions here win, because they were made later. See [decision.md](decision.md).
 
 ## Product
 

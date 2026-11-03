@@ -1,6 +1,6 @@
 # Decisions
 
-Listed in the order they were made. Decisions 1–14 are recorded in §16 of [intial_idea.md](intial_idea.md). This list continues from 15. A later entry can supersede an earlier one; when it does, it says so.
+Listed in the order they were made. Decisions 1–14 are recorded in §16 of [initial_idea.md](initial_idea.md). This list continues from 15. A later entry can supersede an earlier one; when it does, it says so.
 
 ## 2026-11-01
 
@@ -121,8 +121,19 @@ Listed in the order they were made. Decisions 1–14 are recorded in §16 of [in
     - *Hero photo:* stored in `public/` rather than linked, so it can't break.
     - *Tooltips:* the browser's tooltips can't be styled, so one app-wide `Tooltips` component replaces them by reading the existing `title` attributes. That kept every call site unchanged and avoided a tooltip library. A native `<option>` can't show a custom tooltip at all, so the dropdown shows the chosen group's description on the select instead.
 
+73. **Whatstir is open source under the MIT licence, and `main` accepts only changes the owner approves** (the owner's request).
+    - *Licence:* MIT, because the goal is adoption, it matches the dependencies' licences, and it's the simplest to understand. Apache-2.0 would add a patent grant (not needed here). AGPL-3.0 would force hosted forks to share their changes, but it deters casual use. The licence covers the code only; YC's data and trademarks aren't the project's to license.
+    - *Founder fetch off by default:* YC's Terms of Use forbid scraping and the commercial use of site content. Founders come from scraping YC company pages, so `FOUNDERS_FETCH` now has to be exactly `on`. The README's "About the data" section asks people to run their own copy for personal research only.
+    - *Branch protection on `main`:*
+      - A pull request is required, with 1 approval from a code owner (`.github/CODEOWNERS`: the owner owns everything).
+      - New pushes dismiss earlier approvals, and the last push needs an approval.
+      - Conversations must be resolved, and the `ci` check must pass on an up-to-date branch.
+      - Linear history; no force pushes or deletions.
+      - Admins are not subject to the review rule, because GitHub doesn't let anyone approve their own PR. The owner merges their own PRs with `--admin`, and outside contributors can't push at all, so their changes arrive as fork PRs that only the owner can approve.
+    - *CI hardening:* the workflow runs on `pull_request` (never `pull_request_target`) with a read-only token and no secrets. First-time contributors' CI runs need the owner's approval.
+
 ## Open items
 
-- **A. Founder data.** Founders come from YC company pages. Check YC's terms before production use. Until then, the founder fetch can be switched off with `FOUNDERS_FETCH=off`.
+- **A. Founder data.** Founders come from YC company pages. YC's terms of use forbid scraping, so the fetch is now off by default (decision 73); `FOUNDERS_FETCH=on` opts in for private use.
 - **B. Logo reuse.** Logos are linked from YC's CDN rather than copied. Fine for personal use; revisit before any public release.
 - **C. Companies removed from the source.** They are marked `missing_since` and never deleted. Whether the UI should hide them is still open.

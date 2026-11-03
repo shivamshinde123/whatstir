@@ -12,13 +12,14 @@ Pick a sector, ask questions in plain English, and watch the companies each answ
 ![OpenAI](https://img.shields.io/badge/OpenAI-answers%20%26%20embeddings-2b390a?logo=openai&logoColor=white)
 ![Deploy on Vercel](https://img.shields.io/badge/Deploy-Vercel-0a1d08?logo=vercel&logoColor=white)
 ![Tests](https://img.shields.io/badge/tests-Vitest%20%2B%20Playwright-80581c)
+![License: MIT](https://img.shields.io/badge/license-MIT-4a6d47)
 
 <img src="docs/images/home.png" alt="The Whatstir home page: a serif headline beside a misty landscape, and a treemap of YC sectors sized by company count" width="900">
 
 </div>
 
 > [!NOTE]
-> Whatstir is an independent project. It is **not affiliated with Y Combinator**. Company data comes from [yc-oss](https://github.com/yc-oss/api), an open-source mirror of the public YC directory.
+> Whatstir is an independent project. It is **not affiliated with Y Combinator**. Company data comes from [yc-oss](https://github.com/yc-oss/api), an open-source mirror of the public YC directory. Read [About the data](#about-the-data) before you run your own copy.
 
 ---
 
@@ -38,6 +39,9 @@ Pick a sector, ask questions in plain English, and watch the companies each answ
 - [Development](#development)
 - [Project layout](#project-layout)
 - [Documentation](#documentation)
+- [About the data](#about-the-data)
+- [Contributing](#contributing)
+- [License](#license)
 - [Credits](#credits)
 
 ## Features
@@ -151,7 +155,7 @@ npm run dev                      # http://localhost:3000
 ```
 
 - `backfill` shows its progress. It's safe to stop and run again, because finished work is kept. If any company fails (a timeout, say), it exits with code 1; run it again to retry only those.
-- Don't want founders scraped from YC company pages? Set `FOUNDERS_FETCH=off` before the backfill.
+- Founders aren't fetched by default, because that scrapes YC company pages (see [About the data](#about-the-data)). `FOUNDERS_FETCH=on` opts in for your own private use.
 - To regenerate one sector's groups, run `npm run subcategories -- --sector healthcare`, then `npm run backfill`.
 
 ### 4. Deploy to your own Vercel
@@ -206,14 +210,10 @@ npm run test:e2e       # Playwright against a production build
 npm run ci             # typecheck, lint, Vitest and Playwright, the same as the CI check
 ```
 
-Tests never call OpenAI, Jev or YC. Vitest sets `AI_FAKE=1` and `FOUNDERS_FETCH=off`, and the e2e suite serves the feed from a local fixture server. Test conventions are in [CLAUDE.md](CLAUDE.md).
+Tests never call OpenAI, Jev or YC. Vitest sets `AI_FAKE=1` and `FOUNDERS_FETCH=off`, and the e2e suite serves the feed from a local fixture server, so **you can work on the code without any API keys.**
 
-<details>
-<summary><strong>How changes reach <code>main</code></strong></summary>
-
-`main` is protected. Every change starts as a GitHub issue, gets its own branch (`issue-<n>-<slug>`), and adds tests for each item in the issue's test plan. It reaches `main` through a pull request, squash-merged once the `ci` check passes. The design docs in `docs/` are kept current with the code.
-
-</details>
+> [!NOTE]
+> Much of Whatstir was built with an AI coding assistant. [`CLAUDE.md`](CLAUDE.md) and [`AGENTS.md`](AGENTS.md) are the instructions it follows, and they're also the most detailed notes on the workflow and testing rules.
 
 ## Project layout
 
@@ -244,6 +244,25 @@ vercel.json     Region and the daily cron
 | [Environment and config](docs/environment-config-reference.md) | Every variable and setting |
 | [UI/UX and design language](docs/ui-ux-wireframes.md) | Screens, states and the visual style |
 | [Decision log](docs/decision.md) | What was decided, and why |
+
+## About the data
+
+Whatstir reads the public YC directory through [yc-oss](https://github.com/yc-oss/api), an unofficial mirror. YC's [Terms of Use](https://www.ycombinator.com/legal) forbid scraping and the commercial use of their site's content. The yc-oss data comes from that site, and the optional founder fetch scrapes YC company pages directly.
+
+- **Run your own copy for personal, non-commercial research,** and use the data at your own risk.
+- **The founder fetch is off by default.** Turn it on (`FOUNDERS_FETCH=on`) only for private use.
+- **Don't offer a hosted or paid service built on this data** without permission from Y Combinator.
+- Company names, descriptions and logos belong to their owners. AI-generated summaries can be wrong, and nothing here is investment advice.
+
+The MIT licence below covers Whatstir's **code** only. It grants no rights to YC's data or to anyone's trademarks.
+
+## Contributing
+
+Contributions are welcome! Start with [CONTRIBUTING.md](CONTRIBUTING.md), which covers setup without keys, the issue → branch → PR workflow and the conventions, and please follow the [Code of Conduct](CODE_OF_CONDUCT.md). Report security problems privately, as described in [SECURITY.md](SECURITY.md). Changes are listed in [CHANGELOG.md](CHANGELOG.md).
+
+## License
+
+[MIT](LICENSE) © 2026 Shivam Shinde.
 
 ## Credits
 

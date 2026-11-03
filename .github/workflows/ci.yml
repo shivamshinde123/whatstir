@@ -5,6 +5,10 @@ on:
   push:
     branches: [main]
 
+# Read-only token: pull requests from forks run untrusted code, and CI reads no repository secrets at all
+permissions:
+  contents: read
+
 concurrency:
   group: ci-${{ github.ref }}
   cancel-in-progress: true

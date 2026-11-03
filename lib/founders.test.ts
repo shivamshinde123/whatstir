@@ -82,10 +82,12 @@ describe("fetchFounders", () => {
 });
 
 describe("foundersEnabled", () => {
-  it("is on unless FOUNDERS_FETCH=off", () => {
-    vi.stubEnv("FOUNDERS_FETCH", "off");
-    expect(foundersEnabled()).toBe(false);
-    vi.stubEnv("FOUNDERS_FETCH", "");
+  it("is off unless FOUNDERS_FETCH=on", () => {
+    vi.stubEnv("FOUNDERS_FETCH", "on");
     expect(foundersEnabled()).toBe(true);
+    for (const v of ["", "off", "true", "ON"]) {
+      vi.stubEnv("FOUNDERS_FETCH", v);
+      expect(foundersEnabled(), v).toBe(false);
+    }
   });
 });
