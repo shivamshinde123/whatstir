@@ -49,6 +49,8 @@
 - **New session:** asks inline ("Clear the grid?" Cancel / Start over).
 - **Basket ghosts:** logos of companies already in the grid stay in the basket, faded.
 - **Error:** the reply bubble shows "Couldn't answer. [Retry]".
+- **From the web:** when an answer used a web search, a block under it (after "Cites N companies") is headed **FROM THE WEB** in the mono tag style. It holds the web answer, a numbered list of source links that open in a new tab, and the caption "Web results aren't from the YC directory and can be wrong." If the search failed: "Couldn't search the web for “query”." Web sources never become tiles.
+- **Follow-ups:** questions like "Tell me more about this company" work for the whole session: companies already in the grid stay available to every later question until New session.
 - **Suggestions:** an empty conversation shows 3 starter questions as large buttons under the intro. Once the conversation has started they shrink to a scrollable row of chips above the Ask / Explore / Challenge switch. They match the action and scope ("Which Healthcare companies sell to small businesses?", or comparison questions for a selection). One click asks; they're disabled while an answer is pending.
 
 ## 3. Profile panel (slides over the basket)

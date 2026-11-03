@@ -1,5 +1,5 @@
 import type { Sql } from "postgres";
-import { isFake, MODELS } from "./ai";
+import { isFake, MODELS, webSearchEnabled } from "./ai";
 import { countPending } from "./enrich";
 import { jevModel } from "./jev";
 
@@ -37,6 +37,8 @@ export interface AiConfig {
   write: string;
   embed: string;
   assign: string;
+  /** WEB_SEARCH isn't "off". */
+  web: boolean;
 }
 
 export const aiConfig = (): AiConfig => ({
@@ -46,6 +48,7 @@ export const aiConfig = (): AiConfig => ({
   write: MODELS.write,
   embed: MODELS.embed,
   assign: jevModel(),
+  web: webSearchEnabled(),
 });
 
 export interface RefreshStatus extends Settings {

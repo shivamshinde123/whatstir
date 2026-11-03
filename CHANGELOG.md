@@ -6,6 +6,10 @@ All notable changes to Whatstir are recorded here. The format follows [Keep a Ch
 
 ## [2.0.0] - 2026-11-03
 
+### Added
+- **Follow-ups keep their companies for the whole session.** Every company already in the grid stays available to later questions, and the model sees the whole conversation (up to 40 messages), so "Tell me more about this company" works (#52).
+- **Web search in the chat.** When a question needs facts that aren't in the dataset, the answer adds a labelled "From the web" part with source links, searched through OpenRouter. It never mixes into the cited companies or the grid. `WEB_SEARCH=off` disables it (#53).
+
 ### Changed
 - **Breaking: OpenRouter is the only AI provider.** Answers, writing, embeddings and Jev group assignment all go through [OpenRouter](https://openrouter.ai) with one key, `OPENROUTER_API_KEY` (#50).
 - The defaults are the same GPT models through OpenRouter (`openai/gpt-6.1-sol`, `openai/gpt-6-luna`, `openai/text-embedding-3-small`) and Jev's `jev-latest`, so existing data needs no re-embedding.

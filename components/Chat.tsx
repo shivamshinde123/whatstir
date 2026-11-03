@@ -1,10 +1,43 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
+import type { WebResult } from "@/lib/ai";
 import type { Action } from "@/lib/answer";
 import type { Message } from "@/lib/session";
 import { suggestionsFor } from "@/lib/suggestions";
 import Markdown from "./Markdown";
+
+/** What a web search added: labelled, with its sources, and never mixed into the cited companies. */
+function WebPart({ web }: { web: WebResult }) {
+  return (
+    <section aria-label="From the web" className="mt-2 border-t border-separator pt-2">
+      <p className="text-tag text-text-secondary">From the web</p>
+      {web.failed ? (
+        <p className="mt-1 text-caption text-danger">Couldn&apos;t search the web for &ldquo;{web.query}&rdquo;.</p>
+      ) : (
+        <>
+          {web.text && (
+            <div className="mt-1">
+              <Markdown text={web.text} />
+            </div>
+          )}
+          {web.sources.length > 0 && (
+            <ol aria-label="Web sources" className="mt-1 list-decimal pl-5 text-caption">
+              {web.sources.map((s) => (
+                <li key={s.url}>
+                  <a href={s.url} target="_blank" rel="noopener noreferrer nofollow" className="break-all text-link hover:underline">
+                    {s.title}
+                  </a>
+                </li>
+              ))}
+            </ol>
+          )}
+          <p className="mt-1 text-caption text-text-tertiary">Web results aren&apos;t from the YC directory and can be wrong.</p>
+        </>
+      )}
+    </section>
+  );
+}
 
 const ACTIONS: { id: Action; label: string; placeholder: (scope: string) => string }[] = [
   { id: "ask", label: "Ask", placeholder: (s) => `Ask about ${s} companies…` },
@@ -182,6 +215,7 @@ export default function Chat({
                   Cites {m.companyIds.length} {m.companyIds.length === 1 ? "company" : "companies"}
                 </p>
               )}
+              {m.web && <WebPart web={m.web} />}
             </li>
           ),
         )}

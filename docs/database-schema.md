@@ -64,7 +64,7 @@ Indexes: an HNSW index on `embedding` (`vector_cosine_ops`), plus indexes on `se
 `session_id` FK, `company_id` FK, `position` int, `added_by` FK → messages, `added_at`. **Primary key `(session_id, company_id)`.** This key is what keeps duplicate tiles impossible. Inserts use `ON CONFLICT DO NOTHING RETURNING company_id`, so the rows returned are exactly the new tiles to animate. A unique constraint on `(session_id, position)` also stops two tiles from sharing a slot. Deleting a session deletes its tiles and messages too.
 
 ### `messages`
-`id` bigserial PK, `session_id` FK, `role` (`user` or `assistant`), `action` (`ask`, `explore`, `challenge`), `content` text, `scope` jsonb (`{subcategoryId, selectedCompanyIds}`), `company_ids` int[] (the companies supporting this answer), `status` (`ok` or `error`), `created_at`.
+`id` bigserial PK, `session_id` FK, `role` (`user` or `assistant`), `action` (`ask`, `explore`, `challenge`), `content` text, `scope` jsonb (`{subcategoryId, selectedCompanyIds}`), `company_ids` int[] (the companies supporting this answer), `web` jsonb (null, or `{query, text, sources[], failed?}` when the answer ran a web search: migration 005, decision 77), `status` (`ok` or `error`), `created_at`.
 
 ## Owner data
 

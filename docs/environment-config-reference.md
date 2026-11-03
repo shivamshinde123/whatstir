@@ -7,6 +7,7 @@ All variables live in `.env` at the repository root. Start from `.env.example` (
 | `DATABASE_URL` | yes | server, scripts | The Supabase **transaction pooler** URL (port 6543). The client is created with `prepare: false`, which the pooler requires. |
 | `OPENROUTER_API_KEY` | yes | every AI call | Server only. Answers, writing and embeddings go to `https://openrouter.ai/api/v1` (OpenAI SDK); Jev goes to `https://openrouter.ai/api/v1/systemone` (TypeSafe SDK). It's the only AI key (decision 75). |
 | `AI_MODEL_ANSWER`, `AI_MODEL_WRITE`, `AI_MODEL_EMBED` | no | `lib/ai.ts` | Override the answer, writing and embedding models. Blank means the default (below). Answer and writing models must support structured outputs (JSON schema). The embedding model must return 1536 dimensions, or embedding fails with a clear error. |
+| `WEB_SEARCH` | no | `lib/ai.ts` | On by default. When an answer needs facts outside the dataset, one web search runs through OpenRouter (about $0.005–0.015 each, plus tokens). Set to `off` to disable; `/admin` shows the state. |
 | `JEV_MODEL` | no | `lib/jev.ts` | Overrides `jev-latest` (OpenRouter's `~typesafe/jev-latest`), for example `jev-1.14` to pin a version. |
 | `APP_PASSWORD` | on deploy | `proxy.ts` | Leave blank to switch the gate off, which is only acceptable locally. |
 | `CRON_SECRET` | on deploy | `/api/cron/refresh` | Vercel Cron sends it as `Authorization: Bearer <secret>`. |

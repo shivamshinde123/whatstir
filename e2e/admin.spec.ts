@@ -57,7 +57,9 @@ test("shows that AI runs through OpenRouter, and which models", async ({ page, r
     write: "openai/gpt-6-luna",
     embed: "openai/text-embedding-3-small",
     assign: "jev-latest",
+    web: true,
   });
+  await expect(ai).toContainText("web search on");
 });
 
 test("Pause shows as paused, Resume as active, and it survives a reload", async ({ page }) => {

@@ -49,6 +49,8 @@ Pick a sector, ask questions in plain English, and watch the companies each answ
 - 🗺️ **Sector treemap.** About 6,400 YC companies across 9 sectors, sized by count. Filter by batch ("Fall 2026") or show active companies only.
 - 🧺 **The basket.** Every company in a sector as a wall of logos, narrowed by AI-suggested problem groups ("Scheduling", "Billing", …) and by name.
 - 💬 **Ask, Explore, Challenge.** Ask questions about the sector, a group, a batch or a hand-picked selection. Answers are written only from the companies' own descriptions and cite the companies they rely on.
+- 🧠 **Follow-ups that remember.** Every company already discussed stays in context for the whole session, so you can just ask "Tell me more about this company".
+- 🌐 **Web search when the data runs out.** Questions about news, funding or anything outside the dataset get a separate, clearly labelled "From the web" part with source links, searched through OpenRouter.
 - 🧩 **A grid that grows.** Each cited company flies from the basket into a results grid that builds up over the session. The latest answer's companies are ringed.
 - 🔍 **Compare and profiles.** Open any company for its problem card, founders and links, or compare two or three side by side.
 - 📝 **Notes.** Keep notes on companies or general notes, all listed on one page.
@@ -78,7 +80,7 @@ flowchart LR
 ```
 
 1. **Ingest.** `refresh` loads the yc-oss feed into Postgres. Each company is embedded (`text-embedding-3-small` by default) and given a short **problem card** written from its own description (`gpt-6-luna` by default). It's also placed in AI-suggested problem groups by **Jev** (`jev-latest`). Every AI call goes through [OpenRouter](https://openrouter.ai), with one key.
-2. **Ask.** A question is embedded, and pgvector picks the closest companies in scope (sector, group, batch or selection). The answer model (`gpt-6.1-sol` by default; any structured-output model through OpenRouter) must answer from those descriptions only and cite company ids. Citations are checked against the candidates, and the cited companies join the grid.
+2. **Ask.** A question is embedded, and pgvector picks the closest companies in scope (sector, group, batch or selection). Companies already discussed in the session are added back, and the whole conversation goes along. The answer model (`gpt-6.1-sol` by default; any structured-output model through OpenRouter) must answer from those descriptions only and cite company ids. Citations are checked against the candidates, and the cited companies join the grid. If the model needs facts the dataset lacks, one web search through OpenRouter adds a separate, labelled part with source links.
 3. **Keep fresh.** Vercel Cron calls `/api/cron/refresh` daily. Enrichment is keyed by content hashes, so unchanged companies cost nothing.
 
 There's more depth in [docs/system-architecture-document.md](docs/system-architecture-document.md) and [docs/flow.md](docs/flow.md).
@@ -187,6 +189,7 @@ npm run dev                      # http://localhost:3000
    | `DATABASE_URL` | The same Supabase pooler URL |
    | `OPENROUTER_API_KEY` | Your OpenRouter key |
    | `AI_MODEL_*`, `JEV_MODEL` | Optional model overrides |
+   | `WEB_SEARCH` | Optional; `off` disables web search in the chat |
    | `APP_PASSWORD` | A long passphrase. **Required** once the site is public |
    | `CRON_SECRET` | A *different* random string from your local one |
 
@@ -215,7 +218,7 @@ These are rough figures from the author's own deployment, using the default GPT 
 |---|---|
 | First full load (~6.4k companies: embeddings, groups, problem cards) | $1.40 |
 | Daily refresh (only new or changed companies) | $0.01 a day |
-| One question | $0.01–0.025 |
+| One question | $0.01–0.025 (plus about $0.005–0.015 when it searches the web) |
 | Supabase free tier, Vercel Hobby | $0 |
 
 ## Development

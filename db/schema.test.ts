@@ -159,6 +159,15 @@ describe("sessions", () => {
 });
 
 describe("messages", () => {
+  it("stores a web search result as jsonb, null by default (migration 005)", async () => {
+    const sid = await newSession();
+    const web = { query: "q", text: "t", sources: [{ url: "https://example.com", title: "E" }] };
+    const [m] = await sql`insert into messages (session_id, role, content, web) values (${sid}, 'assistant', 'x', ${sql.json(web)}) returning web`;
+    expect(m.web).toEqual(web);
+    const [n] = await sql`insert into messages (session_id, role, content) values (${sid}, 'user', 'y') returning web`;
+    expect(n.web).toBeNull();
+  });
+
   it("rejects an unknown role, action or status", async () => {
     const sid = await newSession();
     await expect(sql`insert into messages (session_id, role, content) values (${sid}, 'bot', 'x')`).rejects.toMatchObject(

@@ -146,6 +146,20 @@ Listed in the order they were made. Decisions 1–14 are recorded in §16 of [in
     - *Defaults kept:* the same GPT models through OpenRouter (`openai/…`), because the stored embeddings came from `text-embedding-3-small`. Keeping it means no re-embedding, and answers and cards behave as before. Any model can be swapped with `AI_MODEL_*`.
     - *Breaking:* this is version 2.0.0. A deployment must set `OPENROUTER_API_KEY` before upgrading, or AI calls fail; `/admin` warns when the key is missing. The keys are passed to both SDKs explicitly, so neither falls back to the old environment variables.
 
+76. **Companies stay in context for the whole session** (the owner's request: "Tell me more about this company" must keep working).
+    - *Before:* each question retrieved its own top 40 by its wording. A vague follow-up lost the company, and the only-listed-companies rule made the model say it wasn't there.
+    - *Now:* every company in the session's grid (all cited companies, the 100 most recent) is sent again as "Companies discussed earlier in this session", next to this question's matches, and stays citable until New session. The model also sees the session's last 40 messages (was 10).
+    - *Why the grid:* it's already the session's cumulative record of cited companies, so this needs no new table, and what's in context matches what the user sees.
+    - *Scope:* earlier companies stay citable even when a later question is narrowed to a group or batch they're not in, because the conversation is about them. An explicit selection ("Ask about these") stays exactly the selection.
+    - *Cost:* longer prompts in long sessions. The caps (100 companies, 40 messages) bound it.
+
+77. **Web search, through OpenRouter, when the dataset can't answer** (the owner's request).
+    - *How:* the answer's strict schema adds `webQuery`. When the model needs facts the listed details and conversation lack (news, funding, people, pricing, anything recent), it answers from the database as far as it can and sets `webQuery`. Whatstir then makes one Chat Completions call with OpenRouter's `web` plugin (`max_results: 5`).
+    - *Why two calls:* OpenRouter doesn't document combining web search with `response_format`, and the database answer must stay schema-checked so `filterIds` can guarantee real citations. The `web` plugin is the documented Chat Completions route. The newer `openrouter:web_search` server tool is documented only for the Responses-style API, so switching is a `ponytail:` note in `searchWeb`.
+    - *Grounding stays intact:* the web part lives in `messages.web` (`query`, `text`, `sources`), never in `company_ids` or the grid, and it's shown as a separate, labelled block with source links. Sources are http(s) only, deduplicated and capped at 8. Links open with `rel=noopener noreferrer nofollow`, and the Markdown renderer's raw-HTML and image blocks still apply. The web prompt tells the model never to follow instructions found in web content.
+    - *Failure:* a failed search keeps the database answer and records `failed: true`, which the UI states. Later turns see the web text in their history.
+    - *Control and cost:* on by default (about $0.005–0.015 a search plus tokens), and `WEB_SEARCH=off` disables it. It never targets ycombinator.com, which would be the scraping YC's terms forbid.
+
 ## Open items
 
 - **A. Founder data.** Founders come from YC company pages. YC's terms of use forbid scraping, so the fetch is now off by default (decision 73); `FOUNDERS_FETCH=on` opts in for private use.

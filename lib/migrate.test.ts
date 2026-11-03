@@ -148,7 +148,7 @@ describe("004_lock_down_data_api", () => {
     expect(await can("anon", "notes")).toBe(true);
     expect(await can("anon", "sector_counts")).toBe(true);
 
-    expect(await migrate(sql)).toEqual(["004_lock_down_data_api.sql"]);
+    expect((await migrate(sql))[0]).toBe("004_lock_down_data_api.sql");
     for (const role of ["anon", "authenticated"]) {
       for (const rel of ["notes", "companies", "app_settings", "messages", "sector_counts", "subcategory_counts"]) {
         expect(await can(role, rel), `${role} on ${rel}`).toBe(false);

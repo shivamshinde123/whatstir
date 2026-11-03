@@ -1,4 +1,5 @@
 import type { Sql } from "postgres";
+import type { WebResult } from "./ai";
 import type { Action } from "./answer";
 
 export interface Tile {
@@ -16,6 +17,8 @@ export interface Message {
   content: string;
   scope: { subcategoryId?: number | null; batch?: string | null; selectedCompanyIds?: number[] };
   companyIds: number[];
+  /** What a web search added (assistant messages only), or null. */
+  web: WebResult | null;
   status: "ok" | "error";
   createdAt: string;
 }
@@ -33,6 +36,7 @@ type MessageRow = {
   content: string;
   scope: Message["scope"];
   company_ids: number[];
+  web: WebResult | null;
   status: Message["status"];
   created_at: Date;
 };
@@ -44,6 +48,7 @@ export const toMessage = (r: MessageRow): Message => ({
   content: r.content,
   scope: r.scope,
   companyIds: r.company_ids,
+  web: r.web ?? null,
   status: r.status,
   createdAt: r.created_at.toISOString(),
 });
@@ -65,7 +70,7 @@ export async function listTiles(sql: Sql, sessionId: string): Promise<Tile[]> {
 async function load(sql: Sql, s: { id: string; sector_id: string; created_at: Date }): Promise<SessionState> {
   const [tiles, messages] = await Promise.all([
     listTiles(sql, s.id),
-    sql<MessageRow[]>`select id, role, action, content, scope, company_ids, status, created_at
+    sql<MessageRow[]>`select id, role, action, content, scope, company_ids, web, status, created_at
       from messages where session_id = ${s.id} order by id`,
   ]);
   return {
