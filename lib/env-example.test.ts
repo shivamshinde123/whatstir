@@ -41,7 +41,7 @@ describe(".env.example", () => {
     for (const key of ["DATABASE_URL", "OPENAI_API_KEY", "TYPESAFE_API_KEY", "APP_PASSWORD", "CRON_SECRET"]) {
       expect(entries[key], key).toBe("");
     }
-    expect(entries.FOUNDERS_FETCH).toBe("on");
+    expect(entries.FOUNDERS_FETCH).toBe("off");
     expect(entries.TEST_DATABASE_URL).toMatch(/^postgres:\/\/postgres:postgres@localhost:54329\//);
     expect(example).not.toMatch(/sk-[A-Za-z0-9_-]{10,}|supabase\.com|[0-9a-f]{32,}/);
   });

@@ -25,12 +25,15 @@ Whatstir/
 ├─ db/migrations/                  001_init.sql, …
 ├─ scripts/                        migrate.mts, refresh.mts, generate-subcategories.mts, backfill.mts
 ├─ README.md                       overview, screenshots, run-your-own setup and deploy guide
-├─ docs/                           this documentation; intial_idea.md is the requirements source
+├─ docs/                           this documentation; initial_idea.md is the requirements source
 │  └─ images/                      README screenshots
 ├─ public/                         static files served as-is (landscape-hills.jpg, the home hero photo)
 ├─ e2e/                            Playwright specs (*.spec.ts), global-setup.ts (e2e DB + feed server), feed-server.ts, db-urls.ts
 ├─ test/                           shared test helpers, fixtures, harness checks
-├─ .github/workflows/ci.yml        the required `ci` check
+├─ .github/workflows/ci.yml        the required `ci` check (read-only token)
+├─ .github/CODEOWNERS              the owner reviews everything
+├─ .github/ISSUE_TEMPLATE/, pull_request_template.md  issue forms and the PR checklist
+├─ LICENSE, CONTRIBUTING.md, CODE_OF_CONDUCT.md, SECURITY.md, CHANGELOG.md  open-source files
 ├─ proxy.ts                        password gate (Next 16 name for middleware)
 ├─ vercel.json                     cron schedule
 ├─ smoke/, playwright.smoke.config.ts  read-only checks against a deployment (npm run test:e2e:smoke)

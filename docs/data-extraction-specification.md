@@ -4,7 +4,7 @@
 
 - **Feed:** `GET https://yc-oss.github.io/api/companies/all.json`. It returns a JSON array of about 6.4k records, roughly 10 MB.
 - **Freshness:** `GET https://yc-oss.github.io/api/meta.json` gives `last_updated` and `companies.all.count`.
-- **Founders:** each company's YC page (`url`, e.g. `https://www.ycombinator.com/companies/<slug>`). The page's embedded data includes founders with name, title and LinkedIn. This is only used when `FOUNDERS_FETCH` is not `off`, and terms still need checking (open item A).
+- **Founders:** each company's YC page (`url`, e.g. `https://www.ycombinator.com/companies/<slug>`). The page's embedded data includes founders with name, title and LinkedIn. This is only used when `FOUNDERS_FETCH=on` (off by default), because YC's terms of use forbid scraping (decision 73).
 
 ### Field mapping (yc-oss → `companies`)
 | yc-oss | column |
@@ -43,7 +43,7 @@ One run is used by the daily cron, the manual button and the backfill script (`l
    Because counts are views over committed rows, readers see either the old dataset or the new one, never a mix.
 5. **Enrich** (`lib/enrich.ts`). Each step has its own hash column on `companies`, and a step is pending when its hash differs from `source_hash` (decision 36). Enrichment works through pending companies in batches of 50, with 4 at a time in parallel, until the time budget runs out: 240 s on Vercel, and as long as it needs in a script. Each company is attempted at most once per run, and companies missing from the source are skipped. The steps are:
    1. **Embed** (`embedded_hash`): one OpenAI `text-embedding-3-small` request per batch (the client sends at most 256 texts per request), using `companyText`: name, one-liner, description and tags, capped at 8,000 characters. If the request fails, every company in the batch counts as failed for this step.
-   2. **Founders** (`founders_hash`, only when `FOUNDERS_FETCH` isn't `off`): fetch the YC page and parse the `data-page` JSON (`props.company.founders[]`: `full_name`, `title`, `linkedin_url`). Founders are upserted by `(company_id, name)`, and anyone no longer listed is deleted. A LinkedIn URL is kept only if it matches `^https://(www\.)?linkedin\.com/in/<handle>/?$`, with no query string; otherwise it's null. A 404 means the company has no founders listed. Any other HTTP error makes the step fail and retry next run.
+   2. **Founders** (`founders_hash`, only when `FOUNDERS_FETCH=on`): fetch the YC page and parse the `data-page` JSON (`props.company.founders[]`: `full_name`, `title`, `linkedin_url`). Founders are upserted by `(company_id, name)`, and anyone no longer listed is deleted. A LinkedIn URL is kept only if it matches `^https://(www\.)?linkedin\.com/in/<handle>/?$`, with no query string; otherwise it's null. A 404 means the company has no founders listed. Any other HTTP error makes the step fail and retry next run.
    3. **Assign** (`assigned_hash`): Jev, see below. If the sector has no `ai` and `unclassified` groups yet, this step waits. The other steps still run, and the company stays pending until the groups exist. Only Jev's own assignments (`assigned_by = 'jev'`) are replaced, so manual ones survive.
    4. **Card** (`carded_hash`): see "Problem cards" below. The row is upserted into `problem_cards`.
 

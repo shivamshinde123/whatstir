@@ -1,0 +1,54 @@
+name: Bug report
+description: Something doesn't work the way it should.
+labels: ["bug", "needs triage"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thanks for reporting! Please don't include API keys, passwords or connection strings. For security problems, follow SECURITY.md instead.
+  - type: textarea
+    id: what
+    attributes:
+      label: What happened?
+      description: What did you see, and what did you expect to see?
+    validations:
+      required: true
+  - type: textarea
+    id: steps
+    attributes:
+      label: Steps to reproduce
+      placeholder: |
+        1. Open a sector (e.g. Healthcare)
+        2. Ask "…"
+        3. See …
+    validations:
+      required: true
+  - type: dropdown
+    id: area
+    attributes:
+      label: Area
+      options:
+        - Home / treemap
+        - Workspace (basket, grid, chat)
+        - Profiles / compare / notes
+        - Admin / refresh / data loading
+        - Setup / deployment
+        - Other
+    validations:
+      required: true
+  - type: input
+    id: version
+    attributes:
+      label: Version or commit
+      placeholder: v1.0.0, or a commit SHA
+  - type: textarea
+    id: environment
+    attributes:
+      label: Environment
+      description: Browser and OS, Node version, and whether it's local or deployed (and which AI provider).
+  - type: textarea
+    id: logs
+    attributes:
+      label: Logs or screenshots
+      description: Any error output. Remove secrets first.
+      render: text
