@@ -38,20 +38,24 @@ test("shows the schedule, the state and the pending count; reachable from the he
   await expect(page.getByTestId("pending")).toHaveText("0"); // global setup enriched everything
 });
 
-test("shows which AI provider and models the deployment uses", async ({ page, request }) => {
+test("shows that AI runs through OpenRouter, and which models", async ({ page, request }) => {
   await open(page);
   const ai = page.getByTestId("ai-config");
-  // The e2e servers use the defaults (OpenAI) with fake answers.
-  await expect(ai).toContainText("OpenAI");
-  await expect(ai).toContainText("answers gpt-6.1-sol · writing gpt-6-luna · embeddings text-embedding-3-small · groups jev-latest");
+  // The e2e servers use the default models with fake answers, and no key.
+  await expect(ai).toContainText("OpenRouter");
+  await expect(ai).toContainText(
+    "answers openai/gpt-6.1-sol · writing openai/gpt-6-luna · embeddings openai/text-embedding-3-small · groups jev-latest",
+  );
   await expect(ai).toContainText("fake (AI_FAKE)");
+  await expect(ai).not.toContainText("OPENROUTER_API_KEY is not set"); // fake mode needs no key
+  await expect(ai).not.toContainText(/\bOpenAI\b/);
   const status = await (await request.get("/api/admin/refresh")).json();
   expect(status.ai).toEqual({
-    provider: "openai",
+    keySet: false,
     fake: true,
-    answer: "gpt-6.1-sol",
-    write: "gpt-6-luna",
-    embed: "text-embedding-3-small",
+    answer: "openai/gpt-6.1-sol",
+    write: "openai/gpt-6-luna",
+    embed: "openai/text-embedding-3-small",
     assign: "jev-latest",
   });
 });

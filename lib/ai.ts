@@ -2,53 +2,49 @@ import { createHash } from "node:crypto";
 import OpenAI, { type ClientOptions } from "openai";
 import { slugify } from "./sector";
 
-/** Where answers, writing and embeddings come from (decision 74). OpenRouter speaks the OpenAI API. */
-export type Provider = "openai" | "openrouter";
+/**
+ * Every AI call goes through OpenRouter (decision 75): answers, writing and embeddings with the
+ * OpenAI SDK, and Jev group assignment with the TypeSafe SDK. One key, OPENROUTER_API_KEY.
+ */
 export const OPENROUTER_BASE_URL = "https://openrouter.ai/api/v1";
 
-const DEFAULT_MODELS: Record<Provider, { answer: string; write: string; embed: string }> = {
-  openai: { answer: "gpt-6.1-sol", write: "gpt-6-luna", embed: "text-embedding-3-small" },
-  openrouter: { answer: "openai/gpt-6.1-sol", write: "openai/gpt-6-luna", embed: "openai/text-embedding-3-small" },
-};
-
-export function provider(): Provider {
-  const p = (process.env.AI_PROVIDER ?? "").trim().toLowerCase() || "openai";
-  if (p === "openai" || p === "openrouter") return p;
-  throw new Error(`AI_PROVIDER must be "openai" or "openrouter", not "${process.env.AI_PROVIDER}".`);
+/** The OpenRouter key, or a clear error. Read when a client is first needed, never at import. */
+export function openRouterKey(): string {
+  const key = process.env.OPENROUTER_API_KEY?.trim();
+  if (!key) throw new Error("OPENROUTER_API_KEY is not set. Get one at https://openrouter.ai/keys.");
+  return key;
 }
+
+/** Defaults are OpenAI's models served through OpenRouter; any OpenRouter model id can replace them. */
+const DEFAULT_MODELS = { answer: "openai/gpt-6.1-sol", write: "openai/gpt-6-luna", embed: "openai/text-embedding-3-small" };
 
 const override = (name: string, fallback: string) => process.env[name]?.trim() || fallback;
 
-/** The models in use: AI_MODEL_* overrides, else the provider's defaults. Read on every access. */
+/** The models in use: AI_MODEL_* overrides, else the defaults. Read on every access. */
 export const MODELS = {
   get answer() {
-    return override("AI_MODEL_ANSWER", DEFAULT_MODELS[provider()].answer);
+    return override("AI_MODEL_ANSWER", DEFAULT_MODELS.answer);
   },
   get write() {
-    return override("AI_MODEL_WRITE", DEFAULT_MODELS[provider()].write);
+    return override("AI_MODEL_WRITE", DEFAULT_MODELS.write);
   },
   get embed() {
-    return override("AI_MODEL_EMBED", DEFAULT_MODELS[provider()].embed);
+    return override("AI_MODEL_EMBED", DEFAULT_MODELS.embed);
   },
 };
 /** Fixed by the `vector(1536)` column: a different size would need a migration and a full re-embed. */
 export const EMBED_DIM = 1536;
 export const EMBED_BATCH = 256;
 
-/** AI_FAKE=1 swaps every OpenAI call for a deterministic stand-in (tests, CI, e2e). */
+/** AI_FAKE=1 swaps every AI call for a deterministic stand-in (tests, CI, e2e). */
 export const isFake = () => process.env.AI_FAKE === "1";
 
-/** SDK options per provider. OpenAI reads OPENAI_API_KEY (and OPENAI_BASE_URL) itself. */
-export function clientOptions(p: Provider = provider()): ClientOptions {
-  if (p === "openai") return {};
-  const apiKey = process.env.OPENROUTER_API_KEY?.trim();
-  if (!apiKey) throw new Error("AI_PROVIDER is openrouter, but OPENROUTER_API_KEY is not set.");
-  return {
-    apiKey,
-    baseURL: OPENROUTER_BASE_URL,
-    // Optional attribution headers OpenRouter shows in its dashboard.
-    defaultHeaders: { "HTTP-Referer": "https://github.com/shivamshinde123/whatstir", "X-Title": "Whatstir" },
-  };
+/** Optional attribution headers OpenRouter shows in its dashboard. */
+export const OPENROUTER_HEADERS = { "HTTP-Referer": "https://github.com/shivamshinde123/whatstir", "X-Title": "Whatstir" };
+
+/** OpenAI SDK options for OpenRouter. The key is passed explicitly, so the SDK never falls back to its own env var. */
+export function clientOptions(): ClientOptions {
+  return { apiKey: openRouterKey(), baseURL: OPENROUTER_BASE_URL, defaultHeaders: OPENROUTER_HEADERS };
 }
 
 let client: OpenAI | undefined;
@@ -96,8 +92,8 @@ export async function embed(texts: string[]): Promise<number[][]> {
       model: MODELS.embed,
       input: texts.slice(i, i + EMBED_BATCH),
       dimensions: EMBED_DIM,
-      // OpenRouter: plain floats, rather than relying on every upstream to honour base64.
-      ...(provider() === "openrouter" && { encoding_format: "float" as const }),
+      // Plain floats, rather than relying on every upstream behind OpenRouter to honour base64.
+      encoding_format: "float",
     });
     for (const d of [...res.data].sort((a, b) => a.index - b.index)) {
       // A wrong size would be stored or compared against 1536-d vectors and silently ruin search.
@@ -118,43 +114,29 @@ function parseJson<T>(model: string, text: string | null | undefined): T {
   }
 }
 
+/** Plain text conversation turns, as the answer builds them. */
+export type ChatTurn = { role: "user" | "assistant"; content: string };
+
 /**
- * One call with a strict JSON schema; returns the parsed object. OpenAI uses the Responses API.
- * OpenRouter uses Chat Completions, which every structured-output model there supports.
+ * One Chat Completions call with a strict JSON schema; returns the parsed object. Every
+ * structured-output model on OpenRouter supports this route.
  */
 export async function structured<T>(
   model: string,
   instructions: string,
-  input: string | OpenAI.Responses.ResponseInput,
+  input: string | ChatTurn[],
   name: string,
   schema: Record<string, unknown>,
 ): Promise<T> {
-  if (provider() === "openrouter") {
-    const turns = typeof input === "string" ? [{ role: "user" as const, content: input }] : input.map(toChatMessage);
-    const res = await openai().chat.completions.create({
-      model,
-      messages: [{ role: "system", content: instructions }, ...turns],
-      response_format: { type: "json_schema", json_schema: { name, schema, strict: true } },
-      // OpenRouter only: route to providers that honour response_format, never silently ignore it.
-      provider: { require_parameters: true },
-    } as OpenAI.Chat.ChatCompletionCreateParamsNonStreaming);
-    return parseJson<T>(model, res.choices[0]?.message?.content);
-  }
-  const res = await openai().responses.create({
+  const turns: ChatTurn[] = typeof input === "string" ? [{ role: "user", content: input }] : input;
+  const res = await openai().chat.completions.create({
     model,
-    instructions,
-    input,
-    text: { format: { type: "json_schema", name, schema, strict: true } },
-  });
-  return parseJson<T>(model, res.output_text);
-}
-
-/** The conversation turns Whatstir builds are plain text messages; anything else is a bug. */
-function toChatMessage(item: OpenAI.Responses.ResponseInputItem): OpenAI.Chat.ChatCompletionMessageParam {
-  if ("role" in item && (item.role === "user" || item.role === "assistant") && typeof item.content === "string") {
-    return { role: item.role, content: item.content };
-  }
-  throw new Error("Only plain user and assistant text turns can be sent to OpenRouter.");
+    messages: [{ role: "system", content: instructions }, ...turns],
+    response_format: { type: "json_schema", json_schema: { name, schema, strict: true } },
+    // OpenRouter: route only to providers that honour response_format, never to one that ignores it.
+    provider: { require_parameters: true },
+  } as OpenAI.Chat.ChatCompletionCreateParamsNonStreaming);
+  return parseJson<T>(model, res.choices[0]?.message?.content);
 }
 
 // --- Problem cards ---------------------------------------------------------

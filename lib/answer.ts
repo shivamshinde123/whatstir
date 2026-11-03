@@ -1,5 +1,4 @@
-import type OpenAI from "openai";
-import { isFake, MODELS, structured } from "./ai";
+import { isFake, MODELS, structured, type ChatTurn } from "./ai";
 
 export type Action = "ask" | "explore" | "challenge";
 
@@ -75,7 +74,7 @@ function describe(c: Candidate): string {
 }
 
 /** The conversation sent to the model: recent history, then the companies and the question. */
-export function buildAnswerInput(req: AnswerRequest): OpenAI.Responses.ResponseInput {
+export function buildAnswerInput(req: AnswerRequest): ChatTurn[] {
   const companies = req.candidates.length ? req.candidates.map(describe).join("\n") : "(none)";
   const skipped = req.skipped
     ? `\n(${req.skipped} more companies in scope couldn't be searched yet and are not listed.)`

@@ -7,7 +7,7 @@ const PORT = 3100;
 const GATED_PORT = 3101;
 export const E2E_PASSWORD = "e2e-password";
 // The default provider and models, whatever a local .env says, so /admin's AI line is predictable.
-const AI_DEFAULTS = { AI_PROVIDER: "openai", AI_MODEL_ANSWER: "", AI_MODEL_WRITE: "", AI_MODEL_EMBED: "", JEV_MODEL: "" };
+const AI_DEFAULTS = { AI_MODEL_ANSWER: "", AI_MODEL_WRITE: "", AI_MODEL_EMBED: "", JEV_MODEL: "" };
 const SHARED_STATE = /(admin|batch|chat|notes|selection)\.spec\.ts/;
 
 export default defineConfig({

@@ -21,7 +21,7 @@ A personal tool for exploring YC startups by sector and the customer problem the
 - JSON columns: pass objects with `sql.json(obj)`. Never write `${JSON.stringify(obj)}::jsonb`, which double-encodes with postgres.js v4.
 - Fake answers can be scripted from the question text: `[ids:1,2]` cites those ids, `[fail]` throws, and `[fail-once]` throws until the same question is retried, and `[md]` answers in Markdown (bold, a list, a table). This is how chat tests and e2e tests control the grid.
 - Every route handler that touches the database calls `await connection()` first, so the build never queries it.
-- `AI_FAKE=1` makes the OpenAI and Jev calls return predictable fake responses. The Vitest config sets `AI_FAKE=1` and `FOUNDERS_FETCH=off` for every test. A test that needs the real code path uses `vi.stubEnv` together with `setOpenAIClient` or `setJevClient`, and enrichment tests swap single steps through the `deps` option of `enrich()`.
+- `AI_FAKE=1` makes every OpenRouter call (models and Jev) return predictable fake responses. The Vitest config sets `AI_FAKE=1` and `FOUNDERS_FETCH=off` for every test. A test that needs the real code path uses `vi.stubEnv` together with `setOpenAIClient` or `setJevClient`, and enrichment tests swap single steps through the `deps` option of `enrich()`.
 - Ingestion tests call `run({ timeBudgetMs: 0 })` to load data without enriching it.
 - Database tests use `TEST_DATABASE_URL`, never `DATABASE_URL`. Locally, `npm run db:test:up` starts a pgvector container on port 54329 (Docker must be running). In CI it's a service container.
 - `createTestDb()` in `test/db.ts` gives each test file its own migrated schema, so test files can run in parallel. Database test files start with `// @vitest-environment node`.

@@ -22,7 +22,7 @@ Whatstir runs on its owner's own server, with their own keys. These are in scope
 
 - getting past the password gate (`proxy.ts`), or reaching data without it;
 - calling `/api/cron/refresh` or the admin endpoints without authorisation;
-- leaking a server-side secret (`OPENAI_API_KEY`, `OPENROUTER_API_KEY`, `TYPESAFE_API_KEY`, `DATABASE_URL`, `APP_PASSWORD`, `CRON_SECRET`) to the browser or the logs;
+- leaking a server-side secret (`OPENROUTER_API_KEY`, `DATABASE_URL`, `APP_PASSWORD`, `CRON_SECRET`) to the browser or the logs;
 - SQL injection, cross-site scripting (for example through rendered Markdown answers), or reading another deployment's data;
 - reaching the database through Supabase's public Data API despite the lockdown migration.
 

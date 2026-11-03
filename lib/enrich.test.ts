@@ -144,10 +144,9 @@ describe("enrich", () => {
     expect(embed).not.toHaveBeenCalled();
   });
 
-  it("records the configured writing model on each problem card (e.g. an OpenRouter model)", async () => {
+  it("records the configured writing model on each problem card", async () => {
     await seedGroups();
     vi.stubEnv("AI_FAKE", "");
-    vi.stubEnv("AI_PROVIDER", "openrouter");
     vi.stubEnv("AI_MODEL_WRITE", "anthropic/claude-sonnet-5.5");
     const card = { customer: null, problem: "p", workaround: null, solution: null };
     const s = await go({

@@ -1,6 +1,6 @@
 // @vitest-environment node
 import { afterEach, describe, expect, it, vi } from "vitest";
-import { assign, setJevClient, toAssignments, type Group, type JevAnswers } from "./jev";
+import { assign, jevClientOptions, setJevClient, toAssignments, type Group, type JevAnswers } from "./jev";
 
 const groups: Group[] = [
   { id: 1, slug: "ai", description: null, kind: "ai" },
@@ -15,6 +15,29 @@ const answers = (choice: string, confidence: number | null | undefined, aiP: num
 const company = { name: "Acme", one_liner: "Scheduling for clinics", long_description: null, tags: [] };
 
 afterEach(() => setJevClient(undefined));
+
+describe("jevClientOptions", () => {
+  afterEach(() => vi.unstubAllEnvs());
+
+  it("sends Jev through OpenRouter with the OpenRouter key, never TYPESAFE_API_KEY", () => {
+    vi.stubEnv("OPENROUTER_API_KEY", "or-test-key");
+    vi.stubEnv("TYPESAFE_API_KEY", "should-not-be-used");
+    expect(jevClientOptions()).toEqual({
+      apiKey: "or-test-key",
+      baseURL: "https://openrouter.ai/api", // the SDK appends /v1/systemone
+      defaultModel: "jev-latest",
+      defaultHeaders: expect.objectContaining({ "X-Title": "Whatstir" }),
+      compression: false,
+    });
+    vi.stubEnv("JEV_MODEL", "jev-1.14");
+    expect(jevClientOptions().defaultModel).toBe("jev-1.14");
+  });
+
+  it("needs OPENROUTER_API_KEY", () => {
+    vi.stubEnv("OPENROUTER_API_KEY", "");
+    expect(() => jevClientOptions()).toThrow(/OPENROUTER_API_KEY is not set/);
+  });
+});
 
 describe("toAssignments", () => {
   it("assigns a confident choice to its problem group", () => {

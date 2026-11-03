@@ -16,7 +16,7 @@
   - **explore:** describe one concrete scenario, labelled *Hypothetical*. Then compare how the cited companies approach the problem, and list directions worth investigating.
   - **challenge:** list the assumptions in the user's idea and the related companies. Then suggest customer-interview questions about the customer's past behaviour. Never give a success score.
 - **Output.** Structured Outputs with a strict JSON schema, `{ text, companyIds: int[] }`, guarantees the shape with no text parsing. Any id that wasn't among the candidates is dropped.
-- **Context.** The last 10 successful messages of the session (`status = 'ok'`, oldest first) go into the Responses API `input` as role-tagged turns, before the turn with the companies and the question. Failed replies are left out.
+- **Context.** The last 10 successful messages of the session (`status = 'ok'`, oldest first) go into the Chat Completions `messages` (after the system instructions) as role-tagged turns, before the turn with the companies and the question. Failed replies are left out.
 - **Code:** `lib/answer.ts` holds `instructionsFor`, `buildAnswerInput` and `filterIds`, which are pure and unit-tested, and `answer()`. `lib/chat.ts` holds `postMessage`, the full flow independent of Next.js, plus `parseMessageInput`. `lib/retrieval.ts` holds `retrieve`.
 - **Fake mode** (`AI_FAKE=1`) can be scripted for tests: a question containing `[ids:1,2]` cites exactly those ids, which still go through `filterIds`; `[fail]` makes it throw; anything else cites the first 3 candidates.
 - **JSON columns:** pass objects with `sql.json(value)`. `${JSON.stringify(x)}::jsonb` double-encodes with postgres.js v4 and stores a JSON string.

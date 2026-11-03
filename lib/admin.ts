@@ -1,5 +1,5 @@
 import type { Sql } from "postgres";
-import { isFake, MODELS, provider } from "./ai";
+import { isFake, MODELS } from "./ai";
 import { countPending } from "./enrich";
 import { jevModel } from "./jev";
 
@@ -29,18 +29,24 @@ export interface Settings {
   minConfidence: number;
 }
 
-/** Which provider and models this deployment uses, or why the configuration is invalid. */
-export type AiConfig =
-  | { provider: string; fake: boolean; answer: string; write: string; embed: string; assign: string }
-  | { error: string };
-
-export function aiConfig(): AiConfig {
-  try {
-    return { provider: provider(), fake: isFake(), answer: MODELS.answer, write: MODELS.write, embed: MODELS.embed, assign: jevModel() };
-  } catch (e) {
-    return { error: e instanceof Error ? e.message : String(e) };
-  }
+/** The OpenRouter models this deployment uses, and whether OPENROUTER_API_KEY is set (never its value). */
+export interface AiConfig {
+  keySet: boolean;
+  fake: boolean;
+  answer: string;
+  write: string;
+  embed: string;
+  assign: string;
 }
+
+export const aiConfig = (): AiConfig => ({
+  keySet: !!process.env.OPENROUTER_API_KEY?.trim(),
+  fake: isFake(),
+  answer: MODELS.answer,
+  write: MODELS.write,
+  embed: MODELS.embed,
+  assign: jevModel(),
+});
 
 export interface RefreshStatus extends Settings {
   ai: AiConfig;

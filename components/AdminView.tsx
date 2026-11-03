@@ -167,16 +167,11 @@ export default function AdminView() {
               </Stat>
             </section>
 
-            <p data-testid="ai-config" className={`mt-3 text-sm ${"error" in s.ai ? "text-danger" : "text-text-secondary"}`}>
-              {"error" in s.ai ? (
-                <>AI configuration: {s.ai.error}</>
-              ) : (
-                <>
-                  <span className="text-tag mr-2">{s.ai.provider === "openrouter" ? "OpenRouter" : "OpenAI"}</span>
-                  answers {s.ai.answer} · writing {s.ai.write} · embeddings {s.ai.embed} · groups {s.ai.assign}
-                  {s.ai.fake && " · fake (AI_FAKE)"}
-                </>
-              )}
+            <p data-testid="ai-config" className="mt-3 text-sm text-text-secondary">
+              <span className="text-tag mr-2">OpenRouter</span>
+              answers {s.ai.answer} · writing {s.ai.write} · embeddings {s.ai.embed} · groups {s.ai.assign}
+              {s.ai.fake && " · fake (AI_FAKE)"}
+              {!s.ai.keySet && !s.ai.fake && <span className="text-danger"> · OPENROUTER_API_KEY is not set</span>}
             </p>
 
             <section aria-label="Controls" className="mt-6 flex flex-wrap items-end gap-3">

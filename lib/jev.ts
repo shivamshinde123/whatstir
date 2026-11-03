@@ -1,8 +1,18 @@
 import { choice, noul, TypeSafeClient } from "@typesafe-ai/sdk";
-import { companyText, isFake, type CompanyText } from "./ai";
+import { companyText, isFake, OPENROUTER_HEADERS, openRouterKey, type CompanyText } from "./ai";
 
-/** JEV_MODEL overrides TypeSafe's model, e.g. a pinned version instead of the latest. */
+/** JEV_MODEL overrides the Jev model, e.g. a pinned version; OpenRouter routes "jev-latest" to ~typesafe/jev-latest. */
 export const jevModel = () => process.env.JEV_MODEL?.trim() || "jev-latest";
+
+/** TypeSafe SDK options for OpenRouter: the SDK appends /v1/systemone (decision 75). */
+export const jevClientOptions = () => ({
+  apiKey: openRouterKey(),
+  baseURL: "https://openrouter.ai/api",
+  defaultModel: jevModel(),
+  defaultHeaders: OPENROUTER_HEADERS,
+  // Bodies are small; OpenRouter's docs don't promise compressed request bodies are accepted.
+  compression: false as const,
+});
 
 export interface Group {
   id: number;
@@ -25,7 +35,7 @@ export interface AssignmentRow {
 
 type Client = Pick<TypeSafeClient, "systemOne">;
 let client: Client | undefined;
-const jev = () => (client ??= new TypeSafeClient({ defaultModel: jevModel() }));
+const jev = () => (client ??= new TypeSafeClient(jevClientOptions()));
 /** Test seam: replace the Jev client. */
 export function setJevClient(c: Client | undefined) {
   client = c;

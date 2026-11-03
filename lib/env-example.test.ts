@@ -1,4 +1,5 @@
 // @vitest-environment node
+import { execFileSync } from "node:child_process";
 import { existsSync, readdirSync, readFileSync, statSync } from "node:fs";
 import path from "node:path";
 import { describe, expect, it } from "vitest";
@@ -27,8 +28,8 @@ const commentedOnly = ["AI_FAKE", "YC_SOURCE_URL"];
 
 describe(".env.example", () => {
   it("documents every variable the code reads, including the ones the SDKs read implicitly", () => {
-    // Read implicitly by the SDKs, or through process.env[name] in lib/ai.ts.
-    const used = new Set(["OPENAI_API_KEY", "TYPESAFE_API_KEY", "AI_MODEL_ANSWER", "AI_MODEL_WRITE", "AI_MODEL_EMBED"]);
+    // Read through process.env[name] in lib/ai.ts.
+    const used = new Set(["AI_MODEL_ANSWER", "AI_MODEL_WRITE", "AI_MODEL_EMBED"]);
     for (const file of [...sources("lib"), ...sources("scripts"), ...sources("app"), "proxy.ts", "test/db.ts"]) {
       for (const m of read(file).matchAll(/process\.env\.([A-Z_]+)/g)) used.add(m[1]);
     }
@@ -39,14 +40,22 @@ describe(".env.example", () => {
   });
 
   it("holds placeholders only: secrets are empty, and only safe local defaults are filled in", () => {
-    for (const key of ["DATABASE_URL", "OPENAI_API_KEY", "OPENROUTER_API_KEY", "TYPESAFE_API_KEY", "APP_PASSWORD", "CRON_SECRET"]) {
+    for (const key of ["DATABASE_URL", "OPENROUTER_API_KEY", "APP_PASSWORD", "CRON_SECRET"]) {
       expect(entries[key], key).toBe("");
     }
     expect(entries.FOUNDERS_FETCH).toBe("off");
-    expect(entries.AI_PROVIDER).toBe("openai");
     for (const key of ["AI_MODEL_ANSWER", "AI_MODEL_WRITE", "AI_MODEL_EMBED", "JEV_MODEL"]) expect(entries[key], key).toBe("");
     expect(entries.TEST_DATABASE_URL).toMatch(/^postgres:\/\/postgres:postgres@localhost:54329\//);
     expect(example).not.toMatch(/sk-[A-Za-z0-9_-]{10,}|supabase\.com|[0-9a-f]{32,}/);
+  });
+
+  it("needs only OpenRouter for AI: no OpenAI or TypeSafe key, and no provider switch", () => {
+    for (const gone of ["OPENAI_API_KEY", "TYPESAFE_API_KEY", "AI_PROVIDER"]) {
+      expect(example, gone).not.toMatch(new RegExp(`^\\s*#?\\s*${gone}=`, "m"));
+      for (const file of [...sources("lib"), ...sources("scripts"), ...sources("app"), "proxy.ts"]) {
+        expect(read(file), `${file} reads ${gone}`).not.toContain(gone);
+      }
+    }
   });
 
   it("is committed while .env stays git-ignored", () => {
@@ -66,6 +75,20 @@ describe("README", () => {
     ].filter((t) => !/^(https?:|mailto:)/.test(t));
     expect(targets.length).toBeGreaterThan(5);
     for (const t of targets) expect(existsSync(path.join(root, decodeURI(t))), t).toBe(true);
+  });
+
+  it("no tracked file names a real deployment: anyone who wants one deploys their own", () => {
+    let hits = "";
+    try {
+      hits = execFileSync("git", ["grep", "-nIE", "https?://[a-z0-9-]+[.]vercel[.]app"], { cwd: root, encoding: "utf8" });
+    } catch (e) {
+      if ((e as { status?: number }).status !== 1) throw e; // 1 = no matches
+    }
+    expect(hits).toBe("");
+  });
+
+  it("keeps Vercel's bot from posting deployment links on pull requests", () => {
+    expect(JSON.parse(read("vercel.json")).github).toEqual({ silent: true });
   });
 
   it("never names a real deployment or database, only placeholders", () => {

@@ -129,20 +129,27 @@ describe("answer (AI_FAKE)", () => {
 
 describe("answer (real path, stubbed client)", () => {
   it("calls the answer model with a strict schema and the built input", async () => {
-    const create = vi.fn(async () => ({ output_text: JSON.stringify({ text: "Co 2 sends reminders.", companyIds: [2] }) }));
+    const create = vi.fn(async () => ({
+      choices: [{ message: { content: JSON.stringify({ text: "Co 2 sends reminders.", companyIds: [2] }) } }],
+    }));
     vi.stubEnv("AI_FAKE", "");
-    setOpenAIClient({ responses: { create } } as unknown as OpenAI);
+    setOpenAIClient({ chat: { completions: { create } } } as unknown as OpenAI);
     expect(await answer(REQ)).toEqual({ text: "Co 2 sends reminders.", companyIds: [2] });
-    const req = (create.mock.calls[0] as unknown[])[0] as { model: string; instructions: string; input: unknown; text: { format: Record<string, unknown> } };
+    const req = (create.mock.calls[0] as unknown[])[0] as {
+      model: string;
+      messages: unknown[];
+      response_format: Record<string, unknown>;
+    };
     expect(req.model).toBe(MODELS.answer);
-    expect(req.instructions).toBe(instructionsFor("ask"));
-    expect(req.input).toEqual(buildAnswerInput(REQ));
-    expect(req.text.format).toMatchObject({ type: "json_schema", name: "answer", strict: true });
+    expect(req.messages).toEqual([{ role: "system", content: instructionsFor("ask") }, ...buildAnswerInput(REQ)]);
+    expect(req.response_format).toMatchObject({ type: "json_schema", json_schema: { name: "answer", strict: true } });
   });
 
   it("copes with a malformed reply", async () => {
     vi.stubEnv("AI_FAKE", "");
-    setOpenAIClient({ responses: { create: async () => ({ output_text: JSON.stringify({ text: 5 }) }) } } as unknown as OpenAI);
+    setOpenAIClient({
+      chat: { completions: { create: async () => ({ choices: [{ message: { content: JSON.stringify({ text: 5 }) } }] }) } },
+    } as unknown as OpenAI);
     expect(await answer(REQ)).toEqual({ text: "5", companyIds: [] });
   });
 });

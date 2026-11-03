@@ -5,9 +5,9 @@
  Browser ──────▶│ proxy.ts (password gate)                          │
   treemap       │ pages: /  /sector/[id]  /admin  /login            │
   workspace     │ route handlers: /api/*                            │
-                │   chat ─────▶ retrieval ──▶ OpenAI gpt-6.1-sol    │
-                │   cron/refresh ─▶ lib/refresh ─▶ OpenAI embed,    │
-                │                         Jev, gpt-6-luna, YC pages │
+                │   chat ─────▶ retrieval ──▶ OpenRouter: answer    │
+                │   cron/refresh ─▶ lib/refresh ─▶ OpenRouter:      │
+                │                 embed, Jev, cards; YC pages       │
                 └───────────────┬──────────────────────────────────┘
                                 │ postgres (pooler, port 6543)
                        ┌────────▼─────────┐

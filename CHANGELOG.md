@@ -4,6 +4,22 @@ All notable changes to Whatstir are recorded here. The format follows [Keep a Ch
 
 ## [Unreleased]
 
+## [2.0.0] - 2026-11-03
+
+### Changed
+- **Breaking: OpenRouter is the only AI provider.** Answers, writing, embeddings and Jev group assignment all go through [OpenRouter](https://openrouter.ai) with one key, `OPENROUTER_API_KEY` (#50).
+- The defaults are the same GPT models through OpenRouter (`openai/gpt-6.1-sol`, `openai/gpt-6-luna`, `openai/text-embedding-3-small`) and Jev's `jev-latest`, so existing data needs no re-embedding.
+- `/admin` shows OpenRouter, the models, and a warning when the key is missing.
+- Vercel no longer posts deployment links on pull requests (`github.silent` in `vercel.json`), and the repository links to no live deployment.
+
+### Removed
+- `AI_PROVIDER`, `OPENAI_API_KEY` and `TYPESAFE_API_KEY`, and the direct OpenAI (Responses API) code path (#50).
+
+### Upgrading from 1.x
+1. Create a key at [openrouter.ai/keys](https://openrouter.ai/keys) and add credit.
+2. Set `OPENROUTER_API_KEY` in your deployment (on Vercel: Settings → Environment Variables) **before** deploying 2.0.0.
+3. Remove `AI_PROVIDER`, `OPENAI_API_KEY` and `TYPESAFE_API_KEY`. They're ignored now.
+
 ## [1.0.0] - 2026-11-03
 
 The first public release.
@@ -34,5 +50,6 @@ The first public release.
 - The workspace fills one screen on desktop, with a compact header (#35).
 - `docs/intial_idea.md` was renamed `docs/initial_idea.md` (#46).
 
-[Unreleased]: https://github.com/shivamshinde123/whatstir/compare/v1.0.0...HEAD
+[Unreleased]: https://github.com/shivamshinde123/whatstir/compare/v2.0.0...HEAD
+[2.0.0]: https://github.com/shivamshinde123/whatstir/releases/tag/v2.0.0
 [1.0.0]: https://github.com/shivamshinde123/whatstir/releases/tag/v1.0.0

@@ -5,7 +5,7 @@ import { defineConfig, devices } from "@playwright/test";
  *   SMOKE_URL=https://… SMOKE_PASSWORD=… npm run test:e2e:smoke
  * Nothing is written: no questions, notes, settings changes or refresh runs.
  */
-if (!process.env.SMOKE_URL) throw new Error("Set SMOKE_URL to the deployment to check, e.g. https://whatstir.vercel.app");
+if (!process.env.SMOKE_URL) throw new Error("Set SMOKE_URL to the deployment to check, e.g. https://<your-app>.vercel.app");
 
 export default defineConfig({
   testDir: "./smoke",
