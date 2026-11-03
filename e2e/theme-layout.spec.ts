@@ -88,6 +88,38 @@ test.describe("full-width layout", () => {
     expect(nav.width).toBeGreaterThan(1850);
   });
 
+  test("on desktop the workspace is one screen tall and the columns take the rest", async ({ page }) => {
+    await page.goto("/sector/b2b");
+    await expect(page.getByLabel("Question")).toBeVisible();
+    const doc = await page.evaluate(() => ({ sh: document.documentElement.scrollHeight, ch: document.documentElement.clientHeight }));
+    expect(doc.sh).toBe(doc.ch); // no page scroll: the columns scroll inside themselves
+    for (const name of ["Company basket", "Results", "Chat"]) {
+      const box = (await page.locator(`section[aria-label="${name}"]`).boundingBox())!;
+      expect(box.y, name).toBeLessThan(260); // compact title and filters above
+      expect(box.y + box.height, name).toBeGreaterThan(1080 - 80); // down to the footer
+    }
+    await expect(page.getByRole("heading", { level: 1, name: "B2B" })).toBeInViewport();
+    await expect(page.getByRole("contentinfo")).toBeInViewport();
+  });
+
+  test("filter chips wrap, so none hides behind a scroll bar", async ({ page }) => {
+    await page.setViewportSize({ width: 1280, height: 800 });
+    await page.goto("/sector/b2b");
+    const group = page.getByRole("group", { name: "Narrow by subcategory" });
+    await expect(group.getByRole("button").first()).toBeVisible();
+    expect(await group.evaluate((g) => g.scrollWidth - g.clientWidth)).toBe(0);
+    for (const chip of await group.getByRole("button").all()) await expect(chip).toBeInViewport();
+  });
+
+  test("the logo is larger, and every page says who made it", async ({ page }) => {
+    for (const path of ["/", "/sector/b2b", "/notes", "/admin"]) {
+      await page.goto(path);
+      await expect(page.getByRole("contentinfo"), path).toContainText("Made by Shivam");
+    }
+    const size = await page.getByRole("link", { name: "Whatstir" }).evaluate((a) => parseFloat(getComputedStyle(a).fontSize));
+    expect(size).toBeGreaterThanOrEqual(20);
+  });
+
   test("phones still have no horizontal scroll", async ({ page }) => {
     await page.setViewportSize({ width: 375, height: 800 });
     for (const path of ["/", "/sector/b2b", "/notes", "/admin"]) {

@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import NotesList from "./NotesList";
+import SiteFooter from "./SiteFooter";
 import SiteHeader from "./SiteHeader";
 
 /** Every saved note, newest first; each links back to its company's profile. */
@@ -15,6 +16,7 @@ export default function NotesView() {
         <p className="mb-6 mt-1 text-text-secondary">Everything you&apos;ve saved, across all sectors.</p>
         <NotesList onGate={setGate} />
       </main>
+      <SiteFooter />
     </>
   );
 }

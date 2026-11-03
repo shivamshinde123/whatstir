@@ -2,6 +2,7 @@
 
 import { useCallback, useEffect, useState } from "react";
 import type { RefreshStatus, Run } from "@/lib/admin";
+import SiteFooter from "./SiteFooter";
 import SiteHeader from "./SiteHeader";
 
 type State = { kind: "loading" } | { kind: "error" } | { kind: "ready"; status: RefreshStatus };
@@ -256,6 +257,7 @@ export default function AdminView() {
           </>
         )}
       </main>
+      <SiteFooter />
     </>
   );
 }

@@ -4,6 +4,7 @@ import Link from "next/link";
 import { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
 import type { SectorOverview } from "@/lib/sectors";
 import { layoutTreemap } from "@/lib/treemap";
+import SiteFooter from "./SiteFooter";
 import SiteHeader from "./SiteHeader";
 import Treemap, { tileLabel } from "./Treemap";
 
@@ -103,7 +104,7 @@ export default function HomeView() {
         </div>
 
         {/* Always mounted so it can be measured; the states render inside it. */}
-        <div ref={mapRef} hidden={asList && !!data && !empty} className="mt-4 h-[max(420px,calc(100dvh-19rem))] w-full">
+        <div ref={mapRef} hidden={asList && !!data && !empty} className="mt-4 h-[max(420px,calc(100dvh-20rem))] w-full">
           {state.kind === "loading" && (
             <div className="grid h-full grid-cols-3 grid-rows-2 gap-1.5" aria-label="Loading sectors" role="status">
               {Array.from({ length: 6 }, (_, i) => (
@@ -152,9 +153,7 @@ export default function HomeView() {
           </ul>
         )}
       </main>
-      <footer className="border-t border-separator px-4 py-4 text-center text-caption text-text-secondary">
-        Not affiliated with Y Combinator. Data from the open-source yc-oss mirror of the YC directory.
-      </footer>
+      <SiteFooter />
     </>
   );
 }
