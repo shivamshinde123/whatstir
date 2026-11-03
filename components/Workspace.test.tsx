@@ -1,5 +1,6 @@
 import { act, fireEvent, render, screen, waitFor, within } from "@testing-library/react";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
+import type { Message, SessionState, Tile } from "@/lib/session";
 import type { CompanyProfile, SectorWorkspace } from "@/lib/workspace";
 import Basket from "./Basket";
 import Logo, { initials } from "./Logo";
@@ -48,9 +49,79 @@ const PROFILE: CompanyProfile = {
 };
 
 const json = (body: unknown, status = 200) => new Response(JSON.stringify(body), { status });
+/** A stateful stand-in for the session API, scripted like the fake model: `[ids:10,11]`. */
+function sessionApi() {
+  let n = 100;
+  let state: SessionState = { session: { id: "s1", sectorId: "healthcare", createdAt: "" }, tiles: [], messages: [] };
+  const msg = (role: Message["role"], content: string, companyIds: number[] = [], status: Message["status"] = "ok"): Message => ({
+    id: n++,
+    role,
+    action: "ask",
+    content,
+    scope: { subcategoryId: null, selectedCompanyIds: [] },
+    companyIds,
+    status,
+    createdAt: "",
+  });
+  const api = {
+    /** Next N message posts fail: "502" (answer failed), "network" (fetch rejects), "409" (session ended). */
+    failures: [] as ("502" | "network" | "409")[],
+    resetFails: false,
+    get state() {
+      return state;
+    },
+    seed(tiles: number[], messages: Message[] = []) {
+      state = { ...state, tiles: tiles.map((id, position) => tile(id, position, null)), messages };
+    },
+    async handle(url: string, init?: RequestInit): Promise<Response> {
+      if (url === "/api/sectors/healthcare/session") return json(state);
+      if (url === "/api/sectors/healthcare/session/reset") {
+        if (api.resetFails) return json({ error: "x" }, 500);
+        state = { session: { id: `s${n++}`, sectorId: "healthcare", createdAt: "" }, tiles: [], messages: [] };
+        return json(state);
+      }
+      const failure = api.failures.shift();
+      if (failure === "network") throw new TypeError("Failed to fetch");
+      if (failure === "409") {
+        state = { session: { id: `s${n++}`, sectorId: "healthcare", createdAt: "" }, tiles: [], messages: [] };
+        return json({ error: "ended" }, 409);
+      }
+      const { text } = JSON.parse(String(init!.body));
+      const user = msg("user", text);
+      if (failure === "502") {
+        const err = msg("assistant", "Couldn't answer that. Try again.", [], "error");
+        state = { ...state, messages: [...state.messages, user, err] };
+        return json({ error: "Couldn't answer that. Try again.", retryable: true, userMessage: user, message: err }, 502);
+      }
+      const ids = (text.match(/\[ids:([\d,]*)\]/)?.[1] ?? "").split(",").filter(Boolean).map(Number);
+      const answer = msg("assistant", `Answer to ${text}`, ids);
+      const fresh = ids.filter((id: number) => !state.tiles.some((t) => t.companyId === id));
+      const tiles = [...state.tiles, ...fresh.map((id: number, i: number) => tile(id, state.tiles.length + i, answer.id))];
+      state = { ...state, tiles, messages: [...state.messages, user, answer] };
+      return json({ userMessage: user, message: answer, newTileIds: fresh, tiles, skipped: 0 });
+    },
+  };
+  return api;
+}
+const tile = (companyId: number, position: number, addedBy: number | null): Tile => ({
+  companyId,
+  position,
+  addedBy,
+  name: COMPANIES.find((c) => c.id === companyId)!.name,
+  logoUrl: null,
+});
+
 let fetchMock: ReturnType<typeof vi.fn>;
+let api: ReturnType<typeof sessionApi>;
 beforeEach(() => {
-  fetchMock = vi.fn(async (url: string) => (url.startsWith("/api/companies/") ? json(PROFILE) : json(WORKSPACE)));
+  api = sessionApi();
+  fetchMock = vi.fn(async (url: string, init?: RequestInit) =>
+    url.startsWith("/api/companies/")
+      ? json(PROFILE)
+      : url.includes("/session") || url.startsWith("/api/sessions/")
+        ? api.handle(url, init)
+        : json(WORKSPACE),
+  );
   vi.stubGlobal("fetch", fetchMock);
 });
 afterEach(() => vi.unstubAllGlobals());
@@ -267,7 +338,7 @@ describe("Workspace", () => {
     await screen.findByText("3 companies");
     fireEvent.click(screen.getByRole("button", { name: "Billing 1" }));
     expect(names()).toEqual(["Care AI"]);
-    expect(screen.getByText(/Scope:/)).toHaveTextContent("Scope: Billing");
+    expect(screen.getByTestId("scope")).toHaveTextContent("Billing");
     fireEvent.click(screen.getByRole("button", { name: "All 3" }));
     expect(names()).toEqual(["Acme Health", "Bolt Clinic", "Care AI"]);
   });
@@ -316,5 +387,210 @@ describe("Workspace", () => {
     fetchMock.mockResolvedValueOnce(json({ ...WORKSPACE, gate: true }));
     render(<Workspace sectorId="healthcare" sectorName="Healthcare" />);
     expect(await screen.findByRole("button", { name: "Sign out" })).toBeInTheDocument();
+  });
+});
+
+describe("Workspace chat and results grid", () => {
+  const basket = () => screen.getByRole("list", { name: "Companies in this sector" });
+  const renderReady = async () => {
+    render(<Workspace sectorId="healthcare" sectorName="Healthcare" />);
+    await screen.findByText("3 companies");
+  };
+  const ask = async (text: string) => {
+    fireEvent.change(screen.getByLabelText("Question"), { target: { value: text } });
+    fireEvent.click(screen.getByRole("button", { name: "Ask" }));
+    await waitFor(() => expect(screen.queryByText(/^Thinking/)).toBeNull());
+  };
+  const tiles = () => [...document.querySelectorAll<HTMLElement>("[data-tile-id]")];
+  const tileIds = () => tiles().map((t) => Number(t.dataset.tileId));
+  const posts = () =>
+    fetchMock.mock.calls.filter(([url]) => String(url).startsWith("/api/sessions/")).map(([, init]) => JSON.parse(init.body));
+
+  it("starts empty, then a response that adds C appends exactly one tile and keeps existing tiles in DOM order", async () => {
+    await renderReady();
+    expect(screen.getByText("Ask a question to start collecting companies.")).toBeInTheDocument();
+    await ask("first [ids:10,11]");
+    expect(tileIds()).toEqual([10, 11]);
+    const [a, b] = tiles();
+    await ask("second [ids:11,12]");
+    expect(tileIds()).toEqual([10, 11, 12]);
+    expect(tiles()[0]).toBe(a); // the same DOM nodes, not re-created
+    expect(tiles()[1]).toBe(b);
+    expect(tiles().filter((t) => "new" in t.dataset).map((t) => t.dataset.tileId)).toEqual(["12"]);
+    expect(screen.getByTestId("results-count")).toHaveTextContent("3 companies");
+  });
+
+  it("leaves the grid unchanged when an answer cites nothing new", async () => {
+    await renderReady();
+    await ask("one [ids:10]");
+    await ask("again [ids:10]");
+    await ask("nothing [ids:]");
+    expect(tileIds()).toEqual([10]);
+    expect(tiles()[0]).not.toHaveAttribute("data-new");
+    expect(screen.getByText("Answer to nothing [ids:]")).toBeInTheDocument();
+  });
+
+  it("rings only the companies cited by the latest answer", async () => {
+    await renderReady();
+    await ask("one [ids:10,11]");
+    expect(tiles().map((t) => t.hasAttribute("data-cited"))).toEqual([true, true]);
+    await ask("two [ids:12]");
+    expect(tiles().map((t) => t.hasAttribute("data-cited"))).toEqual([false, false, true]);
+    expect(screen.getByRole("button", { name: "Care AI, cited by the latest answer" })).toBeInTheDocument();
+    await ask("three [ids:10]"); // already in the grid: no new tile, but the ring moves
+    expect(tiles().map((t) => t.hasAttribute("data-cited"))).toEqual([true, false, false]);
+  });
+
+  it("the error bubble's Retry resends the same text, and the ring stays on the last good answer", async () => {
+    await renderReady();
+    await ask("one [ids:11]");
+    api.failures.push("502");
+    await ask("why clinics? [ids:10]");
+    const failed = screen.getByRole("group", { name: "Failed answer" });
+    expect(failed).toHaveTextContent("Couldn't answer.");
+    expect(tileIds()).toEqual([11]);
+    expect(tiles()[0]).toHaveAttribute("data-cited");
+    fireEvent.click(within(failed).getByRole("button", { name: "Retry" }));
+    await waitFor(() => expect(tileIds()).toEqual([11, 10]));
+    expect(posts().map((p) => p.text)).toEqual(["one [ids:11]", "why clinics? [ids:10]", "why clinics? [ids:10]"]);
+    // Only the latest failure offers Retry.
+    expect(screen.queryByRole("button", { name: "Retry" })).toBeNull();
+  });
+
+  it("keeps a question that couldn't be sent and offers Retry", async () => {
+    await renderReady();
+    api.failures.push("network");
+    await ask("lost? [ids:12]");
+    expect(screen.getByText("Couldn't send that.")).toBeInTheDocument();
+    expect(screen.getByText("lost? [ids:12]")).toBeInTheDocument();
+    fireEvent.click(screen.getByRole("button", { name: "Retry" }));
+    await waitFor(() => expect(tileIds()).toEqual([12]));
+    expect(screen.queryByText("Couldn't send that.")).toBeNull();
+  });
+
+  it("moves to the new session if this one ended elsewhere, keeping the question for Retry", async () => {
+    await renderReady();
+    api.failures.push("409");
+    await ask("stale [ids:10]");
+    expect(screen.getByText("Couldn't send that.")).toBeInTheDocument();
+    fireEvent.click(screen.getByRole("button", { name: "Retry" }));
+    await waitFor(() => expect(tileIds()).toEqual([10]));
+    expect(fetchMock.mock.calls.at(-1)![0]).toBe(`/api/sessions/${api.state.session.id}/messages`);
+  });
+
+  it("shows a thinking state and blocks a second question while waiting", async () => {
+    await renderReady();
+    let release!: () => void;
+    const gate = new Promise<void>((r) => (release = r));
+    const original = fetchMock.getMockImplementation() as (url: string, init?: RequestInit) => Promise<Response>;
+    fetchMock.mockImplementation(async (url: string, init?: RequestInit) => {
+      if (String(url).startsWith("/api/sessions/")) await gate;
+      return original(url, init);
+    });
+    fireEvent.change(screen.getByLabelText("Question"), { target: { value: "slow [ids:10]" } });
+    fireEvent.click(screen.getByRole("button", { name: "Ask" }));
+    expect(await screen.findByRole("status")).toHaveTextContent("Thinking");
+    expect(screen.getByText("slow [ids:10]")).toBeInTheDocument();
+    expect(screen.getByLabelText("Question")).toHaveValue("");
+    fireEvent.change(screen.getByLabelText("Question"), { target: { value: "another" } });
+    expect(screen.getByRole("button", { name: "Ask" })).toBeDisabled();
+    release();
+    await waitFor(() => expect(tileIds()).toEqual([10]));
+    expect(screen.queryByRole("status")).toBeNull();
+  });
+
+  it("sends with Enter, keeps Shift+Enter for a new line, and ignores blank questions", async () => {
+    await renderReady();
+    const box = screen.getByLabelText("Question");
+    fireEvent.change(box, { target: { value: "   " } });
+    fireEvent.keyDown(box, { key: "Enter" });
+    fireEvent.change(box, { target: { value: "line one" } });
+    fireEvent.keyDown(box, { key: "Enter", shiftKey: true });
+    expect(posts()).toEqual([]);
+    fireEvent.keyDown(box, { key: "Enter" });
+    await waitFor(() => expect(posts()).toHaveLength(1));
+    expect(posts()[0]).toEqual({ text: "line one", subcategoryId: null, selectedCompanyIds: [] });
+  });
+
+  it("scopes the question to the selected subcategory and shows it in the scope chip", async () => {
+    await renderReady();
+    expect(screen.getByTestId("scope")).toHaveTextContent("Healthcare");
+    fireEvent.click(screen.getByRole("button", { name: "Scheduling 2" }));
+    expect(screen.getByTestId("scope")).toHaveTextContent("Scheduling");
+    expect(screen.getByLabelText("Question")).toHaveAttribute("placeholder", "Ask about Scheduling companies…");
+    await ask("who? [ids:10]");
+    expect(posts()[0].subcategoryId).toBe(3);
+  });
+
+  it("restores the grid and the conversation on load, without animating anything", async () => {
+    api.seed([12, 10], [
+      { id: 1, role: "user", action: "ask", content: "earlier question", scope: {}, companyIds: [], status: "ok", createdAt: "" },
+      { id: 2, role: "assistant", action: "ask", content: "earlier answer", scope: {}, companyIds: [10], status: "ok", createdAt: "" },
+    ]);
+    await renderReady();
+    expect(tileIds()).toEqual([12, 10]);
+    expect(screen.getByText("earlier question")).toBeInTheDocument();
+    expect(screen.getByText("earlier answer")).toBeInTheDocument();
+    expect(tiles().some((t) => "new" in t.dataset)).toBe(false);
+    expect(tiles().map((t) => t.hasAttribute("data-cited"))).toEqual([false, true]);
+  });
+
+  it("New session clears the grid only after confirmation", async () => {
+    await renderReady();
+    expect(screen.getByRole("button", { name: "New session" })).toBeDisabled(); // nothing to clear yet
+    await ask("one [ids:10,11]");
+    fireEvent.click(screen.getByRole("button", { name: "New session" }));
+    fireEvent.click(screen.getByRole("button", { name: "Cancel" }));
+    expect(tileIds()).toEqual([10, 11]);
+    expect(fetchMock).not.toHaveBeenCalledWith("/api/sectors/healthcare/session/reset", expect.anything());
+
+    fireEvent.click(screen.getByRole("button", { name: "New session" }));
+    expect(screen.getByText("Clear the grid?")).toBeInTheDocument();
+    fireEvent.click(screen.getByRole("button", { name: "Start over" }));
+    expect(await screen.findByText("Ask a question to start collecting companies.")).toBeInTheDocument();
+    expect(tileIds()).toEqual([]);
+    expect(screen.queryByText("one [ids:10,11]")).toBeNull();
+    expect(fetchMock).toHaveBeenCalledWith("/api/sectors/healthcare/session/reset", { method: "POST" });
+    await ask("fresh [ids:12]");
+    expect(fetchMock.mock.calls.at(-1)![0]).toBe(`/api/sessions/${api.state.session.id}/messages`);
+    expect(tileIds()).toEqual([12]);
+  });
+
+  it("says so when New session fails, and keeps the grid", async () => {
+    await renderReady();
+    await ask("one [ids:10]");
+    api.resetFails = true;
+    fireEvent.click(screen.getByRole("button", { name: "New session" }));
+    fireEvent.click(screen.getByRole("button", { name: "Start over" }));
+    expect(await screen.findByText("Couldn't start a new session. Try again.")).toBeInTheDocument();
+    expect(tileIds()).toEqual([10]);
+  });
+
+  it("opens a tile's profile and returns focus to the tile", async () => {
+    await renderReady();
+    await ask("one [ids:10]");
+    const t = tiles()[0];
+    t.focus();
+    fireEvent.click(t);
+    await screen.findByRole("heading", { name: "Acme Health", level: 2 });
+    act(() => {
+      fireEvent.keyDown(window, { key: "Escape" });
+    });
+    await waitFor(() => expect(t).toHaveFocus());
+  });
+
+  it("leaves a faded ghost in the basket for companies already in the grid", async () => {
+    await renderReady();
+    await ask("one [ids:11]");
+    const collected = within(basket()).getAllByRole("button").filter((b) => b.hasAttribute("data-collected"));
+    expect(collected.map((b) => b.getAttribute("title"))).toEqual(["Bolt Clinic"]);
+  });
+
+  it("errors the whole workspace (with retry) when the session can't load", async () => {
+    const original = fetchMock.getMockImplementation() as (url: string, init?: RequestInit) => Promise<Response>;
+    fetchMock.mockImplementationOnce(original).mockImplementationOnce(async () => json({ error: "x" }, 500));
+    render(<Workspace sectorId="healthcare" sectorName="Healthcare" />);
+    fireEvent.click(await screen.findByRole("button", { name: "Try again" }));
+    expect(await screen.findByText("3 companies")).toBeInTheDocument();
   });
 });

@@ -107,6 +107,12 @@ describe("answer (AI_FAKE)", () => {
   it("throws when scripted to fail", async () => {
     await expect(answer({ ...REQ, question: "[fail]" })).rejects.toThrow("fake model failure");
   });
+
+  it("fails a [fail-once] question until it's retried (already in the history)", async () => {
+    const q = "why? [fail-once] [ids:1]";
+    await expect(answer({ ...REQ, question: q })).rejects.toThrow("fake model failure");
+    expect((await answer({ ...REQ, question: q, history: [{ role: "user", content: q }] })).companyIds).toEqual([1]);
+  });
 });
 
 describe("answer (real path, stubbed client)", () => {

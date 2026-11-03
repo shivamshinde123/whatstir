@@ -42,7 +42,10 @@
 - A logo flies from the basket to the grid only for newly cited companies. Existing tiles never move.
 - Tile click opens the profile. A checkbox on hover or focus selects the tile. The website link sits inside the profile.
 - **Grid empty:** "Ask a question to start collecting companies."
-- **No matches:** the chat says "No companies in this scope match." The grid is unchanged.
+- **No matches:** the chat says "No companies in <scope> match yet." when the scope is empty, or the model says none of the companies match. The grid is unchanged.
+- **Thinking:** the question appears straight away, followed by a "Thinking…" bubble. Ask is disabled until the answer arrives.
+- **New session:** asks inline ("Clear the grid?" Cancel / Start over).
+- **Basket ghosts:** logos of companies already in the grid stay in the basket, faded.
 - **Error:** the reply bubble shows "Couldn't answer. [Retry]".
 
 ## 3. Profile panel (slides over the basket)
@@ -108,7 +111,7 @@ The interface should look clean and calm, the way apple.com does. The `apple-des
   - Separators are hairlines in `--separator`.
 - **Motion.**
   - Buttons respond the moment they're pressed (`pressable`, scale 0.97 over 100 ms).
-  - Springs are critically damped: Motion `{ type: "spring", bounce: 0, duration: 0.4 }`. A little bounce is allowed only where a gesture carried momentum.
+  - Springs are critically damped (damping 1, response 0.4 s). The basket-to-grid flight samples one into a CSS `linear()` easing (`components/ResultsGrid.tsx`). A little bounce is allowed only where a gesture carried momentum.
   - Panels enter and leave along the same path. The profile slides in from the left and leaves to the left.
   - Every animation can be interrupted.
 - **Accessibility.**

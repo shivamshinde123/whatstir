@@ -16,14 +16,13 @@
 | `Treemap` | Draws the laid-out `Tile[]` as absolutely positioned links with labels, the compact and tiny variants, and sector tints (`lib/sector-style.ts`). | — |
 | `Workspace` (client) | The three-column layout. Owns the selected subcategory, the name filter and the open profile, including putting focus back afterwards. The session, tiles and messages are added in #9 and #10. | `GET /api/sectors/:id` |
 | `SubcategoryBar` | Chips for All, the subcategories with counts, AI and Unclassified, plus an "AI-suggested" label. | — |
-| `Basket` | A wall of logos for the companies in scope, styled with `content-visibility: auto`, with a name filter and an "N of M" count. Clicking opens the profile. Each cell carries `data-company-id` for the #10 animation. | — |
+| `Basket` | A wall of logos for the companies in scope, styled with `content-visibility: auto`, with a name filter and an "N of M" count. Clicking opens the profile. Each cell carries `data-company-id`, which the grid's flight uses as its starting point. Companies already in the grid stay as faded ghosts (`data-collected`). | — |
 | `StatusBadge` | A small pill: Active green, Acquired blue, Public purple, Inactive or unknown grey. | — |
-| `ResultsGrid` | The cumulative tiles. Marks cited and selected tiles, has a "selected: N, Compare / Ask about these" bar, and shows a count with scrolling. | — |
+| `ResultsGrid` | The cumulative tiles (each a button with `data-tile-id`, plus `data-new` for the latest answer's additions and `data-cited` for the accent ring). Shows the count, scrolls, and runs the basket-to-grid flight for new tiles. The selection bar (Compare / Ask about these) arrives in #12. | — |
 | `Logo` | A lazy `<img>` that gets a white backing once loaded, falling back to initials on a per-company colour when the logo is missing or fails. Decorative (`alt=""`). | — |
-| `CompanyTile` (#10) | A grid tile with the shared `layoutId`. | — |
 | `ProfilePanel` | Slides over the basket column on desktop and becomes a full-screen sheet on phones. Shows the batch, status, one-liner, description, website and YC links (new tab, `noopener`), the problem card (labelled AI-generated, with Unknown for empty fields), groups (explanation as a tooltip), and founders (LinkedIn, or "not available"). It has loading and error-with-retry states and closes with Esc or ×. Notes arrive in #11. | `/api/companies/:id`, notes |
 | `CompareView` | A modal table of 2–3 problem cards, with unknown fields marked. | `/api/companies/:id` ×N |
-| `Chat` | The message list, action buttons (Ask, Explore, Challenge), a visible scope chip, the input, Retry, and New session. | `POST messages`, reset |
+| `Chat` | The message list, the scope chip, the question box (Enter sends, Shift+Enter adds a line), a "Thinking…" bubble while waiting, Retry on the latest failed answer or unsent question, and New session with an inline confirmation. Explore and Challenge buttons arrive in #12. Requests go through `Workspace`. | via `Workspace` |
 | `NotesList` | Create, edit and delete notes for one company, or all notes. | `/api/notes` |
 
 ## Server modules (`lib/`)

@@ -68,7 +68,7 @@ describe("postMessage", () => {
   it("records the tile's source answer", async () => {
     const r = await ask(`[ids:${A}]`);
     if (r.status !== 200) throw new Error();
-    expect(r.body.tiles).toEqual([{ companyId: A, position: 0, addedBy: r.body.message.id }]);
+    expect(r.body.tiles).toEqual([{ companyId: A, position: 0, addedBy: r.body.message.id, name: `Company ${A}`, logoUrl: null }]);
   });
 
   it("never lets an invented or out-of-scope id into the grid", async () => {
@@ -153,6 +153,14 @@ describe("postMessage", () => {
     expect(await grid()).toEqual([A]);
     const [last] = await sql`select status, company_ids from messages where session_id = ${sid} order by id desc limit 1`;
     expect(last).toEqual({ status: "error", company_ids: [] });
+  });
+
+  it("a retry of a failed question succeeds when the failure was transient ([fail-once])", async () => {
+    vi.spyOn(console, "error").mockImplementation(() => {});
+    expect((await ask(`flaky [fail-once] [ids:${B}]`)).status).toBe(502);
+    const retry = await ask(`flaky [fail-once] [ids:${B}]`);
+    expect(retry.status).toBe(200);
+    expect(await grid()).toEqual([B]);
   });
 
   it("treats a retrieval (embedding) failure like a model failure", async () => {
