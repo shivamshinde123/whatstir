@@ -11,14 +11,18 @@ export interface MessageInput {
   text: string;
   action: Action;
   subcategoryId: number | null;
+  /** A YC batch to narrow to ("Fall 2026"), carried over from the home page's filter. */
+  batch: string | null;
   selectedCompanyIds: number[];
 }
+
+export const MAX_BATCH_CHARS = 40;
 
 const isId = (v: unknown): v is number => typeof v === "number" && Number.isSafeInteger(v) && v > 0;
 
 /** Validates a POST body; returns the cleaned input or a message for a 400. */
 export function parseMessageInput(body: unknown): { ok: true; value: MessageInput } | { ok: false; error: string } {
-  if (!body || typeof body !== "object") return { ok: false, error: "Send JSON: { text, action?, subcategoryId?, selectedCompanyIds? }" };
+  if (!body || typeof body !== "object") return { ok: false, error: "Send JSON: { text, action?, subcategoryId?, batch?, selectedCompanyIds? }" };
   const b = body as Record<string, unknown>;
   const text = typeof b.text === "string" ? b.text.trim() : "";
   if (!text) return { ok: false, error: "Type a question first." };
@@ -27,12 +31,17 @@ export function parseMessageInput(body: unknown): { ok: true; value: MessageInpu
   if (!ACTIONS.includes(action as Action)) return { ok: false, error: `Unknown action: ${String(action)}` };
   const subcategoryId = b.subcategoryId ?? null;
   if (subcategoryId !== null && !isId(subcategoryId)) return { ok: false, error: "subcategoryId must be a positive integer." };
+  const rawBatch = b.batch ?? null;
+  if (rawBatch !== null && (typeof rawBatch !== "string" || !rawBatch.trim() || rawBatch.length > MAX_BATCH_CHARS)) {
+    return { ok: false, error: "batch must be a batch name such as \"Fall 2026\"." };
+  }
+  const batch = rawBatch === null ? null : rawBatch.trim();
   const selected = b.selectedCompanyIds ?? [];
   if (!Array.isArray(selected) || !selected.every(isId)) {
     return { ok: false, error: "selectedCompanyIds must be a list of company ids." };
   }
   if (selected.length > MAX_SELECTED) return { ok: false, error: `Select at most ${MAX_SELECTED} companies.` };
-  return { ok: true, value: { text, action: action as Action, subcategoryId, selectedCompanyIds: [...new Set(selected)] } };
+  return { ok: true, value: { text, action: action as Action, subcategoryId, batch, selectedCompanyIds: [...new Set(selected)] } };
 }
 
 export type PostResult =
@@ -73,8 +82,11 @@ export async function postMessage(
     if (!sub) return { status: 400, body: { error: "That subcategory isn't in this sector." } };
     scopeLabel = `${session.sector_name} › ${sub.name}`;
   }
+  // An explicit selection is exactly those companies; otherwise a batch narrows the sector or group.
+  const batch = input.selectedCompanyIds.length ? null : input.batch;
+  if (batch) scopeLabel += ` · ${batch}`;
 
-  const scope = { subcategoryId: input.subcategoryId, selectedCompanyIds: input.selectedCompanyIds };
+  const scope = { subcategoryId: input.subcategoryId, batch, selectedCompanyIds: input.selectedCompanyIds };
   const history = (
     await sql<{ role: HistoryTurn["role"]; content: string }[]>`
       select role, content from messages where session_id = ${sessionId} and status = 'ok'
@@ -91,7 +103,7 @@ export async function postMessage(
   try {
     const found = await retrieve(
       sql,
-      { sectorId: session.sector_id, subcategoryId: input.subcategoryId, selectedIds: input.selectedCompanyIds },
+      { sectorId: session.sector_id, subcategoryId: input.subcategoryId, batch, selectedIds: input.selectedCompanyIds },
       input.text,
     );
     skipped = found.skipped;

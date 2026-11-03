@@ -8,8 +8,12 @@ These are Next.js route handlers under `app/api/`. All of them return JSON. All 
 Data for the treemap. All nine sectors come back in display order, each with both its total and active counts, so the Active-only toggle needs no second request.
 ```json
 { "sectors": [{ "id": "b2b", "name": "B2B", "total": 3233, "active": 2283 }],
-  "total": 6362, "activeTotal": 4396, "lastRefreshAt": "2026-11-02T11:00:00.000Z", "gate": false }
+  "total": 6362, "activeTotal": 4396, "lastRefreshAt": "2026-11-02T11:00:00.000Z",
+  "batches": [{ "name": "Fall 2026", "total": 201, "active": 199,
+                "sectors": { "b2b": { "total": 100, "active": 99 }, "fintech": { "total": 16, "active": 16 } } }],
+  "gate": false }
 ```
+- `batches` lists every YC batch, newest first (calendar order Winter → Spring → Summer → Fall within a year; names that aren't "Season YYYY" go last), with total and active counts overall and per sector. Sectors without companies in a batch are left out of its `sectors`. Companies missing from the source aren't counted.
 - `lastRefreshAt` is when the last successful refresh finished, or `null` if there hasn't been one.
 - `gate` says whether the password gate is on, so the header knows whether to show Sign out.
 - If the database fails, the response is `500 { "error": "Couldn't load sectors." }`.
@@ -69,6 +73,7 @@ Ends the active session and starts a new one. Returns the same shape as the GET 
   - `action` is `ask` (the default), `explore` or `challenge`. Anything else is a 400. Each uses its own prompt rules (`instructionsFor`), and the action is saved on both messages.
   - `subcategoryId` must be a positive integer belonging to this session's sector.
   - `selectedCompanyIds` can hold at most 20 positive integers; duplicates are removed.
+  - `batch` (optional) is a YC batch name such as `"Fall 2026"` (1–40 characters, trimmed). It narrows the sector or group to that batch, and the scope label becomes "Healthcare › Scheduling · Fall 2026". It's ignored when `selectedCompanyIds` is non-empty, and it's saved in the message's `scope`.
 - **Other errors:** an id that isn't a UUID, or an unknown session, returns 404. An ended session returns 409, telling the client to reload into the new one.
 
 Response:

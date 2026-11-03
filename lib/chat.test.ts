@@ -27,6 +27,7 @@ beforeEach(async () => {
   [{ id: sub }] = (await sql`insert into subcategories (sector_id, slug, name, kind)
     values ('healthcare', 'scheduling', 'Scheduling', 'problem') returning id`).map((r) => ({ id: Number(r.id) }));
   await sql`insert into company_subcategories (company_id, subcategory_id, assigned_by) values (${C}, ${sub}, 'jev'), (${D}, ${sub}, 'jev')`;
+  await sql`update companies set batch = case id when ${A} then 'Fall 2026' when ${B} then 'Fall 2026' when ${C} then 'Spring 2025' else 'Winter 2012' end`;
   sid = (await getOrCreateSession(sql, "healthcare"))!.session.id;
 });
 
@@ -34,6 +35,7 @@ const input = (text: string, extra: Partial<MessageInput> = {}): MessageInput =>
   text,
   action: "ask",
   subcategoryId: null,
+  batch: null,
   selectedCompanyIds: [],
   ...extra,
 });
@@ -204,6 +206,44 @@ describe("postMessage", () => {
     expect(r.body.message.content).toMatch(/^\(explore\)/);
   });
 
+  it("narrows candidates to the batch, labels and saves it, and keeps outsiders out of the grid", async () => {
+    const spy = vi.fn(realAnswer);
+    const r = await ask(`fall only [ids:${A},${C}]`, { batch: "Fall 2026" }, { answer: spy });
+    const req = spy.mock.calls[0][0] as AnswerRequest;
+    expect(req.candidates.map((c) => c.id).sort()).toEqual([A, B]);
+    expect(req.scopeLabel).toBe("Healthcare · Fall 2026");
+    if (r.status !== 200) throw new Error();
+    expect(r.body.message.companyIds).toEqual([A]); // C is Spring 2025
+    expect(r.body.userMessage.scope).toEqual({ subcategoryId: null, batch: "Fall 2026", selectedCompanyIds: [] });
+    expect(await grid()).toEqual([A]);
+  });
+
+  it("combines a batch with a subcategory", async () => {
+    const spy = vi.fn(realAnswer);
+    await ask("q", { subcategoryId: sub, batch: "Spring 2025" }, { answer: spy });
+    const req = spy.mock.calls[0][0] as AnswerRequest;
+    expect(req.candidates.map((c) => c.id)).toEqual([C]); // D is in the group but Winter 2012
+    expect(req.scopeLabel).toBe("Healthcare › Scheduling · Spring 2025");
+  });
+
+  it("says so when the batch has no companies in scope, without calling the model", async () => {
+    const spy = vi.fn(realAnswer);
+    const r = await ask("q", { batch: "Summer 1999" }, { answer: spy });
+    expect(spy).not.toHaveBeenCalled();
+    if (r.status !== 200) throw new Error();
+    expect(r.body.message.content).toBe("No companies in Healthcare · Summer 1999 match yet.");
+  });
+
+  it("ignores the batch for an explicit selection", async () => {
+    const spy = vi.fn(realAnswer);
+    const r = await ask("q", { batch: "Fall 2026", selectedCompanyIds: [C, D] }, { answer: spy });
+    const req = spy.mock.calls[0][0] as AnswerRequest;
+    expect(req.candidates.map((c) => c.id)).toEqual([C, D]);
+    expect(req.scopeLabel).toBe("2 selected companies");
+    if (r.status !== 200) throw new Error();
+    expect(r.body.userMessage.scope.batch).toBeNull();
+  });
+
   it("rejects a subcategory from another sector", async () => {
     const other = Number((await sql`insert into subcategories (sector_id, slug, name, kind)
       values ('fintech', 'x', 'X', 'problem') returning id`)[0].id);
@@ -216,13 +256,18 @@ describe("parseMessageInput", () => {
   it("accepts a plain question with defaults", () => {
     expect(parseMessageInput({ text: "  Who?  " })).toEqual({
       ok: true,
-      value: { text: "Who?", action: "ask", subcategoryId: null, selectedCompanyIds: [] },
+      value: { text: "Who?", action: "ask", subcategoryId: null, batch: null, selectedCompanyIds: [] },
     });
   });
 
   it.each(["ask", "explore", "challenge"])("accepts the %s action", (action) => {
     const r = parseMessageInput({ text: "q", action });
     expect(r.ok && r.value.action).toBe(action);
+  });
+
+  it("accepts and trims a batch", () => {
+    const r = parseMessageInput({ text: "q", batch: " Fall 2026 " });
+    expect(r.ok && r.value.batch).toBe("Fall 2026");
   });
 
   it("dedupes selected ids", () => {
@@ -244,6 +289,9 @@ describe("parseMessageInput", () => {
     [{ text: "q", selectedCompanyIds: "1,2" }, /list of company ids/],
     [{ text: "q", selectedCompanyIds: [1, -2] }, /list of company ids/],
     [{ text: "q", selectedCompanyIds: Array.from({ length: 21 }, (_, i) => i + 1) }, /at most 20/],
+    [{ text: "q", batch: 2026 }, /batch must be/],
+    [{ text: "q", batch: "   " }, /batch must be/],
+    [{ text: "q", batch: "x".repeat(41) }, /batch must be/],
   ])("rejects %j", (body, error) => {
     const r = parseMessageInput(body);
     expect(r.ok).toBe(false);

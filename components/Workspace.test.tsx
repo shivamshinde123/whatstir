@@ -18,9 +18,9 @@ const SUBS: SectorWorkspace["subcategories"] = [
   { id: 2, slug: "unclassified", name: "Unclassified", description: null, kind: "unclassified", count: 0 },
 ];
 const COMPANIES: SectorWorkspace["companies"] = [
-  { id: 10, name: "Acme Health", logoUrl: "https://logo/acme.png", status: "Active", subcategoryIds: [1, 3] },
-  { id: 11, name: "Bolt Clinic", logoUrl: null, status: "Inactive", subcategoryIds: [3] },
-  { id: 12, name: "Care AI", logoUrl: null, status: "Active", subcategoryIds: [1, 4] },
+  { id: 10, name: "Acme Health", logoUrl: "https://logo/acme.png", status: "Active", batch: "Fall 2026", subcategoryIds: [1, 3] },
+  { id: 11, name: "Bolt Clinic", logoUrl: null, status: "Inactive", batch: "Winter 2020", subcategoryIds: [3] },
+  { id: 12, name: "Care AI", logoUrl: null, status: "Active", batch: "Fall 2026", subcategoryIds: [1, 4] },
 ];
 const WORKSPACE = { sector: { id: "healthcare", name: "Healthcare", total: 3 }, subcategories: SUBS, companies: COMPANIES, gate: false };
 
@@ -556,7 +556,7 @@ describe("Workspace chat and results grid", () => {
     expect(posts()).toEqual([]);
     fireEvent.keyDown(box, { key: "Enter" });
     await waitFor(() => expect(posts()).toHaveLength(1));
-    expect(posts()[0]).toEqual({ text: "line one", action: "ask", subcategoryId: null, selectedCompanyIds: [] });
+    expect(posts()[0]).toEqual({ text: "line one", action: "ask", subcategoryId: null, batch: null, selectedCompanyIds: [] });
   });
 
   it("scopes the question to the selected subcategory and shows it in the scope chip", async () => {
@@ -900,6 +900,7 @@ describe("suggested questions", () => {
       text: "What customer problems do Healthcare companies solve most often?",
       action: "ask",
       subcategoryId: null,
+      batch: null,
       selectedCompanyIds: [],
     });
     expect(await screen.findByText("Answer to What customer problems do Healthcare companies solve most often?")).toBeInTheDocument();
@@ -957,5 +958,84 @@ describe("suggested questions", () => {
     fireEvent.click(suggestions()[0]);
     await waitFor(() => expect(sent()).toHaveLength(2));
     expect(sent()[1]).toMatchObject({ selectedCompanyIds: [10, 11], action: "ask" });
+  });
+});
+
+describe("batch carried over from the home page", () => {
+  afterEach(() => window.history.replaceState(null, "", "/"));
+  const basketNames = () =>
+    within(screen.getByRole("list", { name: "Companies in this sector" })).getAllByRole("button").map((b) => b.getAttribute("title"));
+
+  it("narrows the basket and the group counts to the batch, with a removable chip", async () => {
+    window.history.replaceState(null, "", "/sector/healthcare?batch=Fall+2026");
+    render(<Workspace sectorId="healthcare" sectorName="Healthcare" />);
+    expect(await screen.findByText("2 of 3 companies")).toBeInTheDocument();
+    expect(basketNames()).toEqual(["Acme Health", "Care AI"]);
+    expect(screen.getByRole("button", { name: "All 2" })).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: "Scheduling 1" })).toBeInTheDocument(); // Bolt Clinic is Winter 2020
+    expect(screen.getByRole("link", { name: "‹ All sectors" })).toHaveAttribute("href", "/?batch=Fall%202026");
+
+    fireEvent.click(screen.getByRole("button", { name: "Show all batches, not just Fall 2026" }));
+    expect(screen.getByText("3 companies")).toBeInTheDocument();
+    expect(basketNames()).toEqual(["Acme Health", "Bolt Clinic", "Care AI"]);
+    expect(screen.getByRole("button", { name: "Scheduling 2" })).toBeInTheDocument();
+    expect(screen.getByRole("link", { name: "‹ All sectors" })).toHaveAttribute("href", "/");
+    expect(window.location.search).toBe("");
+  });
+
+  it("questions follow the batch (chip, suggestions, request) until it's cleared", async () => {
+    window.history.replaceState(null, "", "/sector/healthcare?batch=Fall+2026");
+    render(<Workspace sectorId="healthcare" sectorName="Healthcare" />);
+    await screen.findByText("2 of 3 companies");
+    expect(screen.getByTestId("scope")).toHaveTextContent("Fall 2026 Healthcare");
+    expect(screen.getByLabelText("Question")).toHaveAttribute("placeholder", "Ask about Fall 2026 Healthcare companies…");
+    const suggestion = within(screen.getByRole("group", { name: "Suggestions" })).getAllByRole("button")[0];
+    expect(suggestion).toHaveTextContent("Which Fall 2026 Healthcare companies sell to small businesses?");
+    const posts = () => fetchMock.mock.calls.filter(([u]) => String(u).startsWith("/api/sessions/")).map(([, init]) => JSON.parse(init.body));
+
+    fireEvent.change(screen.getByLabelText("Question"), { target: { value: "who? [ids:10]" } });
+    fireEvent.click(screen.getByRole("button", { name: "Send" }));
+    await waitFor(() => expect(posts()).toHaveLength(1));
+    expect(posts()[0]).toMatchObject({ batch: "Fall 2026", subcategoryId: null });
+
+    // With a group too, both apply.
+    fireEvent.click(screen.getByRole("button", { name: "Scheduling 1" }));
+    expect(screen.getByTestId("scope")).toHaveTextContent("Fall 2026 Scheduling");
+    fireEvent.change(screen.getByLabelText("Question"), { target: { value: "and here?" } });
+    fireEvent.click(screen.getByRole("button", { name: "Send" }));
+    await waitFor(() => expect(posts()).toHaveLength(2));
+    expect(posts()[1]).toMatchObject({ batch: "Fall 2026", subcategoryId: 3 });
+
+    // Clearing the batch widens questions back to every batch.
+    fireEvent.click(screen.getByRole("button", { name: "Show all batches, not just Fall 2026" }));
+    expect(screen.getByTestId("scope")).toHaveTextContent(/^Scheduling$/);
+    fireEvent.change(screen.getByLabelText("Question"), { target: { value: "all batches?" } });
+    fireEvent.click(screen.getByRole("button", { name: "Send" }));
+    await waitFor(() => expect(posts()).toHaveLength(3));
+    expect(posts()[2]).toMatchObject({ batch: null, subcategoryId: 3 });
+  });
+
+  it("an explicit selection ignores the batch", async () => {
+    window.history.replaceState(null, "", "/sector/healthcare?batch=Fall+2026");
+    render(<Workspace sectorId="healthcare" sectorName="Healthcare" />);
+    await screen.findByText("2 of 3 companies");
+    fireEvent.change(screen.getByLabelText("Question"), { target: { value: "seed [ids:10,12]" } });
+    fireEvent.click(screen.getByRole("button", { name: "Send" }));
+    await waitFor(() => expect(document.querySelectorAll("[data-tile-id]")).toHaveLength(2));
+    fireEvent.click(screen.getByRole("checkbox", { name: "Select Acme Health" }));
+    fireEvent.click(screen.getByRole("button", { name: "Ask about these" }));
+    expect(screen.getByTestId("scope")).toHaveTextContent("1 selected");
+    fireEvent.change(screen.getByLabelText("Question"), { target: { value: "this one?" } });
+    fireEvent.click(screen.getByRole("button", { name: "Send" }));
+    const last = () => JSON.parse(fetchMock.mock.calls.filter(([u]) => String(u).startsWith("/api/sessions/")).at(-1)![1].body);
+    await waitFor(() => expect(last().text).toBe("this one?"));
+    expect(last()).toMatchObject({ batch: null, selectedCompanyIds: [10] });
+  });
+
+  it("ignores a batch the sector has no companies in", async () => {
+    window.history.replaceState(null, "", "/sector/healthcare?batch=Summer+1999");
+    render(<Workspace sectorId="healthcare" sectorName="Healthcare" />);
+    expect(await screen.findByText("3 companies")).toBeInTheDocument();
+    expect(screen.queryByRole("button", { name: /Show all batches/ })).toBeNull();
   });
 });

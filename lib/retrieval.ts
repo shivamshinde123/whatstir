@@ -8,6 +8,8 @@ export const MAX_SELECTED = 20;
 export interface Scope {
   sectorId: string;
   subcategoryId?: number | null;
+  /** A YC batch ("Fall 2026") to narrow to. Ignored for an explicit selection. */
+  batch?: string | null;
   /** When set, the scope is exactly these companies (no vector search). */
   selectedIds?: number[];
 }
@@ -65,12 +67,13 @@ export async function retrieve(sql: Sql, scope: Scope, question: string): Promis
     };
   }
 
+  const searchable = scope.batch ? sql`${inScope} and c.batch = ${scope.batch}` : inScope;
   const [{ skipped }] = await sql<{ skipped: number }[]>`
-    select count(*)::int as skipped from companies c where ${inScope} and c.embedding is null`;
+    select count(*)::int as skipped from companies c where ${searchable} and c.embedding is null`;
   const [vector] = await embed([question]);
   const rows = await sql<Row[]>`select ${columns} from companies c
     left join problem_cards p on p.company_id = c.id
-    where ${inScope} and c.embedding is not null
+    where ${searchable} and c.embedding is not null
     order by c.embedding <=> ${`[${vector.join(",")}]`}::vector, c.id
     limit ${TOP_K}`;
   return { candidates: rows.map(toCandidate), skipped };
