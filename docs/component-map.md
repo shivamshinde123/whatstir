@@ -20,10 +20,11 @@
 | `StatusBadge` | A small pill: Active green, Acquired blue, Public purple, Inactive or unknown grey. | — |
 | `ResultsGrid` | The cumulative tiles (each a button with `data-tile-id`, plus `data-new` for the latest answer's additions and `data-cited` for the accent ring). Shows the count, scrolls, and runs the basket-to-grid flight for new tiles. The selection bar (Compare / Ask about these) arrives in #12. | — |
 | `Logo` | A lazy `<img>` that gets a white backing once loaded, falling back to initials on a per-company colour when the logo is missing or fails. Decorative (`alt=""`). | — |
-| `ProfilePanel` | Slides over the basket column on desktop and becomes a full-screen sheet on phones. Shows the batch, status, one-liner, description, website and YC links (new tab, `noopener`), the problem card (labelled AI-generated, with Unknown for empty fields), groups (explanation as a tooltip), and founders (LinkedIn, or "not available"). It has loading and error-with-retry states and closes with Esc or ×. Notes arrive in #11. | `/api/companies/:id`, notes |
+| `ProfilePanel` | Slides over the basket column on desktop and becomes a full-screen sheet on phones. Shows the batch, status, one-liner, description, website and YC links (new tab, `noopener`), the problem card (labelled AI-generated, with Unknown for empty fields), groups (explanation as a tooltip), and founders (LinkedIn, or "not available"). It has loading and error-with-retry states and closes with Esc or ×. Ends with the company's notes (`NotesList`). | `/api/companies/:id` |
 | `CompareView` | A modal table of 2–3 problem cards, with unknown fields marked. | `/api/companies/:id` ×N |
 | `Chat` | The message list, the scope chip, the question box (Enter sends, Shift+Enter adds a line), a "Thinking…" bubble while waiting, Retry on the latest failed answer or unsent question, and New session with an inline confirmation. Explore and Challenge buttons arrive in #12. Requests go through `Workspace`. | via `Workspace` |
-| `NotesList` | Create, edit and delete notes for one company, or all notes. | `/api/notes` |
+| `NotesList` | Notes for one company (in its profile) or all notes (on /notes, each linking to `/sector/:sectorId?company=:id`, or labelled "General note"). Add at the top, edit in place (Save/Cancel; Esc cancels without closing the profile), delete after an inline "Delete this note?". Shows added and edited times. Loading, empty, and error-with-Try-again states. | `/api/notes` |
+| `NotesView` | The /notes page: header, title, and `NotesList` for all notes. | via `NotesList` |
 
 ## Server modules (`lib/`)
 | Module | Responsibility |

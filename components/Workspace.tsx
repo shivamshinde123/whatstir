@@ -41,6 +41,11 @@ export default function Workspace({ sectorId, sectorName }: { sectorId: string; 
       setSession(s);
       setFresh(NONE);
       setState({ kind: "ready", data });
+      const linked = Number(new URLSearchParams(window.location.search).get("company"));
+      if (Number.isSafeInteger(linked) && linked > 0) {
+        setProfileId(linked);
+        setProfileOpen(true);
+      }
     } catch {
       setState({ kind: "error" });
     }

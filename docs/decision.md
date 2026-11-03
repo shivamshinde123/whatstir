@@ -84,6 +84,9 @@ Listed in the order they were made. Decisions 1–14 are recorded in §16 of [in
 50. **New session asks inline ("Clear the grid?" Cancel / Start over)** rather than with a browser `confirm()` dialog. It's only offered once the session has messages.
 51. **One question at a time.** The Ask button is disabled while an answer is pending, so answers and their animations never overlap.
 
+52. **Notes have no separate detail page.** A note on /notes links to its company with `/sector/:sectorId?company=:id`, and the workspace opens that profile when it loads. Notes are listed most recently edited first. General notes (no company) can be written on /notes.
+53. **Note deletion asks inline ("Delete this note?" Cancel / Delete)** rather than with `confirm()`, the same as New session (decision 50). Deletion is permanent; there is no undo or trash.
+
 ## Open items
 
 - **A. Founder data.** Founders come from YC company pages. Check YC's terms before production use. Until then, the founder fetch can be switched off with `FOUNDERS_FETCH=off`.

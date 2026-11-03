@@ -118,7 +118,9 @@ beforeEach(() => {
   fetchMock = vi.fn(async (url: string, init?: RequestInit) =>
     url.startsWith("/api/companies/")
       ? json(PROFILE)
-      : url.includes("/session") || url.startsWith("/api/sessions/")
+      : url.startsWith("/api/notes")
+        ? json({ notes: [], gate: false })
+        : url.includes("/session") || url.startsWith("/api/sessions/")
         ? api.handle(url, init)
         : json(WORKSPACE),
   );
@@ -374,6 +376,30 @@ describe("Workspace", () => {
     });
     await waitFor(() => expect(acme).toHaveFocus());
     expect(acme).not.toHaveAttribute("aria-current");
+  });
+
+  it("opens the company named in ?company= (links from /notes), with its notes", async () => {
+    window.history.pushState({}, "", "/sector/healthcare?company=10");
+    try {
+      render(<Workspace sectorId="healthcare" sectorName="Healthcare" />);
+      expect(await screen.findByRole("heading", { name: "Acme Health", level: 2 })).toBeInTheDocument();
+      expect(await screen.findByText("No notes yet.")).toBeInTheDocument();
+      expect(fetchMock).toHaveBeenCalledWith("/api/notes?companyId=10", expect.anything());
+    } finally {
+      window.history.pushState({}, "", "/");
+    }
+  });
+
+  it("ignores a malformed ?company=", async () => {
+    window.history.pushState({}, "", "/sector/healthcare?company=abc");
+    try {
+      render(<Workspace sectorId="healthcare" sectorName="Healthcare" />);
+      await screen.findByText("3 companies");
+      expect(document.querySelector('aside[aria-label="Company profile"]')).toHaveAttribute("aria-hidden", "true");
+      expect(fetchMock).not.toHaveBeenCalledWith(expect.stringMatching(/^\/api\/companies\//));
+    } finally {
+      window.history.pushState({}, "", "/");
+    }
   });
 
   it("shows an error with a retry", async () => {

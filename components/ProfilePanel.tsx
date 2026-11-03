@@ -3,6 +3,7 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import type { CompanyProfile } from "@/lib/workspace";
 import Logo from "./Logo";
+import NotesList from "./NotesList";
 import StatusBadge from "./StatusBadge";
 
 type State = { kind: "loading" } | { kind: "error" } | { kind: "ready"; profile: CompanyProfile };
@@ -205,6 +206,13 @@ export default function ProfilePanel({
               ) : (
                 <p className="mt-2 text-sm text-text-secondary">No founders listed.</p>
               )}
+            </section>
+
+            <section className="mt-6" aria-labelledby="notes-heading">
+              <h3 id="notes-heading" className="mb-2 font-semibold">
+                Notes
+              </h3>
+              <NotesList key={p.id} companyId={p.id} />
             </section>
 
             <p className="mt-6 text-caption text-text-secondary">

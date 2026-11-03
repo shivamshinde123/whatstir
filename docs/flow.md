@@ -46,6 +46,11 @@ New session → inline confirm → POST /api/sectors/:id/session/reset → empty
 ## Opening a profile
 `Basket` or `ResultsGrid` tile click → `Workspace.openProfile(id, element)` remembers what opened it → `<ProfilePanel open>` fetches `/api/companies/:id` (`getCompanyProfile`), slides over the basket and focuses the company name. Esc or × sets `open = false`, after which an effect returns focus to the element that opened it. The panel stays mounted but `inert` and `aria-hidden`, so it can slide out the same way it came in.
 
+## Notes
+- **In a profile:** `<NotesList companyId>` → `GET /api/notes?companyId=` (`listNotes`). Add → `POST /api/notes` (`createNote`) and the note goes to the top. Edit → `PATCH /api/notes/:id` (`updateNote`, bumps `updated_at`). Delete → inline confirm → `DELETE /api/notes/:id` (`deleteNote`).
+- **On /notes:** `NotesView` → `<NotesList>` → `GET /api/notes`, which joins each note's company. A company link goes to `/sector/:sectorId?company=:id`. Once its data loads, `Workspace` reads `?company=` from the URL and opens that profile.
+- Refresh runs never touch `notes`. A company that drops out of the source is only marked `missing_since`, so its notes stay attached.
+
 ## Refresh
 ```
 refresh.run(trigger)
