@@ -290,3 +290,13 @@ test("a question the dataset can't answer gets a labelled web part with sources,
   await ask(page, "And their funding? [ids:6] [web-fail]");
   await expect(page.getByText("Couldn't search the web for “iCracked latest news”.")).toBeVisible();
 });
+
+test("companies a web answer names join the grid and are ringed", async ({ page }) => {
+  await open(page);
+  await ask(page, "Who in consumer raised money recently? [ids:6] [web] [web-names:Couple|Matterport]");
+  await expect(tiles(page)).toHaveCount(3);
+  expect(await tileIds(page)).toEqual([6, 17, 30]);
+  await expect(page.locator("[data-tile-id][data-cited]")).toHaveCount(3);
+  await expect(page.getByRole("region", { name: "From the web" })).toContainText("Added 2 companies from these results to the grid.");
+  await expect(page.locator('li[data-action="ask"]').last()).toContainText("Cites 3 companies");
+});

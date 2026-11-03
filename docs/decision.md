@@ -160,6 +160,12 @@ Listed in the order they were made. Decisions 1–14 are recorded in §16 of [in
     - *Failure:* a failed search keeps the database answer and records `failed: true`, which the UI states. Later turns see the web text in their history.
     - *Control and cost:* on by default (about $0.005–0.015 a search plus tokens), and `WEB_SEARCH=off` disables it. It never targets ycombinator.com, which would be the scraping YC's terms forbid.
 
+78. **Companies a web answer names join the grid, when they're in this sector's data** (the owner's request: a funding question answered from the web named companies, but none reached the grid). This amends decision 77's "never in the grid".
+    - *How:* after a web search, `webCompanies` finds the sector's present companies whose names appear in the web text as whole words (case-insensitive, 3+ characters, longest first, at most 40). One strict-JSON call to the writing model then confirms which ones the text actually discusses as companies, because names like "Ramp" or "Mesh" are also ordinary words. Only confirmed, listed ids survive (`filterIds`).
+    - *Effect:* the confirmed companies the database answer didn't already cite are appended to the message's `companyIds` (so they're ringed and counted) and recorded in `web.companyIds`. They're added as tiles in the order the web text first mentions them, and the web block says "Added N companies from these results to the grid".
+    - *Grounding still holds:* only real companies from this sector of the dataset can reach the grid. Web-only companies, and companies in other sectors, stay text and links. A matching failure keeps the answer and the web part.
+    - *Cost:* one extra small call per web search that names any sector company.
+
 ## Open items
 
 - **A. Founder data.** Founders come from YC company pages. YC's terms of use forbid scraping, so the fetch is now off by default (decision 73); `FOUNDERS_FETCH=on` opts in for private use.

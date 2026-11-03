@@ -388,6 +388,7 @@ describe("web search (decision 77)", () => {
         { url: "https://example.com/news", title: "Example news" },
         { url: "https://example.org/profile", title: "Example profile" },
       ],
+      companyIds: [], // the web text names A, but the answer already cited it
     });
     const [row] = await sql`select web from messages where id = ${r.body.message.id}`;
     expect(row.web.sources).toHaveLength(2);
@@ -398,6 +399,44 @@ describe("web search (decision 77)", () => {
     const searchWeb = vi.fn(async () => ({ text: "found", sources: [] }));
     await ask(`funding? [ids:${A}] [web]`, {}, { searchWeb });
     expect(searchWeb).toHaveBeenCalledWith(`Company ${A} latest news`, `funding? [ids:${A}] [web]`, `Companies in the conversation: Company ${A}.`);
+  });
+
+  it("adds the sector's companies that the web answer names to the citations and the grid (decision 78)", async () => {
+    const r = await ask(`Who raised recently? [ids:${A}] [web] [web-names:Company ${B}|Company ${C}|Company 9]`);
+    if (r.status !== 200) throw new Error();
+    // A was cited from the database; B and C come from the web text. 9 is in fintech, so it's not added.
+    expect(r.body.message.companyIds).toEqual([A, B, C]);
+    expect(r.body.message.web?.companyIds).toEqual([B, C]); // only what the web added: A was already cited
+    expect(r.body.newTileIds).toEqual([A, B, C]);
+    expect(await grid()).toEqual([A, B, C]);
+    const [row] = await sql`select company_ids, web from messages where id = ${r.body.message.id}`;
+    expect(row.company_ids).toEqual([A, B, C]);
+    expect(row.web.companyIds).toEqual([B, C]);
+  });
+
+  it("never adds a web-named company that has left the source, and doesn't repeat a cited one", async () => {
+    await sql`update companies set missing_since = now() where id = ${D}`;
+    const r = await ask(`news [ids:${A}] [web] [web-names:Company ${A}|Company ${D}]`);
+    if (r.status !== 200) throw new Error();
+    expect(r.body.message.companyIds).toEqual([A]);
+    expect(r.body.message.web?.companyIds).toEqual([]);
+  });
+
+  it("keeps the answer and the web part when matching companies fails", async () => {
+    vi.spyOn(console, "error").mockImplementation(() => {});
+    const webCompanies = vi.fn().mockRejectedValue(new Error("model down"));
+    const r = await ask(`news [ids:${A}] [web] [web-names:Company ${B}]`, {}, { webCompanies });
+    if (r.status !== 200) throw new Error();
+    expect(r.body.message.companyIds).toEqual([A]);
+    expect(r.body.message.web).toMatchObject({ text: expect.stringContaining("Company 2"), companyIds: [] });
+  });
+
+  it("doesn't look for companies when no web search ran, or it failed", async () => {
+    const webCompanies = vi.fn(async () => []);
+    await ask(`plain [ids:${A}]`, {}, { webCompanies });
+    vi.spyOn(console, "error").mockImplementation(() => {});
+    await ask(`news [ids:${A}] [web-fail]`, {}, { webCompanies });
+    expect(webCompanies).not.toHaveBeenCalled();
   });
 
   it("keeps the database answer when the web search fails", async () => {

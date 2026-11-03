@@ -4,6 +4,9 @@ All notable changes to Whatstir are recorded here. The format follows [Keep a Ch
 
 ## [Unreleased]
 
+### Added
+- **Companies a web answer names now join the grid.** After a web search, companies from the current sector that the web text discusses are confirmed by a quick model check, added to the grid and ringed. The web block says how many were added (#54).
+
 ## [2.0.0] - 2026-11-03
 
 ### Added

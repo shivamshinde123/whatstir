@@ -48,6 +48,7 @@
 | `session.ts` | `getOrCreateSession` (safe when requests race), `resetSession`, `appendTiles` (locks the session, appends only new companies), `listTiles`. |
 | `chat.ts` | `parseMessageInput`, and `postMessage(sql, sessionId, input, deps?)`: the whole question-to-answer-to-tiles flow. |
 | `answer.ts` | `instructionsFor(action)`, `buildAnswerInput`, `filterIds`, and `answer()` (`gpt-6.1-sol`, Structured Outputs, scriptable fake). |
+| `web-companies.ts` | `namesInText(text, companies)` (whole-word, case-insensitive name prefilter, longest first, capped at 40) and `webCompanies(sql, sector, text)` (a writing-model confirmation; returns ids in the order the text first mentions them). Decision 78. |
 | `retrieval.ts` | `retrieve(sql, scope, question)` → `{ candidates (top 40), skipped }`, scoped by sector, subcategory or selected ids. `loadCompanies(sql, sector, ids)` → those companies in order, if in the sector and still in the source (the session's earlier companies). |
 | `founders.ts` | `parseFounders(html)` (from the `data-page` JSON), `fetchFounders(ycUrl)`, `foundersEnabled()`. |
 | `subcategories.ts` | `generateSubcategories({ sql, sectorId?, minCompanies? })` → per-sector results, and `parseSectorArg(argv)`. |

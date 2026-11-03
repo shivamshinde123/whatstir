@@ -50,7 +50,7 @@ Pick a sector, ask questions in plain English, and watch the companies each answ
 - 🧺 **The basket.** Every company in a sector as a wall of logos, narrowed by AI-suggested problem groups ("Scheduling", "Billing", …) and by name.
 - 💬 **Ask, Explore, Challenge.** Ask questions about the sector, a group, a batch or a hand-picked selection. Answers are written only from the companies' own descriptions and cite the companies they rely on.
 - 🧠 **Follow-ups that remember.** Every company already discussed stays in context for the whole session, so you can just ask "Tell me more about this company".
-- 🌐 **Web search when the data runs out.** Questions about news, funding or anything outside the dataset get a separate, clearly labelled "From the web" part with source links, searched through OpenRouter.
+- 🌐 **Web search when the data runs out.** Questions about news, funding or anything outside the dataset get a separate, clearly labelled "From the web" part with source links, searched through OpenRouter. Companies from your data that it names join the grid too.
 - 🧩 **A grid that grows.** Each cited company flies from the basket into a results grid that builds up over the session. The latest answer's companies are ringed.
 - 🔍 **Compare and profiles.** Open any company for its problem card, founders and links, or compare two or three side by side.
 - 📝 **Notes.** Keep notes on companies or general notes, all listed on one page.

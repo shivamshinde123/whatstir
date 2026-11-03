@@ -150,6 +150,8 @@ export interface WebResult {
   query: string;
   text: string | null;
   sources: WebSource[];
+  /** Companies from this sector that the web text discusses and the database answer didn't cite; they join the grid (decision 78). */
+  companyIds?: number[];
   failed?: boolean;
 }
 
@@ -182,13 +184,15 @@ export function webSources(annotations: Annotated["annotations"]): WebSource[] {
 /**
  * One web-search answer through OpenRouter's `web` plugin (decision 77). The search runs on
  * OpenRouter's side; sources come back as url_citation annotations. Fake mode never searches:
- * "[web-fail]" in the question throws, otherwise it returns a canned result.
+ * "[web-fail]" in the question throws, otherwise it returns a canned result, which names any
+ * companies scripted as "[web-names:Name A|Name B]".
  */
 export async function searchWeb(query: string, question: string, context: string): Promise<Omit<WebResult, "query">> {
   if (isFake()) {
     if (question.includes("[web-fail]")) throw new Error("fake web search failure");
+    const named = question.match(/\[web-names:([^\]]*)\]/)?.[1].split("|").filter(Boolean) ?? [];
     return {
-      text: `From a web search for "${query}": example findings.`,
+      text: `From a web search for "${query}": example findings.${named.length ? ` Also mentioned: ${named.join(", ")}.` : ""}`,
       sources: [
         { url: "https://example.com/news", title: "Example news" },
         { url: "https://example.org/profile", title: "Example profile" },

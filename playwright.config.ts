@@ -6,8 +6,9 @@ const PORT = 3100;
 /** A second server of the same build with the password gate switched on. */
 const GATED_PORT = 3101;
 export const E2E_PASSWORD = "e2e-password";
-// The default provider and models, whatever a local .env says, so /admin's AI line is predictable.
-const AI_DEFAULTS = { AI_MODEL_ANSWER: "", AI_MODEL_WRITE: "", AI_MODEL_EMBED: "", JEV_MODEL: "" };
+// The default models and no real key, whatever a local .env says: /admin's AI line is predictable,
+// and the e2e servers can never spend real OpenRouter credit even if AI_FAKE were dropped.
+const AI_DEFAULTS = { OPENROUTER_API_KEY: "", AI_MODEL_ANSWER: "", AI_MODEL_WRITE: "", AI_MODEL_EMBED: "", JEV_MODEL: "", WEB_SEARCH: "" };
 const SHARED_STATE = /(admin|batch|chat|notes|selection)\.spec\.ts/;
 
 export default defineConfig({

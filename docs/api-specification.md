@@ -91,7 +91,7 @@ Response:
 - **`web`** is `null` unless the model asked for a web search and `WEB_SEARCH` isn't `off` (decision 77).
   - It holds the search `query`, the web answer `text` and up to 8 `sources` (http(s) only).
   - On a failed search it's `{ query, text: null, sources: [], failed: true }`, and the database answer still stands.
-  - Web sources never appear in `companyIds` or the grid. Messages loaded with the session carry `web` too.
+  - Web *sources* (links) never appear in `companyIds` or the grid. But companies from this sector that the web text discusses are confirmed and added (decision 78): they're appended to `companyIds` and `newTileIds`, and listed in `web.companyIds` (only those the database answer didn't already cite). Messages loaded with the session carry `web` too.
 - `skipped` is the number of companies in scope that couldn't be searched because they have no embedding yet.
 - If nothing at all is in scope and the session has no earlier companies, the model isn't called, and the reply is "No companies in <scope> match yet."
 - `companyIds` are the companies the latest answer cites. The grid highlights them.

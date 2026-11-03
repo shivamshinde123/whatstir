@@ -29,6 +29,8 @@ Chat.submit(text) → Workspace.ask(text, scope)
           ├─ answer.filterIds(ids, earlier + candidates)
           ├─ if webQuery and WEB_SEARCH isn't off: ai.searchWeb(webQuery, text, cited names)
           │    (OpenRouter web plugin) → web = { query, text, sources }; on error web = { …, failed: true }
+          ├─ if web.text: webCompanies(sector, web.text): name prefilter → writing-model confirmation
+          │    → web.companyIds (new ones only) appended to companyIds (decision 78)
           ├─ insert messages(role=assistant, company_ids, web)
           ├─ session.appendTiles(sid, mid, ids) → newTileIds
           └─ return { userMessage, message, newTileIds, tiles, skipped }
