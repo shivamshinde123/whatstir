@@ -56,6 +56,7 @@ describe("Chat bubbles", () => {
     content,
     scope: {},
     companyIds: [],
+    web: null,
     status: "ok",
     createdAt: "",
   });
@@ -67,5 +68,43 @@ describe("Chat bubbles", () => {
     const answer = document.querySelector("[data-markdown]")!;
     expect(answer.querySelector("strong")).toHaveTextContent("bold");
     expect(answer.textContent).toBe("It is bold.");
+  });
+
+  it("shows a web search under the answer: labelled, with safe external links, apart from the citations", () => {
+    const m = {
+      ...msg(2, "assistant", "From the companies: Acme."),
+      companyIds: [7],
+      web: {
+        query: "Acme funding",
+        text: "Acme raised a **Series A**.",
+        sources: [
+          { url: "https://news.example.com/acme", title: "Acme raises" },
+          { url: "https://acme.example.org/", title: "acme.example.org" },
+        ],
+      },
+    };
+    render(<Chat {...props} messages={[msg(1, "user", "funding?"), m]} />);
+    const web = screen.getByRole("region", { name: "From the web" });
+    expect(web).toHaveTextContent("From the web");
+    expect(web.querySelector("strong")).toHaveTextContent("Series A");
+    const links = within(screen.getByRole("list", { name: "Web sources" })).getAllByRole("link");
+    expect(links.map((l) => l.textContent)).toEqual(["Acme raises", "acme.example.org"]);
+    for (const l of links) {
+      expect(l).toHaveAttribute("target", "_blank");
+      expect(l).toHaveAttribute("rel", "noopener noreferrer nofollow");
+    }
+    expect(links[0]).toHaveAttribute("href", "https://news.example.com/acme");
+    expect(web).toHaveTextContent("Web results aren't from the YC directory and can be wrong.");
+    expect(screen.getByText("Cites 1 company")).toBeInTheDocument(); // database citations stay separate
+  });
+
+  it("says when the web search failed, and shows no block when none ran", () => {
+    const failed = { ...msg(2, "assistant", "From the companies."), web: { query: "Acme news", text: null, sources: [], failed: true } };
+    const { unmount } = render(<Chat {...props} messages={[failed]} />);
+    expect(screen.getByRole("region", { name: "From the web" })).toHaveTextContent("Couldn't search the web for “Acme news”.");
+    expect(screen.queryByRole("list", { name: "Web sources" })).toBeNull();
+    unmount();
+    render(<Chat {...props} messages={[msg(3, "assistant", "plain")]} />);
+    expect(screen.queryByRole("region", { name: "From the web" })).toBeNull();
   });
 });

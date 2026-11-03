@@ -30,7 +30,7 @@ Seeded with the nine sectors listed in decision 21.
 | `sector_id` | text FK → sectors | The primary sector. |
 | `sector_reason` | text | Filled in when the company landed in `other`, e.g. "industry=Unspecified". |
 | `source_hash` | text | A hash of the source fields; when it changes, the company is re-enriched. |
-| `embedding` | vector(1536) | OpenAI `text-embedding-3-small` embedding of name, one-liner, description and tags. |
+| `embedding` | vector(1536) | `text-embedding-3-small` embedding (through OpenRouter) of name, one-liner, description and tags. |
 | `embedded_hash`, `assigned_hash`, `carded_hash`, `founders_hash` | text | The `source_hash` each enrichment step last finished with (migration 003, decision 36). A step is pending when its hash differs from `source_hash`. The partial index `companies_pending_idx` covers all four. |
 | `first_seen_at`, `refreshed_at` | timestamptz | |
 | `missing_since` | timestamptz | Set when the company drops out of the source. Companies are never deleted. |
@@ -64,7 +64,7 @@ Indexes: an HNSW index on `embedding` (`vector_cosine_ops`), plus indexes on `se
 `session_id` FK, `company_id` FK, `position` int, `added_by` FK → messages, `added_at`. **Primary key `(session_id, company_id)`.** This key is what keeps duplicate tiles impossible. Inserts use `ON CONFLICT DO NOTHING RETURNING company_id`, so the rows returned are exactly the new tiles to animate. A unique constraint on `(session_id, position)` also stops two tiles from sharing a slot. Deleting a session deletes its tiles and messages too.
 
 ### `messages`
-`id` bigserial PK, `session_id` FK, `role` (`user` or `assistant`), `action` (`ask`, `explore`, `challenge`), `content` text, `scope` jsonb (`{subcategoryId, selectedCompanyIds}`), `company_ids` int[] (the companies supporting this answer), `status` (`ok` or `error`), `created_at`.
+`id` bigserial PK, `session_id` FK, `role` (`user` or `assistant`), `action` (`ask`, `explore`, `challenge`), `content` text, `scope` jsonb (`{subcategoryId, selectedCompanyIds}`), `company_ids` int[] (the companies supporting this answer), `web` jsonb (null, or `{query, text, sources[], failed?}` when the answer ran a web search: migration 005, decision 77), `status` (`ok` or `error`), `created_at`.
 
 ## Owner data
 

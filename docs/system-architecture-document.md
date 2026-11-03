@@ -5,9 +5,9 @@
  Browser ──────▶│ proxy.ts (password gate)                          │
   treemap       │ pages: /  /sector/[id]  /admin  /login            │
   workspace     │ route handlers: /api/*                            │
-                │   chat ─────▶ retrieval ──▶ OpenAI gpt-6.1-sol    │
-                │   cron/refresh ─▶ lib/refresh ─▶ OpenAI embed,    │
-                │                         Jev, gpt-6-luna, YC pages │
+                │   chat ─────▶ retrieval ──▶ OpenRouter: answer    │
+                │   cron/refresh ─▶ lib/refresh ─▶ OpenRouter:      │
+                │                 embed, Jev, cards; YC pages       │
                 └───────────────┬──────────────────────────────────┘
                                 │ postgres (pooler, port 6543)
                        ┌────────▼─────────┐
@@ -30,11 +30,13 @@
 3. **Ask.**
    1. The question is embedded with `text-embedding-3-small`.
    2. pgvector finds the top 40 companies within the current scope (sector, plus subcategory if one is selected, or exactly the selected companies).
-   3. `gpt-6.1-sol` receives those 40 companies, each with id, name, one-liner, batch, status and problem card, plus the recent conversation.
-   4. It returns `{ answer, companyIds }` through Structured Outputs (a strict JSON schema).
-   5. The server keeps only ids that were among the candidates.
-   6. The server inserts those companies as tiles with `ON CONFLICT DO NOTHING`.
-   7. The response tells the browser which tiles are new (to animate) and which companies the answer cites (to highlight).
+   3. The companies already in the session's grid are added as "discussed earlier" (decision 76).
+   4. The answer model receives both lists (id, name, one-liner, batch, status and problem card for each) and the session's conversation.
+   5. It returns `{ text, companyIds, webQuery }` through Structured Outputs (a strict JSON schema).
+   6. The server keeps only ids from those two lists.
+   7. When `webQuery` is set, one web-search call through OpenRouter's `web` plugin adds a separate, labelled web part with source links (decision 77).
+   8. The server inserts the cited companies as tiles with `ON CONFLICT DO NOTHING`.
+   9. The response tells the browser which tiles are new (to animate) and which companies the answer cites (to highlight).
 4. **Save.** Notes are stored in the `notes` table, independently of everything else.
 
 ## Why there's no separate backend or queue

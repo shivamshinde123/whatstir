@@ -3,7 +3,7 @@ import type { Sql } from "postgres";
 import { afterAll, beforeAll, beforeEach, describe, expect, it } from "vitest";
 import { createTestDb, insertCompany, resetData } from "@/test/db";
 import { companyText, fakeEmbedding } from "./ai";
-import { retrieve, TOP_K } from "./retrieval";
+import { loadCompanies, retrieve, TOP_K } from "./retrieval";
 
 let sql: Sql;
 let drop: () => Promise<void>;
@@ -94,5 +94,20 @@ describe("retrieve", () => {
       card: { customer: "Clinics", problem: "No-shows", workaround: null, solution: null },
     });
     expect(c[1].card).toBeNull();
+  });
+});
+
+describe("loadCompanies (session context)", () => {
+  it("keeps the given order and drops companies from other sectors, unknown ids and ones missing from the source", async () => {
+    await sql`update companies set missing_since = now() where id = 2`;
+    const out = await loadCompanies(sql, "healthcare", [3, 6, 2, 999, 1]);
+    expect(out.map((c) => c.id)).toEqual([3, 1]);
+    expect(out[0]).toMatchObject({ id: 3, name: expect.any(String) });
+    await sql`update companies set missing_since = null where id = 2`;
+  });
+
+  it("includes companies with no embedding yet, and returns nothing for no ids", async () => {
+    expect((await loadCompanies(sql, "healthcare", [5])).map((c) => c.id)).toEqual([5]);
+    expect(await loadCompanies(sql, "healthcare", [])).toEqual([]);
   });
 });

@@ -44,6 +44,19 @@ const toCandidate = (r: Row): Candidate => ({
   card: r.has_card ? { customer: r.customer, problem: r.problem, workaround: r.workaround, solution: r.solution } : null,
 });
 
+const columns = (sql: Sql) => sql`c.id, c.name, c.one_liner, c.batch, c.status, c.launched_at,
+    p.customer, p.problem, p.workaround, p.solution, p.company_id is not null as has_card`;
+
+/** These companies, in the given order, if they're in the sector and still in the source. */
+export async function loadCompanies(sql: Sql, sectorId: string, ids: number[]): Promise<Candidate[]> {
+  if (!ids.length) return [];
+  const rows = await sql<Row[]>`select ${columns(sql)} from companies c
+    left join problem_cards p on p.company_id = c.id
+    where c.sector_id = ${sectorId} and c.missing_since is null and c.id = any(${ids}::int[])`;
+  const byId = new Map(rows.map((r) => [r.id, r]));
+  return ids.flatMap((id) => (byId.has(id) ? [toCandidate(byId.get(id)!)] : []));
+}
+
 /** Companies the model may cite for this question: the scope, ranked by similarity. */
 export async function retrieve(sql: Sql, scope: Scope, question: string): Promise<Retrieved> {
   const inScope = sql`c.sector_id = ${scope.sectorId} and c.missing_since is null ${
@@ -52,11 +65,8 @@ export async function retrieve(sql: Sql, scope: Scope, question: string): Promis
           where cs.company_id = c.id and cs.subcategory_id = ${scope.subcategoryId})`
       : sql``
   }`;
-  const columns = sql`c.id, c.name, c.one_liner, c.batch, c.status, c.launched_at,
-    p.customer, p.problem, p.workaround, p.solution, p.company_id is not null as has_card`;
-
   if (scope.selectedIds?.length) {
-    const rows = await sql<Row[]>`select ${columns} from companies c
+    const rows = await sql<Row[]>`select ${columns(sql)} from companies c
       left join problem_cards p on p.company_id = c.id
       where ${inScope} and c.id = any(${scope.selectedIds}::int[])`;
     // Keep the user's selection order.
@@ -71,7 +81,7 @@ export async function retrieve(sql: Sql, scope: Scope, question: string): Promis
   const [{ skipped }] = await sql<{ skipped: number }[]>`
     select count(*)::int as skipped from companies c where ${searchable} and c.embedding is null`;
   const [vector] = await embed([question]);
-  const rows = await sql<Row[]>`select ${columns} from companies c
+  const rows = await sql<Row[]>`select ${columns(sql)} from companies c
     left join problem_cards p on p.company_id = c.id
     where ${searchable} and c.embedding is not null
     order by c.embedding <=> ${`[${vector.join(",")}]`}::vector, c.id

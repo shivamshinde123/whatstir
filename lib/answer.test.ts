@@ -85,13 +85,34 @@ describe("buildAnswerInput", () => {
     expect(msg.content).toContain("12 more companies in scope couldn't be searched yet");
   });
 
-  it("puts the last 10 history turns first, in order", () => {
-    const history = Array.from({ length: 14 }, (_, i) => ({ role: (i % 2 ? "assistant" : "user") as "user" | "assistant", content: `t${i}` }));
+  it("puts the last HISTORY_TURNS (40) history turns first, in order", () => {
+    const history = Array.from({ length: 44 }, (_, i) => ({ role: (i % 2 ? "assistant" : "user") as "user" | "assistant", content: `t${i}` }));
     const input = buildAnswerInput({ ...REQ, history }) as { role: string; content: string }[];
-    expect(input).toHaveLength(11);
-    expect(input.slice(0, 10).map((t) => t.content)).toEqual(history.slice(4).map((t) => t.content));
+    expect(input).toHaveLength(41);
+    expect(input.slice(0, 40).map((t) => t.content)).toEqual(history.slice(4).map((t) => t.content));
     expect(input[0].role).toBe("user");
     expect(input[1].role).toBe("assistant");
+  });
+});
+
+describe("session context in the prompt (decision 76)", () => {
+  it("lists earlier session companies in their own section, before this question's matches", () => {
+    const input = buildAnswerInput({ ...REQ, earlier: [cand(7)], candidates: [cand(1)] });
+    const content = input.at(-1)!.content;
+    expect(content).toMatch(/Companies discussed earlier in this session \(id in brackets\):\n- \[7\] Co 7/);
+    expect(content.indexOf("[7]")).toBeLessThan(content.indexOf("Companies matching this question"));
+    expect(content).toMatch(/Companies matching this question \(id in brackets\):\n- \[1\] Co 1/);
+  });
+
+  it("leaves the section out when there are no earlier companies", () => {
+    expect(buildAnswerInput({ ...REQ, earlier: [] }).at(-1)!.content).not.toContain("discussed earlier");
+  });
+
+  it("tells the model how to use earlier companies and when to ask for a web search", () => {
+    const rules = instructionsFor("ask");
+    expect(rules).toMatch(/"Companies discussed earlier in this session" stay available/);
+    expect(rules).toMatch(/"this company", "it" or "them"/);
+    expect(rules).toMatch(/set webQuery to a short web search query/);
   });
 });
 
@@ -129,20 +150,42 @@ describe("answer (AI_FAKE)", () => {
 
 describe("answer (real path, stubbed client)", () => {
   it("calls the answer model with a strict schema and the built input", async () => {
-    const create = vi.fn(async () => ({ output_text: JSON.stringify({ text: "Co 2 sends reminders.", companyIds: [2] }) }));
+    const create = vi.fn(async () => ({
+      choices: [{ message: { content: JSON.stringify({ text: "Co 2 sends reminders.", companyIds: [2] }) } }],
+    }));
     vi.stubEnv("AI_FAKE", "");
-    setOpenAIClient({ responses: { create } } as unknown as OpenAI);
-    expect(await answer(REQ)).toEqual({ text: "Co 2 sends reminders.", companyIds: [2] });
-    const req = (create.mock.calls[0] as unknown[])[0] as { model: string; instructions: string; input: unknown; text: { format: Record<string, unknown> } };
+    setOpenAIClient({ chat: { completions: { create } } } as unknown as OpenAI);
+    expect(await answer(REQ)).toEqual({ text: "Co 2 sends reminders.", companyIds: [2], webQuery: null });
+    const req = (create.mock.calls[0] as unknown[])[0] as {
+      model: string;
+      messages: unknown[];
+      response_format: Record<string, unknown>;
+    };
     expect(req.model).toBe(MODELS.answer);
-    expect(req.instructions).toBe(instructionsFor("ask"));
-    expect(req.input).toEqual(buildAnswerInput(REQ));
-    expect(req.text.format).toMatchObject({ type: "json_schema", name: "answer", strict: true });
+    expect(req.messages).toEqual([{ role: "system", content: instructionsFor("ask") }, ...buildAnswerInput(REQ)]);
+    expect(req.response_format).toMatchObject({ type: "json_schema", json_schema: { name: "answer", strict: true } });
   });
 
   it("copes with a malformed reply", async () => {
     vi.stubEnv("AI_FAKE", "");
-    setOpenAIClient({ responses: { create: async () => ({ output_text: JSON.stringify({ text: 5 }) }) } } as unknown as OpenAI);
-    expect(await answer(REQ)).toEqual({ text: "5", companyIds: [] });
+    setOpenAIClient({
+      chat: { completions: { create: async () => ({ choices: [{ message: { content: JSON.stringify({ text: 5 }) } }] }) } },
+    } as unknown as OpenAI);
+    expect(await answer(REQ)).toEqual({ text: "5", companyIds: [], webQuery: null });
+  });
+
+  it("passes on a web query the model asks for, trimmed and capped", async () => {
+    vi.stubEnv("AI_FAKE", "");
+    const reply = (webQuery: unknown) => ({
+      chat: { completions: { create: async () => ({ choices: [{ message: { content: JSON.stringify({ text: "t", companyIds: [], webQuery }) } }] }) } },
+    });
+    setOpenAIClient(reply("  Co 2 funding 2026 ") as unknown as OpenAI);
+    expect((await answer(REQ)).webQuery).toBe("Co 2 funding 2026");
+    setOpenAIClient(reply("x".repeat(500)) as unknown as OpenAI);
+    expect((await answer(REQ)).webQuery).toHaveLength(200);
+    for (const empty of ["  ", 7, null]) {
+      setOpenAIClient(reply(empty) as unknown as OpenAI);
+      expect((await answer(REQ)).webQuery).toBeNull();
+    }
   });
 });

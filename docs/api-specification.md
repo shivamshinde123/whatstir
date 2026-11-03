@@ -78,11 +78,22 @@ Ends the active session and starts a new one. Returns the same shape as the GET 
 
 Response:
 ```json
-{ "userMessage": { … }, "message": { "id": 42, "role": "assistant", "content": "…", "companyIds": [9, 17], "status": "ok", … },
+{ "userMessage": { … }, "message": { "id": 42, "role": "assistant", "content": "…", "companyIds": [9, 17],
+    "web": { "query": "Acme funding 2026", "text": "…", "sources": [{ "url": "https://…", "title": "…" }] },
+    "status": "ok", … },
   "newTileIds": [17], "tiles": [ … the full tile list … ], "skipped": 0 }
 ```
+- **Context carries through the session (decision 76):**
+  - Every company already in the session's grid (the 100 most recent) is offered to the model again on each question, next to this question's top 40.
+  - The whole conversation (the last 40 messages) is sent too, so "tell me more about this company" works.
+  - Earlier companies can be cited even when the question is narrowed to a group or batch they're not in.
+  - An explicit selection is exactly the selection.
+- **`web`** is `null` unless the model asked for a web search and `WEB_SEARCH` isn't `off` (decision 77).
+  - It holds the search `query`, the web answer `text` and up to 8 `sources` (http(s) only).
+  - On a failed search it's `{ query, text: null, sources: [], failed: true }`, and the database answer still stands.
+  - Web sources never appear in `companyIds` or the grid. Messages loaded with the session carry `web` too.
 - `skipped` is the number of companies in scope that couldn't be searched because they have no embedding yet.
-- If nothing at all is in scope, the model isn't called, and the reply is "No companies in <scope> match yet."
+- If nothing at all is in scope and the session has no earlier companies, the model isn't called, and the reply is "No companies in <scope> match yet."
 - `companyIds` are the companies the latest answer cites. The grid highlights them.
 - `newTileIds` are the companies just added to the grid. Only these animate.
 - If nothing matches, `companyIds` is `[]` and the grid is unchanged.

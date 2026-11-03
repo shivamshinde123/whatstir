@@ -64,6 +64,7 @@ function sessionApi() {
     content,
     scope: { subcategoryId: null, selectedCompanyIds: [] },
     companyIds,
+    web: null,
     status,
     createdAt: "",
   });
@@ -585,8 +586,8 @@ describe("Workspace chat and results grid", () => {
 
   it("restores the grid and the conversation on load, without animating anything", async () => {
     api.seed([12, 10], [
-      { id: 1, role: "user", action: "ask", content: "earlier question", scope: {}, companyIds: [], status: "ok", createdAt: "" },
-      { id: 2, role: "assistant", action: "ask", content: "earlier answer", scope: {}, companyIds: [10], status: "ok", createdAt: "" },
+      { id: 1, role: "user", action: "ask", content: "earlier question", scope: {}, companyIds: [], web: null, status: "ok", createdAt: "" },
+      { id: 2, role: "assistant", action: "ask", content: "earlier answer", scope: {}, companyIds: [10], web: null, status: "ok", createdAt: "" },
     ]);
     await renderReady();
     expect(tileIds()).toEqual([12, 10]);

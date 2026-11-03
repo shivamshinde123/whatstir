@@ -28,7 +28,13 @@ afterEach(() => {
   vi.unstubAllEnvs();
 });
 
-type ResponsesRequest = { model: string; input: string; text: { format: Record<string, unknown> } };
+type ChatRequest = {
+  model: string;
+  messages: { role: string; content: string }[];
+  response_format: { type: string; json_schema: Record<string, unknown> };
+};
+/** A Chat Completions reply whose content is the given JSON. */
+const reply = (body: unknown) => ({ choices: [{ message: { content: JSON.stringify(body) } }] });
 
 /** Switches to the real code path with a stubbed OpenAI client. */
 function realWith(client: Partial<OpenAI>) {
@@ -144,8 +150,8 @@ describe("writeCard", () => {
   });
 
   it("calls the writing model with a strict JSON schema and verifies the result", async () => {
-    const create = vi.fn(async () => ({
-      output_text: JSON.stringify({
+    const create = vi.fn(async () =>
+      reply({
         customer: "Small clinics",
         problem: "Invented problem",
         workaround: null,
@@ -157,13 +163,13 @@ describe("writeCard", () => {
           solution: "Acme books patients automatically.",
         },
       }),
-    }));
-    realWith({ responses: { create } } as unknown as OpenAI);
+    );
+    realWith({ chat: { completions: { create } } } as unknown as OpenAI);
     const c = await writeCard(company);
-    const req = (create.mock.calls[0] as unknown[])[0] as ResponsesRequest;
+    const req = (create.mock.calls[0] as unknown[])[0] as ChatRequest;
     expect(req.model).toBe(MODELS.write);
-    expect(req.text.format).toMatchObject({ type: "json_schema", name: "problem_card", strict: true });
-    expect(req.input).toBe(companyText(company));
+    expect(req.response_format).toMatchObject({ type: "json_schema", json_schema: { name: "problem_card", strict: true } });
+    expect(req.messages.at(-1)).toEqual({ role: "user", content: companyText(company) });
     expect(c).toMatchObject({ customer: "Small clinics", problem: null, solution: "Automatic booking" });
   });
 });
@@ -198,13 +204,13 @@ describe("nameGroups", () => {
       name: n,
       description: `${n} problems`,
     }));
-    const create = vi.fn(async () => ({ output_text: JSON.stringify({ groups }) }));
-    realWith({ responses: { create } } as unknown as OpenAI);
+    const create = vi.fn(async () => reply({ groups }));
+    realWith({ chat: { completions: { create } } } as unknown as OpenAI);
     const out = await nameGroups("Healthcare", ["Books patients", "Bills insurers"]);
-    const req = (create.mock.calls[0] as unknown[])[0] as ResponsesRequest;
+    const req = (create.mock.calls[0] as unknown[])[0] as ChatRequest;
     expect(req.model).toBe(MODELS.write);
-    expect(req.input).toContain("Sector: Healthcare");
-    expect(req.input).toContain("- Bills insurers");
+    expect(req.messages.at(-1)!.content).toContain("Sector: Healthcare");
+    expect(req.messages.at(-1)!.content).toContain("- Bills insurers");
     expect(out.map((x) => x.slug)).toEqual(["scheduling", "billing", "records", "imaging", "pharmacy", "telehealth"]);
   });
 });

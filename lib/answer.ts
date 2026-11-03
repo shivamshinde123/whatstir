@@ -1,5 +1,4 @@
-import type OpenAI from "openai";
-import { isFake, MODELS, structured } from "./ai";
+import { isFake, MODELS, structured, type ChatTurn } from "./ai";
 
 export type Action = "ask" | "explore" | "challenge";
 
@@ -26,6 +25,8 @@ export interface AnswerRequest {
   action: Action;
   question: string;
   candidates: Candidate[];
+  /** Companies cited earlier in this session, kept available until it ends (decision 76). */
+  earlier?: Candidate[];
   /** Companies in scope that couldn't be searched (no embedding yet). */
   skipped: number;
   history: HistoryTurn[];
@@ -34,13 +35,18 @@ export interface AnswerRequest {
 export interface Answer {
   text: string;
   companyIds: number[];
+  /** A web search to run when the listed companies can't answer (decision 77), else null. */
+  webQuery: string | null;
 }
 
-export const HISTORY_TURNS = 10;
+/** The conversation the model sees: the whole session, up to this many recent messages. */
+export const HISTORY_TURNS = 40;
 
 const BASE_RULES = `You help a founder explore Y Combinator startups and the customer problems they solve.
 Rules:
 - Use ONLY the companies listed in the message. Never mention or invent other companies.
+- "Companies discussed earlier in this session" stay available: when the user says "this company", "it" or "them", use the conversation to tell which ones they mean, and cite them.
+- If the question needs facts the listed details and the conversation don't contain (news, funding, founders, customers, pricing, anything recent), answer from what you have and set webQuery to a short web search query (name the company). Otherwise set webQuery to null.
 - Cite every company your answer relies on by putting its id in companyIds. Cite nothing you didn't use.
 - In the text, refer to companies by name. Keep it short: a few sentences or a short list.
 - Say "the company says" for claims from a company's own description; label your own inferences as inferences.
@@ -75,8 +81,11 @@ function describe(c: Candidate): string {
 }
 
 /** The conversation sent to the model: recent history, then the companies and the question. */
-export function buildAnswerInput(req: AnswerRequest): OpenAI.Responses.ResponseInput {
+export function buildAnswerInput(req: AnswerRequest): ChatTurn[] {
   const companies = req.candidates.length ? req.candidates.map(describe).join("\n") : "(none)";
+  const earlier = req.earlier?.length
+    ? `Companies discussed earlier in this session (id in brackets):\n${req.earlier.map(describe).join("\n")}\n\n`
+    : "";
   const skipped = req.skipped
     ? `\n(${req.skipped} more companies in scope couldn't be searched yet and are not listed.)`
     : "";
@@ -84,7 +93,7 @@ export function buildAnswerInput(req: AnswerRequest): OpenAI.Responses.ResponseI
     ...req.history.slice(-HISTORY_TURNS).map((t) => ({ role: t.role, content: t.content })),
     {
       role: "user" as const,
-      content: `Sector: ${req.sectorName}\nScope: ${req.scopeLabel}\nCompanies you may cite (id in brackets):\n${companies}${skipped}\n\nQuestion: ${req.question}`,
+      content: `Sector: ${req.sectorName}\nScope: ${req.scopeLabel}\n${earlier}Companies matching this question (id in brackets):\n${companies}${skipped}\n\nQuestion: ${req.question}`,
     },
   ];
 }
@@ -92,14 +101,15 @@ export function buildAnswerInput(req: AnswerRequest): OpenAI.Responses.ResponseI
 const ANSWER_SCHEMA = {
   type: "object",
   additionalProperties: false,
-  required: ["text", "companyIds"],
+  required: ["text", "companyIds", "webQuery"],
   properties: {
     text: { type: "string" },
     companyIds: { type: "array", items: { type: "integer" } },
+    webQuery: { type: ["string", "null"] },
   },
 };
 
-/** Keeps only ids that were candidates, once each, in the model's order. */
+/** Keeps only ids that were candidates (or earlier companies), once each, in the model's order. */
 export function filterIds(ids: unknown, candidates: { id: number }[]): number[] {
   if (!Array.isArray(ids)) return [];
   const allowed = new Set(candidates.map((c) => c.id));
@@ -115,6 +125,7 @@ export function filterIds(ids: unknown, candidates: { id: number }[]): number[] 
  * "[ids:1,2]" cites exactly those ids, "[fail]" throws; otherwise it cites the first 3 candidates.
  * "[fail-once]" throws unless the same question is already in the history, i.e. on its retry.
  * "[md]" answers in Markdown (bold, a list and a table), like the real model often does.
+ * "[web]" (or "[web-fail]") asks for a web search. Earlier session companies count as candidates.
  */
 function fakeAnswer(req: AnswerRequest): Answer {
   if (req.question.includes("[fail]")) throw new Error("fake model failure");
@@ -125,12 +136,15 @@ function fakeAnswer(req: AnswerRequest): Answer {
   const companyIds = scripted
     ? scripted[1].split(",").filter((s) => s.trim()).map(Number)
     : req.candidates.slice(0, 3).map((c) => c.id);
-  const names = req.candidates.filter((c) => companyIds.includes(c.id)).map((c) => c.name);
+  const all = [...(req.earlier ?? []), ...req.candidates];
+  const names = all.filter((c) => companyIds.includes(c.id)).map((c) => c.name);
+  const webQuery = /\[web(-fail)?\]/.test(req.question) ? `${names[0] ?? req.sectorName} latest news` : null;
   if (req.question.includes("[md]")) {
     const rows = names.map((n) => `| ${n} | ${req.scopeLabel} |`).join("\n");
     return {
       text: `**${names.length} companies** match (${req.action}).\n\n- first point\n- second point\n\n| Company | Scope |\n|---|---|\n${rows}`,
       companyIds,
+      webQuery,
     };
   }
   return {
@@ -138,6 +152,7 @@ function fakeAnswer(req: AnswerRequest): Answer {
       ? `(${req.action}) In ${req.scopeLabel}: ${names.join(", ")}.`
       : `(${req.action}) None of the companies in ${req.scopeLabel} match.`,
     companyIds,
+    webQuery,
   };
 }
 
@@ -151,5 +166,6 @@ export async function answer(req: AnswerRequest): Promise<Answer> {
     "answer",
     ANSWER_SCHEMA,
   );
-  return { text: String(res.text ?? ""), companyIds: Array.isArray(res.companyIds) ? res.companyIds : [] };
+  const webQuery = typeof res.webQuery === "string" && res.webQuery.trim() ? res.webQuery.trim().slice(0, 200) : null;
+  return { text: String(res.text ?? ""), companyIds: Array.isArray(res.companyIds) ? res.companyIds : [], webQuery };
 }

@@ -3,8 +3,8 @@ import type { Sql } from "postgres";
 import { afterAll, beforeAll, beforeEach, describe, expect, it, vi } from "vitest";
 import { createTestDb, insertCompany, resetData } from "@/test/db";
 import { fakeEmbedding } from "./ai";
-import { answer as realAnswer, type AnswerRequest } from "./answer";
-import { MAX_QUESTION_CHARS, parseMessageInput, postMessage, type MessageInput } from "./chat";
+import { answer as realAnswer, HISTORY_TURNS, type AnswerRequest } from "./answer";
+import { MAX_QUESTION_CHARS, parseMessageInput, postMessage, SESSION_CONTEXT_MAX, type MessageInput } from "./chat";
 import { getOrCreateSession, listTiles } from "./session";
 
 let sql: Sql;
@@ -138,11 +138,17 @@ describe("postMessage", () => {
     expect(history.some((h) => h.content.startsWith("Couldn't answer"))).toBe(false);
   });
 
-  it("caps history at the last 10 messages", async () => {
+  it("sends the whole session's conversation, up to the last HISTORY_TURNS messages", async () => {
     for (let i = 0; i < 8; i++) await ask(`q${i} [ids:]`);
     const spy = vi.fn(realAnswer);
     await ask("last", {}, { answer: spy });
-    expect((spy.mock.calls[0][0] as AnswerRequest).history).toHaveLength(10);
+    const history = (spy.mock.calls[0][0] as AnswerRequest).history;
+    expect(history).toHaveLength(16); // all of it: well over the old limit of 10
+    expect(history[0].content).toBe("q0 [ids:]");
+    expect(HISTORY_TURNS).toBe(40);
+    for (let i = 8; i < 22; i++) await ask(`q${i} [ids:]`);
+    await ask("later", {}, { answer: spy });
+    expect((spy.mock.calls[1][0] as AnswerRequest).history).toHaveLength(HISTORY_TURNS);
   });
 
   it("on a model failure: 502, the question is kept, an error reply is stored, the grid is unchanged", async () => {
@@ -296,5 +302,138 @@ describe("parseMessageInput", () => {
     const r = parseMessageInput(body);
     expect(r.ok).toBe(false);
     if (!r.ok) expect(r.error).toMatch(error);
+  });
+});
+
+describe("session context (decision 76)", () => {
+  /** Retrieval that never finds A, like a vague follow-up ("tell me more about it"). */
+  const withoutA = vi.fn(async () => ({
+    candidates: [{ id: B, name: `Company ${B}`, oneLiner: null, batch: null, status: null, launchedAt: null, card: null }],
+    skipped: 0,
+  }));
+
+  it("keeps a company cited earlier citable on a follow-up that doesn't retrieve it", async () => {
+    await ask(`Tell me about A [ids:${A}]`);
+    const spy = vi.fn(realAnswer);
+    const r = await ask(`Tell me more about this company [ids:${A}]`, {}, { retrieve: withoutA, answer: spy });
+    if (r.status !== 200) throw new Error(String(r.status));
+    const req = spy.mock.calls[0][0] as AnswerRequest;
+    expect(req.earlier!.map((c) => c.id)).toEqual([A]);
+    expect(req.candidates.map((c) => c.id)).toEqual([B]);
+    expect(r.body.message.companyIds).toEqual([A]); // not dropped by filterIds
+    expect(await grid()).toEqual([A]);
+  });
+
+  it("carries every company in the grid, newest first, without repeating this question's matches", async () => {
+    await ask(`one [ids:${A},${C}]`);
+    await ask(`two [ids:${D}]`);
+    const spy = vi.fn(realAnswer);
+    await ask("three [ids:]", {}, { retrieve: withoutA, answer: spy });
+    expect((spy.mock.calls[0][0] as AnswerRequest).earlier!.map((c) => c.id)).toEqual([D, C, A]);
+    await ask(`four [ids:${B}]`);
+    await ask("five [ids:]", {}, { retrieve: withoutA, answer: spy });
+    // B is in the grid now, but it's also this question's match, so it's listed once, as a match.
+    expect((spy.mock.calls[1][0] as AnswerRequest).earlier!.map((c) => c.id)).toEqual([D, C, A]);
+  });
+
+  it("still carries earlier companies when the question is narrowed to a group without them", async () => {
+    await ask(`[ids:${A}]`);
+    const r = await ask(`more on it [ids:${A}]`, { subcategoryId: sub }); // the group holds only C and D
+    if (r.status !== 200) throw new Error();
+    expect(r.body.message.companyIds).toEqual([A]);
+  });
+
+  it("answers from earlier companies even when nothing new matches", async () => {
+    await ask(`[ids:${A}]`);
+    const none = vi.fn(async () => ({ candidates: [], skipped: 0 }));
+    const r = await ask(`and its customers? [ids:${A}]`, {}, { retrieve: none });
+    if (r.status !== 200) throw new Error();
+    expect(r.body.message.companyIds).toEqual([A]);
+    expect(r.body.message.content).not.toMatch(/match yet/);
+  });
+
+  it("an explicit selection gets no carry-over: it's exactly the selected companies", async () => {
+    await ask(`[ids:${A}]`);
+    const spy = vi.fn(realAnswer);
+    const r = await ask(`compare [ids:${A},${C}]`, { selectedCompanyIds: [C, D] }, { answer: spy });
+    if (r.status !== 200) throw new Error();
+    expect((spy.mock.calls[0][0] as AnswerRequest).earlier).toEqual([]);
+    expect(r.body.message.companyIds).toEqual([C]);
+  });
+
+  it("never carries a company that has left the source", async () => {
+    await ask(`[ids:${A}]`);
+    await sql`update companies set missing_since = now() where id = ${A}`;
+    const spy = vi.fn(realAnswer);
+    const r = await ask(`more [ids:${A}]`, {}, { retrieve: withoutA, answer: spy });
+    if (r.status !== 200) throw new Error();
+    expect((spy.mock.calls[0][0] as AnswerRequest).earlier).toEqual([]);
+    expect(r.body.message.companyIds).toEqual([]);
+  });
+
+  it("caps the carried companies at SESSION_CONTEXT_MAX", () => {
+    expect(SESSION_CONTEXT_MAX).toBe(100);
+  });
+});
+
+describe("web search (decision 77)", () => {
+  it("adds a web part when the model asks for one, stored apart from the citations", async () => {
+    const r = await ask(`What's the latest news? [ids:${A}] [web]`);
+    if (r.status !== 200) throw new Error();
+    expect(r.body.message.companyIds).toEqual([A]);
+    expect(r.body.message.web).toEqual({
+      query: `Company ${A} latest news`,
+      text: `From a web search for "Company ${A} latest news": example findings.`,
+      sources: [
+        { url: "https://example.com/news", title: "Example news" },
+        { url: "https://example.org/profile", title: "Example profile" },
+      ],
+    });
+    const [row] = await sql`select web from messages where id = ${r.body.message.id}`;
+    expect(row.web.sources).toHaveLength(2);
+    expect(await grid()).toEqual([A]); // web sources never become tiles
+  });
+
+  it("passes the question, the query and the cited companies to the search", async () => {
+    const searchWeb = vi.fn(async () => ({ text: "found", sources: [] }));
+    await ask(`funding? [ids:${A}] [web]`, {}, { searchWeb });
+    expect(searchWeb).toHaveBeenCalledWith(`Company ${A} latest news`, `funding? [ids:${A}] [web]`, `Companies in the conversation: Company ${A}.`);
+  });
+
+  it("keeps the database answer when the web search fails", async () => {
+    vi.spyOn(console, "error").mockImplementation(() => {});
+    const r = await ask(`news? [ids:${A}] [web-fail]`);
+    if (r.status !== 200) throw new Error();
+    expect(r.body.message.companyIds).toEqual([A]);
+    expect(r.body.message.web).toEqual({ query: `Company ${A} latest news`, text: null, sources: [], failed: true });
+  });
+
+  it("doesn't search when the model doesn't ask, or when WEB_SEARCH=off", async () => {
+    const searchWeb = vi.fn();
+    const r1 = await ask(`plain [ids:${A}]`, {}, { searchWeb });
+    if (r1.status !== 200) throw new Error();
+    expect(r1.body.message.web).toBeNull();
+    vi.stubEnv("WEB_SEARCH", "off");
+    const r2 = await ask(`news? [ids:${A}] [web]`, {}, { searchWeb });
+    vi.unstubAllEnvs();
+    if (r2.status !== 200) throw new Error();
+    expect(r2.body.message.web).toBeNull();
+    expect(searchWeb).not.toHaveBeenCalled();
+  });
+
+  it("puts what the web said into later questions' history", async () => {
+    await ask(`news? [ids:${A}] [web]`);
+    const spy = vi.fn(realAnswer);
+    await ask("and then?", {}, { answer: spy });
+    const last = (spy.mock.calls[0][0] as AnswerRequest).history.at(-1)!;
+    expect(last.role).toBe("assistant");
+    expect(last.content).toContain(`From the web (Company ${A} latest news): From a web search`);
+  });
+
+  it("returns web parts when the session is reloaded", async () => {
+    await ask(`news? [ids:${A}] [web]`);
+    const s = (await getOrCreateSession(sql, "healthcare"))!;
+    expect(s.messages.at(-1)!.web?.sources[0].url).toBe("https://example.com/news");
+    expect(s.messages[0].web).toBeNull();
   });
 });

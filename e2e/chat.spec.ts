@@ -110,18 +110,25 @@ test("answers written in Markdown render as formatting, not symbols", async ({ p
 
 test("a no-match answer shows the message and leaves the grid unchanged", async ({ page }) => {
   await open(page);
-  await ask(page, "first [ids:6]");
-  await expect(tiles(page)).toHaveCount(1);
-  await ask(page, "nothing relevant [ids:]");
-  await expect(page.getByText("(ask) None of the companies in Consumer match.")).toBeVisible();
-
-  // A scope with no companies at all answers without the model.
+  // A scope with no companies at all, before anything is in the session, answers without the model.
   const select = page.getByRole("combobox", { name: "Subcategory" });
   const empty = (await select.locator("option").allTextContents()).find((t) => / · 0$/.test(t))!;
   const group = empty.replace(/ · 0$/, "");
   await select.selectOption({ label: empty });
   await ask(page, "anyone?");
   await expect(page.getByText(`No companies in Consumer › ${group} match yet.`)).toBeVisible();
+  await expect(tiles(page)).toHaveCount(0);
+
+  await select.selectOption({ index: 0 });
+  await ask(page, "first [ids:6]");
+  await expect(tiles(page)).toHaveCount(1);
+  await ask(page, "nothing relevant [ids:]");
+  await expect(page.getByText("(ask) None of the companies in Consumer match.")).toBeVisible();
+
+  // Once a company is in the session, even the empty group can still talk about it (decision 76).
+  await select.selectOption({ label: empty });
+  await ask(page, "and this one? [ids:6]");
+  await expect(page.locator('li[data-action="ask"]').last()).toContainText("iCracked");
   expect(await tileIds(page)).toEqual([6]);
 });
 
@@ -245,4 +252,41 @@ test("60 cited companies: the count says 60 and every tile is reachable by scrol
     await expect(t).toBeInViewport();
     await expect(t).toHaveAccessibleName(`Result ${String(i + 1).padStart(2, "0")}, cited by the latest answer`);
   }
+});
+
+test("a follow-up keeps the company from earlier, even in a group that doesn't hold it", async ({ page, request }) => {
+  await open(page);
+  await ask(page, "Tell me about iCracked [ids:6]");
+  await expect(tiles(page)).toHaveCount(1);
+
+  // Pick a group that doesn't contain company 6, so this question's own search can't find it.
+  const sector = await (await request.get("/api/sectors/consumer")).json();
+  const icracked = sector.companies.find((c: { id: number }) => c.id === 6);
+  const other = sector.subcategories.find((s: { id: number }) => !icracked.subcategoryIds.includes(s.id));
+  await page.getByRole("combobox", { name: "Subcategory" }).selectOption({ value: String(other.id) });
+
+  await ask(page, "Tell me more about this company [ids:6]");
+  const answers = page.locator('li[data-action="ask"]');
+  await expect(answers.last()).toContainText("iCracked");
+  await expect(answers.last()).toContainText("Cites 1 company");
+  await expect(page.locator('[data-tile-id="6"][data-cited]')).toHaveCount(1);
+});
+
+test("a question the dataset can't answer gets a labelled web part with sources, outside the grid", async ({ page }) => {
+  await open(page);
+  await ask(page, "What's the latest news on iCracked? [ids:6] [web]");
+  const web = page.getByRole("region", { name: "From the web" });
+  await expect(web).toBeVisible();
+  await expect(web).toContainText('From a web search for "iCracked latest news"');
+  const links = page.getByRole("list", { name: "Web sources" }).getByRole("link");
+  await expect(links).toHaveCount(2);
+  await expect(links.first()).toHaveAttribute("href", "https://example.com/news");
+  await expect(links.first()).toHaveAttribute("rel", "noopener noreferrer nofollow");
+  await expect(tiles(page)).toHaveCount(1); // only the cited company, never web sources
+
+  // It survives a reload, and a failed search keeps the answer.
+  await page.reload();
+  await expect(page.getByRole("region", { name: "From the web" })).toBeVisible();
+  await ask(page, "And their funding? [ids:6] [web-fail]");
+  await expect(page.getByText("Couldn't search the web for “iCracked latest news”.")).toBeVisible();
 });

@@ -16,15 +16,20 @@ Chat.submit(text) → Workspace.ask(text, scope)
      ├─ parseMessageInput(body)          → 400 if invalid
      └─ chat.postMessage(sql, sid, input)
           ├─ session exists? (404) still active? (409); subcategory in sector? (400)
-          ├─ history = last 10 ok messages
+          ├─ history = the session's last 40 ok messages (web text appended to assistant turns)
+          ├─ earlierIds = the session's grid companies, newest first (≤ 100; none for a selection)
           ├─ insert messages(role=user, scope)
           ├─ retrieval.retrieve(scope, text)
-          │    ├─ ai.embed([text])                (text-embedding-3-small)
+          │    ├─ ai.embed([text])                (text-embedding-3-small via OpenRouter)
           │    └─ SQL: pgvector top 40 within scope (+ count skipped)
-          ├─ answer.answer(...)                   (gpt-6.1-sol, Structured Outputs); skipped if no candidates
+          ├─ retrieval.loadCompanies(sector, earlierIds not already matched) → earlier
+          ├─ answer.answer({ candidates, earlier, history, … })   (Structured Outputs: text, companyIds, webQuery);
+          │    │                                                    skipped only if candidates AND earlier are empty
           │    └─ on error: insert assistant(status=error) → 502 retryable
-          ├─ answer.filterIds(ids, candidates)
-          ├─ insert messages(role=assistant, company_ids)
+          ├─ answer.filterIds(ids, earlier + candidates)
+          ├─ if webQuery and WEB_SEARCH isn't off: ai.searchWeb(webQuery, text, cited names)
+          │    (OpenRouter web plugin) → web = { query, text, sources }; on error web = { …, failed: true }
+          ├─ insert messages(role=assistant, company_ids, web)
           ├─ session.appendTiles(sid, mid, ids) → newTileIds
           └─ return { userMessage, message, newTileIds, tiles, skipped }
 Workspace state update
