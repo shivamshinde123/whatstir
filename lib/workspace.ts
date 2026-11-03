@@ -15,6 +15,7 @@ export interface BasketCompany {
   name: string;
   logoUrl: string | null;
   status: string | null;
+  batch: string | null;
   subcategoryIds: number[];
 }
 
@@ -41,8 +42,8 @@ export async function getSectorWorkspace(sql: Sql, sectorId: string): Promise<Se
     // AI first, then problem groups largest first, Unclassified last.
     .sort((a, b) => KIND_ORDER[a.kind] - KIND_ORDER[b.kind] || b.count - a.count || a.name.localeCompare(b.name));
 
-  const rows = await sql<{ id: number; name: string; logo_url: string | null; status: string | null; subs: string[] }[]>`
-    select c.id, c.name, c.logo_url, c.status,
+  const rows = await sql<{ id: number; name: string; logo_url: string | null; status: string | null; batch: string | null; subs: string[] }[]>`
+    select c.id, c.name, c.logo_url, c.status, c.batch,
       coalesce(array_agg(cs.subcategory_id order by cs.subcategory_id)
         filter (where cs.subcategory_id is not null), '{}') as subs
     from companies c
@@ -59,6 +60,7 @@ export async function getSectorWorkspace(sql: Sql, sectorId: string): Promise<Se
       name: r.name,
       logoUrl: r.logo_url,
       status: r.status,
+      batch: r.batch,
       subcategoryIds: r.subs.map(Number),
     })),
   };

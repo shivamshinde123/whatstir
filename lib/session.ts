@@ -14,7 +14,7 @@ export interface Message {
   role: "user" | "assistant";
   action: Action;
   content: string;
-  scope: { subcategoryId?: number | null; selectedCompanyIds?: number[] };
+  scope: { subcategoryId?: number | null; batch?: string | null; selectedCompanyIds?: number[] };
   companyIds: number[];
   status: "ok" | "error";
   createdAt: string;

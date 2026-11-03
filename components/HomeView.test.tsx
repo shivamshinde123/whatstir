@@ -17,6 +17,11 @@ const DATA = {
   total: 6362,
   activeTotal: 4396,
   lastRefreshAt: "2026-11-02T11:00:00.000Z",
+  batches: [
+    { name: "Fall 2026", total: 201, active: 199, sectors: { b2b: { total: 120, active: 119 }, fintech: { total: 81, active: 80 } } },
+    { name: "Spring 2025", total: 144, active: 120, sectors: { b2b: { total: 100, active: 90 }, healthcare: { total: 44, active: 30 } } },
+    { name: "Summer 2005", total: 8, active: 0, sectors: { b2b: { total: 8, active: 0 } } },
+  ],
   gate: false,
 };
 
@@ -135,5 +140,81 @@ describe("HomeView", () => {
     render(<HomeView />);
     const signOut = await screen.findByRole("button", { name: "Sign out" });
     expect(signOut.closest("form")).toHaveAttribute("action", "/api/logout");
+  });
+});
+
+describe("batch filter", () => {
+  const tiles = () => [...document.querySelectorAll<HTMLAnchorElement>('ul[aria-label="Sectors sized by number of companies"] a')];
+  const labels = () => tiles().map((a) => a.getAttribute("aria-label"));
+  beforeEach(() => window.history.replaceState(null, "", "/"));
+
+  it("lists every batch, newest first, with counts, after All batches", async () => {
+    render(<HomeView />);
+    const select = await screen.findByRole("combobox", { name: "Batch" });
+    expect([...(select as HTMLSelectElement).options].map((o) => o.textContent)).toEqual([
+      "All batches",
+      "Fall 2026 · 201",
+      "Spring 2025 · 144",
+      "Summer 2005 · 8",
+    ]);
+  });
+
+  it("re-sizes the treemap to the batch, updates the subtitle, and links tiles with the batch", async () => {
+    render(<HomeView />);
+    fireEvent.change(await screen.findByRole("combobox", { name: "Batch" }), { target: { value: "Fall 2026" } });
+    expect(labels().sort()).toEqual(["B2B, 120 companies", "Fintech, 81 companies"]);
+    expect(screen.getByText(/^201 companies in Fall 2026/)).toBeInTheDocument();
+    expect(tiles().every((a) => a.getAttribute("href")!.endsWith("?batch=Fall%202026"))).toBe(true);
+    expect(window.location.search).toBe("?batch=Fall+2026");
+  });
+
+  it("combines with Active only, and says so when nothing is left", async () => {
+    render(<HomeView />);
+    fireEvent.change(await screen.findByRole("combobox", { name: "Batch" }), { target: { value: "Spring 2025" } });
+    fireEvent.click(screen.getByRole("button", { name: "Active only" }));
+    expect(labels().sort()).toEqual(["B2B, 90 companies", "Healthcare, 30 companies"]);
+    expect(screen.getByText(/^120 active companies in Spring 2025/)).toBeInTheDocument();
+
+    fireEvent.change(screen.getByRole("combobox", { name: "Batch" }), { target: { value: "Summer 2005" } });
+    expect(screen.getByText("No active companies in Summer 2005.")).toBeInTheDocument();
+    expect(tiles()).toHaveLength(0);
+    fireEvent.click(screen.getByRole("button", { name: "Show all companies" }));
+    expect(labels()).toEqual(["B2B, 8 companies"]);
+  });
+
+  it("All batches (or Clear batch) restores everything", async () => {
+    render(<HomeView />);
+    const select = await screen.findByRole("combobox", { name: "Batch" });
+    fireEvent.change(select, { target: { value: "Fall 2026" } });
+    fireEvent.click(screen.getByRole("button", { name: "Clear batch" }));
+    expect(tiles()).toHaveLength(9);
+    expect(tiles()[0].getAttribute("href")).not.toContain("batch");
+    expect(window.location.search).toBe("");
+    fireEvent.change(select, { target: { value: "Fall 2026" } });
+    fireEvent.change(select, { target: { value: "" } });
+    expect(tiles()).toHaveLength(9);
+  });
+
+  it("starts with the batch in the URL (coming back from a sector), ignoring unknown ones", async () => {
+    window.history.replaceState(null, "", "/?batch=Spring+2025");
+    render(<HomeView />);
+    expect(await screen.findByText(/^144 companies in Spring 2025/)).toBeInTheDocument();
+    expect(screen.getByRole("combobox", { name: "Batch" })).toHaveValue("Spring 2025");
+  });
+
+  it("ignores a batch in the URL that doesn't exist", async () => {
+    window.history.replaceState(null, "", "/?batch=Nope+1999");
+    render(<HomeView />);
+    expect(await screen.findByText(/^6,362 companies from yc-oss/)).toBeInTheDocument();
+    expect(screen.getByRole("combobox", { name: "Batch" })).toHaveValue("");
+  });
+
+  it("filters the list view too, and links its rows with the batch", async () => {
+    render(<HomeView />);
+    fireEvent.change(await screen.findByRole("combobox", { name: "Batch" }), { target: { value: "Fall 2026" } });
+    fireEvent.click(screen.getByRole("button", { name: "Show as list" }));
+    const rows = screen.getAllByRole("link", { name: /companies$/ }).filter((a) => a.closest("ul")?.tagName === "UL" && !a.closest('[aria-label="Sectors sized by number of companies"]'));
+    expect(rows.map((a) => a.getAttribute("aria-label"))).toEqual(["B2B, 120 companies", "Fintech, 81 companies"]);
+    expect(rows[0]).toHaveAttribute("href", "/sector/b2b?batch=Fall%202026");
   });
 });

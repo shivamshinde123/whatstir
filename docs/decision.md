@@ -108,6 +108,8 @@ Listed in the order they were made. Decisions 1–14 are recorded in §16 of [in
 
 68. **The workspace is a one-screen app on desktop** (the owner's request): a compact title line, wrapping group chips, and the three columns filling the rest of the viewport (`lg:h-dvh`, columns `flex-1` with a `minmax(0,1fr)` row). This supersedes the fixed `calc(100dvh - 18rem)` column height, which wasted the top of the page. The header wordmark grows to 20 px, and every page has a "Made by Shivam" footer.
 
+69. **The home page filters by YC batch** (the owner's request). `/api/sectors` returns per-batch, per-sector total and active counts (about 460 rows), so changing the batch is instant, with no request. Batches are ordered newest first in calendar order (Winter, Spring, Summer, Fall), by `lib/batches.ts`. The batch goes in the URL (`/?batch=Fall+2026`). Tiles carry it into the sector (`?batch=`), where it narrows the basket, the group counts **and questions** (the owner asked for questions to follow it). The scope chip shows the batch ("Fall 2026 B2B"), retrieval adds `batch = …`, and the batch is saved in each message's scope, so Retry keeps it. Clearing the chip (×) widens everything back to all batches. An explicit selection ("Ask about these") ignores the batch, since those companies were picked by hand. A single batch at a time; multi-select or ranges can come later if needed.
+
 ## Open items
 
 - **A. Founder data.** Founders come from YC company pages. Check YC's terms before production use. Until then, the founder fetch can be switched off with `FOUNDERS_FETCH=off`.

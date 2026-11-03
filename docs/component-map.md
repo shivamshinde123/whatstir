@@ -18,6 +18,7 @@
 | `Treemap` | Draws the laid-out `Tile[]` as absolutely positioned links with labels, the compact and tiny variants, and sector tints (`lib/sector-style.ts`). | — |
 | `Workspace` (client) | The three-column layout. Owns the selected subcategory, the name filter and the open profile, including putting focus back afterwards. The session, tiles and messages are added in #9 and #10. | `GET /api/sectors/:id` |
 | `SiteFooter` | "Made by Shivam" and the "Not affiliated with Y Combinator" attribution, on every page. | — |
+| `HomeView` batch filter | A `<select aria-label="Batch">` over `batches`, with the choice kept in `?batch=`. It passes `?batch=` into `Treemap` and the list links. | `/api/sectors` |
 | `SubcategoryBar` | Chips for All, the subcategories with counts, AI and Unclassified, plus an "AI-suggested" label. | — |
 | `Basket` | A wall of logos for the companies in scope, styled with `content-visibility: auto`, with a name filter and an "N of M" count. Clicking opens the profile. Each cell carries `data-company-id`, which the grid's flight uses as its starting point. Companies already in the grid stay as faded ghosts (`data-collected`). | — |
 | `StatusBadge` | A small pill: Active green, Acquired blue, Public purple, Inactive or unknown grey. | — |

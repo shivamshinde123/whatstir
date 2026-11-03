@@ -52,6 +52,9 @@ tile checkbox → Workspace.toggle(id) → selected: number[] (ordered, ≤ 20)
 ```
 The Ask / Explore / Challenge switch sets `action` on the next POST. Retry reuses the failed message's action and scope.
 
+## Batch filter
+`HomeView` → `GET /api/sectors` (now with `batches`: every batch with total and active counts per sector, from `getSectorOverview`) → the Batch `<select>` → the treemap items use that batch's per-sector counts (combined with Active only), the URL becomes `/?batch=…`, and tiles link to `/sector/:id?batch=…`. `Workspace` reads `?batch=` once the sector loads → `inBatch` filters the basket, and the group chips are recounted for that batch → questions send `batch` too, so `retrieve` adds `c.batch = …` (unless it's an explicit selection), and the scope chip and suggestions read "Fall 2026 B2B" → the chip's × clears the batch everywhere, including the URL.
+
 ## Selecting a subcategory
 `SubcategoryBar.onChange(id)` → `Workspace.subcategoryId` changes → the basket is filtered in the browser using each company's `subcategoryIds` → the scope chip updates. Nothing is sent to the server, and the grid is not touched.
 

@@ -33,6 +33,8 @@ function useSize<T extends HTMLElement>() {
 export default function HomeView() {
   const [state, setState] = useState<State>({ kind: "loading" });
   const [activeOnly, setActiveOnly] = useState(false);
+  /** The chosen YC batch ("Fall 2026"), or null for all. Kept in the URL so "‹ All sectors" returns to it. */
+  const [batch, setBatchState] = useState<string | null>(null);
   const [asList, setAsList] = useState(false);
   const [mapRef, size] = useSize<HTMLDivElement>();
 
@@ -41,7 +43,10 @@ export default function HomeView() {
     try {
       const res = await fetch("/api/sectors", { cache: "no-store" });
       if (!res.ok) throw new Error(String(res.status));
-      setState({ kind: "ready", data: (await res.json()) as Data });
+      const data = (await res.json()) as Data;
+      setState({ kind: "ready", data });
+      const wanted = new URLSearchParams(window.location.search).get("batch");
+      if (wanted && data.batches.some((b) => b.name === wanted)) setBatchState(wanted);
     } catch {
       setState({ kind: "error" });
     }
@@ -52,17 +57,32 @@ export default function HomeView() {
     void load();
   }, [load]);
 
+  const setBatch = useCallback((b: string | null) => {
+    setBatchState(b);
+    const url = new URL(window.location.href);
+    if (b) url.searchParams.set("batch", b);
+    else url.searchParams.delete("batch");
+    window.history.replaceState(null, "", url);
+  }, []);
+
+  const data = state.kind === "ready" ? state.data : null;
+  const chosen = data && batch ? (data.batches.find((b) => b.name === batch) ?? null) : null;
   const items = useMemo(
     () =>
-      state.kind === "ready"
-        ? state.data.sectors.map((s) => ({ id: s.id, name: s.name, count: activeOnly ? s.active : s.total }))
+      data
+        ? data.sectors.map((s) => {
+            const counts = chosen ? (chosen.sectors[s.id] ?? { total: 0, active: 0 }) : s;
+            return { id: s.id, name: s.name, count: activeOnly ? counts.active : counts.total };
+          })
         : [],
-    [state, activeOnly],
+    [data, chosen, activeOnly],
   );
   const tiles = useMemo(() => layoutTreemap(items, size.width, size.height), [items, size]);
-  const data = state.kind === "ready" ? state.data : null;
-  const shown = data ? (activeOnly ? data.activeTotal : data.total) : 0;
+  const shown = data ? (chosen ? (activeOnly ? chosen.active : chosen.total) : activeOnly ? data.activeTotal : data.total) : 0;
   const empty = data !== null && data.total === 0;
+  /** Data exists, but not for this batch (or not active in it). */
+  const noMatch = data !== null && !empty && shown === 0;
+  const query = chosen ? `?batch=${encodeURIComponent(chosen.name)}` : "";
 
   return (
     <>
@@ -71,12 +91,13 @@ export default function HomeView() {
         <h1 className="text-headline">Explore startups by sector</h1>
         <p className="mt-2 text-text-secondary" aria-live="polite">
           {data && !empty
-            ? `${fmt.format(shown)} ${activeOnly ? "active " : ""}companies from yc-oss` +
+            ? `${fmt.format(shown)} ${activeOnly ? "active " : ""}${shown === 1 ? "company" : "companies"} ${chosen ? `in ${chosen.name}` : "from yc-oss"}` +
               (data.lastRefreshAt ? ` · updated ${dateFmt.format(new Date(data.lastRefreshAt))}` : "")
             : " "}
         </p>
 
         <div className="mt-6 flex flex-wrap items-center justify-between gap-3">
+          <div className="flex flex-wrap items-center gap-2">
           <div role="group" aria-label="Which companies to count" className="inline-flex rounded-full bg-surface p-0.5 text-sm">
             {[
               { label: "All companies", value: false },
@@ -92,6 +113,27 @@ export default function HomeView() {
                 {o.label}
               </button>
             ))}
+          </div>
+          {data && data.batches.length > 0 && (
+            <select
+              aria-label="Batch"
+              value={chosen?.name ?? ""}
+              onChange={(e) => setBatch(e.target.value || null)}
+              className="pressable h-8 cursor-pointer rounded-full border-0 bg-surface pl-4 pr-8 text-sm outline-none focus-visible:ring-2 focus-visible:ring-accent"
+            >
+              <option value="">All batches</option>
+              {data.batches.map((b) => (
+                <option key={b.name} value={b.name}>
+                  {b.name} · {fmt.format(activeOnly ? b.active : b.total)}
+                </option>
+              ))}
+            </select>
+          )}
+          {chosen && (
+            <button type="button" onClick={() => setBatch(null)} className="pressable text-sm text-link hover:underline">
+              Clear batch
+            </button>
+          )}
           </div>
           <button
             type="button"
@@ -131,17 +173,27 @@ export default function HomeView() {
             </div>
           )}
 
-          {data && !empty && <Treemap tiles={tiles} />}
+          {noMatch && (
+            <div className="flex h-full flex-col items-center justify-center gap-2 rounded-[var(--radius-card)] bg-surface text-center">
+              <p className="font-medium">No {activeOnly ? "active " : ""}companies in {chosen?.name}.</p>
+              <button type="button" onClick={() => setActiveOnly(false)} hidden={!activeOnly} className="pressable text-sm text-link hover:underline">
+                Show all companies
+              </button>
+            </div>
+          )}
+
+          {data && !empty && !noMatch && <Treemap tiles={tiles} query={query} />}
         </div>
 
         {asList && data && !empty && (
           <ul className="mt-4 divide-y divide-separator overflow-hidden rounded-[var(--radius-card)] bg-surface">
             {[...items]
+              .filter((s) => !chosen || s.count > 0)
               .sort((a, b) => b.count - a.count)
               .map((s) => (
                 <li key={s.id}>
                   <Link
-                    href={`/sector/${s.id}`}
+                    href={`/sector/${s.id}${query}`}
                     aria-label={tileLabel(s)}
                     className="flex items-center justify-between px-4 py-3 hover:bg-bg/60"
                   >

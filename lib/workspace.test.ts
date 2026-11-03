@@ -10,7 +10,7 @@ import { SECTOR_NAMES } from "./sector";
 import { generateSubcategories } from "./subcategories";
 import { getCompanyProfile, getSectorWorkspace } from "./workspace";
 
-const FIXTURE: { id: number; name: string; industry?: string }[] = JSON.parse(
+const FIXTURE: { id: number; name: string; industry?: string; batch?: string }[] = JSON.parse(
   readFileSync(path.join(process.cwd(), "test", "fixtures", "yc-sample.json"), "utf8"),
 );
 
@@ -56,8 +56,12 @@ describe("getSectorWorkspace", () => {
       name: expect.any(String),
       logoUrl: expect.toBeOneOf([expect.any(String), null]),
       status: expect.any(String),
+      batch: expect.toBeOneOf([expect.any(String), null]),
       subcategoryIds: expect.any(Array),
     });
+    // Each company carries its batch, for the batch filter.
+    const muse = w.companies.find((c) => c.name === "The Muse")!;
+    expect(muse.batch).toBe(FIXTURE.find((c) => c.name === "The Muse")!.batch);
   });
 
   it("orders groups AI first, problem groups by size, Unclassified last, with counts that match", async () => {

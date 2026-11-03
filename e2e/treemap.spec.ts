@@ -117,7 +117,7 @@ test.describe("sector treemap", () => {
   test("explains an empty dataset", async ({ page }) => {
     await page.route("**/api/sectors", (route) =>
       route.fulfill({
-        json: { sectors: [], total: 0, activeTotal: 0, lastRefreshAt: null, gate: false },
+        json: { sectors: [], total: 0, activeTotal: 0, lastRefreshAt: null, batches: [], gate: false },
       }),
     );
     await page.goto("/");

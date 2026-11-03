@@ -23,6 +23,8 @@
 - **Source unavailable:** "Couldn't load data. Retry."
 - **Empty:** "No companies loaded yet. Run the backfill."
 
+**Batch filter (home):** a "Batch" dropdown sits next to All companies / Active only: "All batches", then every batch newest first with its count ("Fall 2026 · 201"). Choosing one re-sizes the treemap and updates the subtitle ("201 companies in Fall 2026"), and a "Clear batch" link appears. If the batch has no companies (or no active ones), the map shows "No active companies in Summer 2005." with "Show all companies".
+
 ## 2. Workspace
 ```
 ┌ ← Sectors  Healthcare · 708 ─────────────────────────────────────────────┐

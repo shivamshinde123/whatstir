@@ -6,7 +6,7 @@ const PORT = 3100;
 /** A second server of the same build with the password gate switched on. */
 const GATED_PORT = 3101;
 export const E2E_PASSWORD = "e2e-password";
-const SHARED_STATE = /(admin|chat|notes|selection)\.spec\.ts/;
+const SHARED_STATE = /(admin|batch|chat|notes|selection)\.spec\.ts/;
 
 export default defineConfig({
   testDir: "./e2e",

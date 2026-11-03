@@ -49,6 +49,7 @@ The checks live in `lib/session.test.ts` and `lib/chat.test.ts`:
 - Tiles cited by the latest answer get an accent ring (`CITED_CLASS`). Selected tiles get an accent tint and a ticked checkbox (`SELECTED_CLASS`). The two looks are deliberately different, and a tile can have both.
 
 ## Selection, Compare and actions
+- **Batch scope:** with a batch carried over from the home page, questions send `batch`, retrieval narrows to `c.batch = batch` (combined with any group), and the label reads "Sector › Group · Batch". An explicit selection ignores it.
 - **Selection** lives in `Workspace` as an ordered list of ids (at most 20, the server's `MAX_SELECTED`). It isn't saved: a reload or New session clears it.
 - **Ask about these** turns on selection scope: questions send `selectedCompanyIds` (and no subcategory), and the chip reads "N selected". The server then retrieves exactly those companies, so the answer can only cite them. Scope returns to the sector or group with the chip's ×, Clear, or unticking everything.
 - **Compare** fetches each selected profile and shows a native modal `<dialog>`. Compare needs 2–3 companies; with any other count the button is disabled and says why.

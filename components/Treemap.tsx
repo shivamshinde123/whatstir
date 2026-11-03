@@ -7,7 +7,7 @@ export const tileLabel = (t: Pick<Tile, "name" | "count">) =>
   `${t.name}, ${fmt.format(t.count)} ${t.count === 1 ? "company" : "companies"}`;
 
 /** Absolutely positioned sector tiles. Each is a link into that sector's workspace. */
-export default function Treemap({ tiles }: { tiles: Tile[] }) {
+export default function Treemap({ tiles, query = "" }: { tiles: Tile[]; query?: string }) {
   return (
     <ul className="relative h-full w-full" aria-label="Sectors sized by number of companies">
       {tiles.map((t) => {
@@ -21,7 +21,7 @@ export default function Treemap({ tiles }: { tiles: Tile[] }) {
             style={{ left: t.x, top: t.y, width: t.w, height: t.h }}
           >
             <Link
-              href={`/sector/${t.id}`}
+              href={`/sector/${t.id}${query}`}
               aria-label={tileLabel(t)}
               title={tileLabel(t)}
               data-compact={compact || undefined}

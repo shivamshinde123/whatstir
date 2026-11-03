@@ -37,6 +37,8 @@ export default function Workspace({ sectorId, sectorName }: { sectorId: string; 
   const [selected, setSelected] = useState<number[]>([]);
   const [askSelected, setAskSelected] = useState(false);
   const [comparing, setComparing] = useState(false);
+  /** A YC batch carried over from the home page's filter (?batch=); narrows the basket only. */
+  const [batch, setBatchState] = useState<string | null>(null);
   // Questions go to the selection only while "Ask about these" is on and something is selected.
   const selectionScope = askSelected && selected.length > 0;
 
@@ -49,7 +51,10 @@ export default function Workspace({ sectorId, sectorName }: { sectorId: string; 
       setSession(s);
       setFresh(NONE);
       setState({ kind: "ready", data });
-      const linked = Number(new URLSearchParams(window.location.search).get("company"));
+      const params = new URLSearchParams(window.location.search);
+      const wantedBatch = params.get("batch");
+      if (wantedBatch && data.companies.some((c) => c.batch === wantedBatch)) setBatchState(wantedBatch);
+      const linked = Number(params.get("company"));
       if (Number.isSafeInteger(linked) && linked > 0) {
         setProfileId(linked);
         setProfileOpen(true);
@@ -64,28 +69,42 @@ export default function Workspace({ sectorId, sectorName }: { sectorId: string; 
     void load();
   }, [load]);
 
+  const clearBatch = useCallback(() => {
+    setBatchState(null);
+    const url = new URL(window.location.href);
+    url.searchParams.delete("batch");
+    window.history.replaceState(null, "", url);
+  }, []);
+
   const data = state.kind === "ready" ? state.data : null;
+  const inBatch = useMemo(() => (data ? data.companies.filter((c) => !batch || c.batch === batch) : []), [data, batch]);
+  // With a batch chosen, the group chips count only that batch's companies, so they match the basket.
+  const subcategories = useMemo(
+    () =>
+      !data || !batch
+        ? (data?.subcategories ?? [])
+        : data.subcategories.map((s) => ({ ...s, count: inBatch.filter((c) => c.subcategoryIds.includes(s.id)).length })),
+    [data, batch, inBatch],
+  );
   const inScope = useMemo(
-    () => (data ? data.companies.filter((c) => subcategory === null || c.subcategoryIds.includes(subcategory)) : []),
-    [data, subcategory],
+    () => inBatch.filter((c) => subcategory === null || c.subcategoryIds.includes(subcategory)),
+    [inBatch, subcategory],
   );
   const shown = useMemo(() => {
     const q = query.trim().toLowerCase();
     return q ? inScope.filter((c) => c.name.toLowerCase().includes(q)) : inScope;
   }, [inScope, query]);
-  const scopeName = selectionScope
-    ? `${selected.length} selected`
-    : subcategory === null
-      ? sectorName
-      : (data?.subcategories.find((s) => s.id === subcategory)?.name ?? sectorName);
+  const groupName = subcategory === null ? sectorName : (data?.subcategories.find((s) => s.id === subcategory)?.name ?? sectorName);
+  // Questions follow the batch too ("Fall 2026 B2B"); an explicit selection is just those companies.
+  const scopeName = selectionScope ? `${selected.length} selected` : batch ? `${batch} ${groupName}` : groupName;
 
   const ask = useCallback(
     async (
       text: string,
       action: Action = "ask",
       scope: Message["scope"] = selectionScope
-        ? { subcategoryId: null, selectedCompanyIds: selected }
-        : { subcategoryId: subcategory, selectedCompanyIds: [] },
+        ? { subcategoryId: null, batch: null, selectedCompanyIds: selected }
+        : { subcategoryId: subcategory, batch, selectedCompanyIds: [] },
     ) => {
       if (!session) return;
       setPending(text);
@@ -94,7 +113,13 @@ export default function Workspace({ sectorId, sectorName }: { sectorId: string; 
         const res = await fetch(`/api/sessions/${session.session.id}/messages`, {
           method: "POST",
           headers: { "content-type": "application/json" },
-          body: JSON.stringify({ text, action, subcategoryId: scope.subcategoryId ?? null, selectedCompanyIds: scope.selectedCompanyIds ?? [] }),
+          body: JSON.stringify({
+            text,
+            action,
+            subcategoryId: scope.subcategoryId ?? null,
+            batch: scope.batch ?? null,
+            selectedCompanyIds: scope.selectedCompanyIds ?? [],
+          }),
         });
         const body = await res.json().catch(() => null);
         if (res.ok) {
@@ -119,7 +144,7 @@ export default function Workspace({ sectorId, sectorName }: { sectorId: string; 
         setPending(null);
       }
     },
-    [session, sectorId, subcategory, selectionScope, selected],
+    [session, sectorId, subcategory, batch, selectionScope, selected],
   );
   const retry = useCallback((text: string, action: Action, scope: Message["scope"]) => ask(text, action, scope), [ask]);
 
@@ -178,13 +203,26 @@ export default function Workspace({ sectorId, sectorName }: { sectorId: string; 
       <SiteHeader showSignOut={data?.gate} />
       <main className="flex min-h-0 w-full flex-1 flex-col px-4 pb-4 pt-3 sm:px-6 lg:px-8">
         <div className="flex flex-wrap items-baseline gap-x-3 gap-y-1">
-          <Link href="/" className="text-sm text-link hover:underline">
+          <Link href={batch ? `/?batch=${encodeURIComponent(batch)}` : "/"} className="text-sm text-link hover:underline">
             ‹ All sectors
           </Link>
           <h1 className="text-2xl font-semibold tracking-[-0.015em]">{sectorName}</h1>
           <p className="text-sm text-text-secondary" aria-live="polite">
-            {data ? `${fmt.format(data.sector.total)} companies` : " "}
+            {data ? (batch ? `${fmt.format(inBatch.length)} of ${fmt.format(data.sector.total)} companies` : `${fmt.format(data.sector.total)} companies`) : " "}
           </p>
+          {batch && (
+            <span className="inline-flex items-center gap-1 self-center rounded-full bg-accent/10 py-0.5 pl-2.5 pr-1 text-sm text-link">
+              {batch}
+              <button
+                type="button"
+                onClick={clearBatch}
+                aria-label={`Show all batches, not just ${batch}`}
+                className="pressable flex size-5 items-center justify-center rounded-full hover:bg-accent/15"
+              >
+                ×
+              </button>
+            </span>
+          )}
         </div>
 
         {state.kind === "loading" && (
@@ -203,8 +241,8 @@ export default function Workspace({ sectorId, sectorName }: { sectorId: string; 
         {data && (
           <>
             <SubcategoryBar
-              total={data.sector.total}
-              subcategories={data.subcategories}
+              total={inBatch.length}
+              subcategories={subcategories}
               selected={subcategory}
               onSelect={setSubcategory}
             />
