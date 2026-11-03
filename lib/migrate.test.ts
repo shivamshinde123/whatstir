@@ -1,5 +1,5 @@
 // @vitest-environment node
-import { mkdtemp, readdir, rm, writeFile } from "node:fs/promises";
+import { mkdtemp, readdir, readFile, rm, writeFile } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import path from "node:path";
 import { randomBytes } from "node:crypto";
@@ -110,5 +110,57 @@ describe("migrate", () => {
     const { sql } = await emptySchema();
     const dir = await tempMigrations({ "001_a.sql": "create table a (x int);", "README.md": "not sql" });
     expect(await migrate(sql, dir)).toEqual(["001_a.sql"]);
+  });
+});
+
+describe("004_lock_down_data_api", () => {
+  /** Supabase's API roles, created once on the test server (roles are server-wide). */
+  async function apiRoles(sql: Sql) {
+    for (const r of ["anon", "authenticated"]) {
+      await sql.unsafe(`do $$ begin create role ${r} nologin; exception when duplicate_object then null; end $$`);
+    }
+  }
+  const tables = async (sql: Sql, schema: string) =>
+    (await sql<{ relname: string; rls: boolean }[]>`select c.relname, c.relrowsecurity as rls from pg_class c
+      join pg_namespace n on n.oid = c.relnamespace where n.nspname = ${schema} and c.relkind = 'r' order by 1`);
+
+  it("turns on row-level security for every table", async () => {
+    const { sql, schema } = await emptySchema();
+    await migrate(sql);
+    const all = await tables(sql, schema);
+    expect(all.map((t) => t.relname)).toContain("notes");
+    expect(all.filter((t) => !t.rls)).toEqual([]);
+  });
+
+  it("takes Supabase's API roles' access away from tables and views, as Supabase grants it", async () => {
+    const { sql, schema } = await emptySchema();
+    await apiRoles(sql);
+    // Everything before 004, then the broad grants Supabase gives its API roles by default.
+    const files = (await readdir(MIGRATIONS_DIR)).filter((f) => f.endsWith(".sql") && f < "004");
+    const dir = await tempMigrations(
+      Object.fromEntries(await Promise.all(files.map(async (f) => [f, await readFile(path.join(MIGRATIONS_DIR, f), "utf8")]))),
+    );
+    await migrate(sql, dir);
+    await sql.unsafe(`grant usage on schema ${schema} to anon, authenticated;
+      grant all on all tables in schema ${schema} to anon, authenticated`);
+    const can = async (role: string, rel: string) =>
+      (await sql`select has_table_privilege(${role}, ${`${schema}.${rel}`}, 'select') as ok`)[0].ok;
+    expect(await can("anon", "notes")).toBe(true);
+    expect(await can("anon", "sector_counts")).toBe(true);
+
+    expect(await migrate(sql)).toEqual(["004_lock_down_data_api.sql"]);
+    for (const role of ["anon", "authenticated"]) {
+      for (const rel of ["notes", "companies", "app_settings", "messages", "sector_counts", "subcategory_counts"]) {
+        expect(await can(role, rel), `${role} on ${rel}`).toBe(false);
+      }
+    }
+    expect((await tables(sql, schema)).every((t) => t.rls)).toBe(true);
+  });
+
+  it("leaves the app's own access alone (the owner bypasses RLS)", async () => {
+    const { sql } = await emptySchema();
+    await migrate(sql);
+    await sql`insert into notes (body) values ('still works')`;
+    expect(await sql`select body from notes`).toEqual([{ body: "still works" }]);
   });
 });

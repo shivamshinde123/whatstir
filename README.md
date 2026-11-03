@@ -42,7 +42,7 @@ Tests never call OpenAI, Jev or YC: Vitest sets `AI_FAKE=1` and `FOUNDERS_FETCH=
    npm run backfill        # re-run until it exits 0; finished work is kept
    ```
    This needs `OPENAI_API_KEY` and `TYPESAFE_API_KEY` in `.env`.
-3. **Vercel.** Import the GitHub repo as a Vercel project with the Next.js preset. Set these environment variables for Production: `DATABASE_URL` (the same pooler URL), `OPENAI_API_KEY`, `TYPESAFE_API_KEY`, `APP_PASSWORD` (a long passphrase) and `CRON_SECRET` (`openssl rand -hex 32`). Leave `AI_FAKE`, `FOUNDERS_FETCH` and `YC_SOURCE_URL` unset. Deploy.
+3. **Vercel.** `vercel.json` pins the server functions to `iad1`, next to a us-east-1 database. Import the GitHub repo as a Vercel project with the Next.js preset. Set these environment variables for Production: `DATABASE_URL` (the same pooler URL), `OPENAI_API_KEY`, `TYPESAFE_API_KEY`, `APP_PASSWORD` (a long passphrase) and `CRON_SECRET` (`openssl rand -hex 32`). Leave `AI_FAKE`, `FOUNDERS_FETCH` and `YC_SOURCE_URL` unset. Deploy.
 4. **Cron.** `vercel.json` registers `/api/cron/refresh` at 11:00 UTC daily. Check it under Settings → Cron Jobs. Vercel sends `CRON_SECRET` as a Bearer token.
 5. **Smoke test** (read-only):
    ```sh

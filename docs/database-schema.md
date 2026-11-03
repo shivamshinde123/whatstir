@@ -91,3 +91,8 @@ Indexes: an HNSW index on `embedding` (`vector_cosine_ops`), plus indexes on `se
 - Identity columns are `bigint generated always as identity`. postgres.js returns `bigint` values as strings, so wrap ids with `Number()` when they're used as JS numbers.
 - `companies.status` has no check constraint, because yc-oss may add new values and a refresh should never fail over one. The UI treats unknown values as unknown.
 - Every constraint here is covered by a test in `db/schema.test.ts`.
+
+## Access control
+- Migration `004_lock_down_data_api.sql` enables row-level security on every table, with no policies, and revokes all privileges from Supabase's `anon` and `authenticated` roles (tables, views, sequences, functions and default privileges). The REST Data API therefore sees nothing.
+- The app connects as the owning role through the transaction pooler, so RLS doesn't apply to it.
+- **A new table must enable RLS in its own migration** (`alter table … enable row level security`). The default privileges are already revoked.

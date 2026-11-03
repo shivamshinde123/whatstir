@@ -8,6 +8,7 @@ describe("vercel.json", () => {
   it("parses and schedules the cron path daily at 11:00 UTC", () => {
     const config = JSON.parse(readFileSync(path.join(process.cwd(), "vercel.json"), "utf8"));
     expect(config.crons).toEqual([{ path: CRON_PATH, schedule: CRON_SCHEDULE }]);
+    expect(config.regions).toEqual(["iad1"]); // next to the Supabase database (us-east-1)
     expect(CRON_SCHEDULE).toBe("0 11 * * *");
     expect(CRON_PATH).toBe("/api/cron/refresh");
   });

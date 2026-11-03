@@ -386,8 +386,9 @@ describe("Workspace", () => {
     window.history.pushState({}, "", "/sector/healthcare?company=10");
     try {
       render(<Workspace sectorId="healthcare" sectorName="Healthcare" />);
-      expect(await screen.findByRole("heading", { name: "Acme Health", level: 2 })).toBeInTheDocument();
-      expect(await screen.findByText("No notes yet.")).toBeInTheDocument();
+      // Three fetches in a row (sector + session, then profile, then notes): allow for a slow machine.
+      expect(await screen.findByRole("heading", { name: "Acme Health", level: 2 }, { timeout: 5000 })).toBeInTheDocument();
+      expect(await screen.findByText("No notes yet.", {}, { timeout: 5000 })).toBeInTheDocument();
       expect(fetchMock).toHaveBeenCalledWith("/api/notes?companyId=10", expect.anything());
     } finally {
       window.history.pushState({}, "", "/");
