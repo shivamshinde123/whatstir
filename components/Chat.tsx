@@ -4,6 +4,7 @@ import { useEffect, useRef, useState } from "react";
 import type { Action } from "@/lib/answer";
 import type { Message } from "@/lib/session";
 import { suggestionsFor } from "@/lib/suggestions";
+import Markdown from "./Markdown";
 
 const ACTIONS: { id: Action; label: string; placeholder: (scope: string) => string }[] = [
   { id: "ask", label: "Ask", placeholder: (s) => `Ask about ${s} companies…` },
@@ -175,7 +176,7 @@ export default function Chat({
           ) : (
             <li key={m.id} data-action={m.action} className="mr-8 rounded-2xl rounded-bl-md bg-bg px-3 py-2 text-sm">
               <Tag action={m.action} />
-              <p className="whitespace-pre-wrap">{m.content}</p>
+              <Markdown text={m.content} />
               {m.companyIds.length > 0 && (
                 <p className="mt-1 text-caption text-text-secondary">
                   Cites {m.companyIds.length} {m.companyIds.length === 1 ? "company" : "companies"}

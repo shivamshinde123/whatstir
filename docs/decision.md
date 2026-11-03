@@ -101,6 +101,8 @@ Listed in the order they were made. Decisions 1–14 are recorded in §16 of [in
 63. **Pages use the full window width** (the owner's request), replacing the `max-w-5xl` and 1400 px containers. Gutters keep content off the edges, and the workspace columns are proportional. The 404 page alone stays centred, since it's a single message.
 64. **Suggested questions are templates, not AI-generated.** Three per action, worded for the current scope or selection, in `lib/suggestions.ts`. They cost nothing, are instant and predictable, and can't invent companies. Clicking one asks it straight away.
 
+65. **Assistant answers are rendered as Markdown** with `react-markdown` and `remark-gfm`, because the real answer model writes bold, lists and tables, and plain text showed the raw symbols (found in the Government trial). For safety it never adds `rehype-raw`, so raw HTML stays inert. Images are disallowed, so nothing is fetched from model-written URLs, and the default URL filter drops `javascript:` links. User messages stay literal text.
+
 ## Open items
 
 - **A. Founder data.** Founders come from YC company pages. Check YC's terms before production use. Until then, the founder fetch can be switched off with `FOUNDERS_FETCH=off`.

@@ -109,6 +109,13 @@ describe("answer (AI_FAKE)", () => {
     expect(none.text).toMatch(/None of the companies/);
   });
 
+  it("answers in Markdown with a table when scripted with [md]", async () => {
+    const r = await answer({ ...REQ, question: "x [md] [ids:2]" });
+    expect(r.companyIds).toEqual([2]);
+    expect(r.text).toMatch(/^\*\*1 companies\*\*/);
+    expect(r.text).toContain("| Company | Scope |\n|---|---|\n| Co 2 |");
+  });
+
   it("throws when scripted to fail", async () => {
     await expect(answer({ ...REQ, question: "[fail]" })).rejects.toThrow("fake model failure");
   });

@@ -114,6 +114,7 @@ export function filterIds(ids: unknown, candidates: { id: number }[]): number[] 
  * Deterministic stand-in (AI_FAKE). Tests script it from the question:
  * "[ids:1,2]" cites exactly those ids, "[fail]" throws; otherwise it cites the first 3 candidates.
  * "[fail-once]" throws unless the same question is already in the history, i.e. on its retry.
+ * "[md]" answers in Markdown (bold, a list and a table), like the real model often does.
  */
 function fakeAnswer(req: AnswerRequest): Answer {
   if (req.question.includes("[fail]")) throw new Error("fake model failure");
@@ -125,6 +126,13 @@ function fakeAnswer(req: AnswerRequest): Answer {
     ? scripted[1].split(",").filter((s) => s.trim()).map(Number)
     : req.candidates.slice(0, 3).map((c) => c.id);
   const names = req.candidates.filter((c) => companyIds.includes(c.id)).map((c) => c.name);
+  if (req.question.includes("[md]")) {
+    const rows = names.map((n) => `| ${n} | ${req.scopeLabel} |`).join("\n");
+    return {
+      text: `**${names.length} companies** match (${req.action}).\n\n- first point\n- second point\n\n| Company | Scope |\n|---|---|\n${rows}`,
+      companyIds,
+    };
+  }
   return {
     text: names.length
       ? `(${req.action}) In ${req.scopeLabel}: ${names.join(", ")}.`
