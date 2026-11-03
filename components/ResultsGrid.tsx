@@ -19,11 +19,14 @@ function compareHint(n: number): string | null {
   return null;
 }
 
-const FLIGHT_MS = 600;
-/** Critically damped spring (Apple: damping 1, response 0.4 s), sampled into a CSS easing. */
+// Slow enough to read as a trip from the basket on the left to the grid (the owner found 0.4 s too quick).
+const RESPONSE_S = 0.8;
+const FLIGHT_MS = 1300;
+const STAGGER_MS = 70;
+/** Critically damped spring (damping 1, response 0.8 s), sampled into a CSS easing. */
 const SPRING = `linear(${Array.from({ length: 21 }, (_, i) => {
   const t = (i / 20) * (FLIGHT_MS / 1000);
-  const w = (2 * Math.PI) / 0.4;
+  const w = (2 * Math.PI) / RESPONSE_S;
   return i === 20 ? 1 : +(1 - (1 + w * t) * Math.exp(-w * t)).toFixed(4);
 }).join(", ")})`;
 
@@ -76,7 +79,7 @@ function fly(grid: HTMLElement, ids: number[]) {
       transformOrigin: "top left",
     });
     document.body.append(clone);
-    const delay = Math.min(i, 12) * 35;
+    const delay = Math.min(i, 12) * STAGGER_MS;
     const dx = from!.left - to.left;
     const dy = from!.top - to.top;
     const s = from!.width / to.width;

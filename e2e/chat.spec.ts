@@ -14,12 +14,18 @@ test.beforeEach(async ({ page, request }) => {
   await page.route("**/bookface-images.s3.amazonaws.com/**", (r) => r.fulfill({ body: TINY_PNG, contentType: "image/png" }));
   // Record every Web Animation so tests can tell what moved and how.
   await page.addInitScript(() => {
-    const w = window as unknown as { __anims: { flight: boolean; transform: boolean }[] };
+    const w = window as unknown as { __anims: { flight: boolean; transform: boolean; duration: number; dx: number }[] };
     w.__anims = [];
     const animate = Element.prototype.animate;
     Element.prototype.animate = function (keyframes, options) {
       const frames = (Array.isArray(keyframes) ? keyframes : [keyframes]) as Keyframe[];
-      w.__anims.push({ flight: this.hasAttribute("data-flight"), transform: frames.some((f) => f.transform && f.transform !== "none") });
+      const start = String(frames[0]?.transform ?? "").match(/translate\((-?[\d.]+)px/);
+      w.__anims.push({
+        flight: this.hasAttribute("data-flight"),
+        transform: frames.some((f) => f.transform && f.transform !== "none"),
+        duration: typeof options === "number" ? options : Number(options?.duration ?? 0),
+        dx: start ? Number(start[1]) : 0,
+      });
       return animate.call(this, keyframes, options);
     };
   });
@@ -28,7 +34,7 @@ test.beforeEach(async ({ page, request }) => {
 
 const tiles = (page: Page) => page.locator("[data-tile-id]");
 const tileIds = (page: Page) => tiles(page).evaluateAll((els) => els.map((e) => Number((e as HTMLElement).dataset.tileId)));
-const anims = (page: Page) => page.evaluate(() => (window as unknown as { __anims: { flight: boolean; transform: boolean }[] }).__anims);
+const anims = (page: Page) => page.evaluate(() => (window as unknown as { __anims: { flight: boolean; transform: boolean; duration: number; dx: number }[] }).__anims);
 
 async function ask(page: Page, text: string) {
   await page.getByLabel("Question").fill(text);
@@ -57,6 +63,19 @@ test("[A,B] then [B,C]: one grid of 3, only C is new and only C flies in from th
   await expect(page.getByTestId("results-count")).toHaveText("3 companies");
   await expect(page.locator("[data-tile-id][data-cited]")).toHaveCount(2); // Couple and Mino Games
   await expect(page.locator("[data-flight]")).toHaveCount(0); // flights clean up after landing
+});
+
+test("logos take an unhurried trip from the basket on the left to the grid", async ({ page }) => {
+  await open(page);
+  await ask(page, "Who sells to families? [ids:6,17]");
+  await expect(tiles(page)).toHaveCount(2);
+  const flights = (await anims(page)).filter((a) => a.flight && a.transform);
+  expect(flights).toHaveLength(2);
+  for (const f of flights) {
+    expect(f.duration).toBeGreaterThanOrEqual(1200); // long enough to follow with the eye
+    expect(f.dx).toBeLessThan(0); // starts to the left of its tile
+  }
+  await expect(page.locator("[data-flight]")).toHaveCount(0); // gone once landed
 });
 
 test("a suggested question asks itself with one click and fills the grid", async ({ page }) => {

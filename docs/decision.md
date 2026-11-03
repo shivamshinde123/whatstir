@@ -112,6 +112,8 @@ Listed in the order they were made. Decisions 1–14 are recorded in §16 of [in
 
 70. **Subcategories are a dropdown, the columns split 30 / 30 / 40, and dark mode has more contrast** (the owner's requests). Chips wrapped onto two or three lines in large sectors (B2B has 15+ groups), pushing the columns down; a native `<select>` in the title row costs no height, is keyboard- and screen-reader-friendly for free, and still shows every count. Group descriptions move to option tooltips. This supersedes decision 68's "wrapping group chips". The basket, results and chat columns are `3fr 3fr 4fr` on desktop (was 22% / rest / 27%), because the chat holds the longest content. In dark mode, cards were `#1c1c1e` on black, which the owner couldn't tell apart; surfaces are now `#262628`, hairlines 20% white (was 12%) and secondary text `#aeaeb2`, while the page stays true black. The home heading reads "Explore YC startups by sector".
 
+71. **The basket-to-grid flight is slower**: spring response 0.4 s → 0.8 s, flight 600 ms → 1.3 s, stagger 35 → 70 ms (the owner's request). At 0.4 s most of the travel happened in the first ~150 ms, so logos seemed to jump rather than travel from left to right. It stays critically damped (no overshoot), tiles are still clickable mid-flight, and reduced motion keeps its 200 ms fade.
+
 ## Open items
 
 - **A. Founder data.** Founders come from YC company pages. Check YC's terms before production use. Until then, the founder fetch can be switched off with `FOUNDERS_FETCH=off`.
