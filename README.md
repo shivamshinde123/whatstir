@@ -1,55 +1,257 @@
+<div align="center">
+
 # Whatstir
 
-A personal tool for exploring Y Combinator startups by sector and by the customer problems they solve. It starts with a treemap of sectors. Opening a sector shows its companies, which you can question in natural language, and the companies each answer relies on collect in a grid. Not affiliated with Y Combinator.
+**Explore Y Combinator startups by sector and by the customer problems they solve.**
 
-The requirements are in [docs/intial_idea.md](docs/intial_idea.md). Decisions made since then are in [docs/decision.md](docs/decision.md), and the rest of the design is in [docs/](docs/).
+Pick a sector, ask questions in plain English, and watch the companies each answer relies on collect in a grid.
 
-## Requirements
-- Node.js 22 or newer
-- A Postgres database with pgvector (Supabase in production)
-- An OpenAI API key and a TypeSafe (Jev) API key
-- Docker, to run the tests' database locally
+![Next.js 16](https://img.shields.io/badge/Next.js-16-0a1d08?logo=nextdotjs&logoColor=white)
+![React 19](https://img.shields.io/badge/React-19-4a6d47?logo=react&logoColor=white)
+![Postgres + pgvector](https://img.shields.io/badge/Postgres-pgvector-2b6b5e?logo=postgresql&logoColor=white)
+![OpenAI](https://img.shields.io/badge/OpenAI-answers%20%26%20embeddings-2b390a?logo=openai&logoColor=white)
+![Deploy on Vercel](https://img.shields.io/badge/Deploy-Vercel-0a1d08?logo=vercel&logoColor=white)
+![Tests](https://img.shields.io/badge/tests-Vitest%20%2B%20Playwright-80581c)
 
-## First-time setup
-```sh
-npm install
-# Fill in .env: DATABASE_URL, OPENAI_API_KEY, TYPESAFE_API_KEY (see docs/environment-config-reference.md)
-npm run migrate                  # create the schema
-npm run refresh -- --load-only   # load ~6.4k companies from yc-oss (about 5 s, no AI)
-npm run subcategories            # name each sector's problem groups (one gpt-6-luna call per sector)
-npm run backfill                 # embeddings, Jev assignments, problem cards and founders for everything
+<img src="docs/images/home.png" alt="The Whatstir home page: a serif headline beside a misty landscape, and a treemap of YC sectors sized by company count" width="900">
+
+</div>
+
+> [!NOTE]
+> Whatstir is an independent project. It is **not affiliated with Y Combinator**. Company data comes from [yc-oss](https://github.com/yc-oss/api), an open-source mirror of the public YC directory.
+
+---
+
+## Contents
+
+- [Features](#features)
+- [Screenshots](#screenshots)
+- [How it works](#how-it-works)
+- [Tech stack](#tech-stack)
+- [Run your own Whatstir](#run-your-own-whatstir)
+  - [1. Get your own accounts and keys](#1-get-your-own-accounts-and-keys)
+  - [2. Set up locally](#2-set-up-locally)
+  - [3. Load the data](#3-load-the-data)
+  - [4. Deploy to your own Vercel](#4-deploy-to-your-own-vercel)
+  - [5. Check your deployment](#5-check-your-deployment)
+- [What it costs to run](#what-it-costs-to-run)
+- [Development](#development)
+- [Project layout](#project-layout)
+- [Documentation](#documentation)
+- [Credits](#credits)
+
+## Features
+
+- 🗺️ **Sector treemap.** About 6,400 YC companies across 9 sectors, sized by count. Filter by batch ("Fall 2026") or show active companies only.
+- 🧺 **The basket.** Every company in a sector as a wall of logos, narrowed by AI-suggested problem groups ("Scheduling", "Billing", …) and by name.
+- 💬 **Ask, Explore, Challenge.** Ask questions about the sector, a group, a batch or a hand-picked selection. Answers are written only from the companies' own descriptions and cite the companies they rely on.
+- 🧩 **A grid that grows.** Each cited company flies from the basket into a results grid that builds up over the session. The latest answer's companies are ringed.
+- 🔍 **Compare and profiles.** Open any company for its problem card, founders and links, or compare two or three side by side.
+- 📝 **Notes.** Keep notes on companies or general notes, all listed on one page.
+- 🔄 **Daily refresh.** A cron job re-reads the directory each day and enriches only new or changed companies. `/admin` shows every run.
+- 🔒 **Private by default.** A single site password guards every page, and all AI and database calls run on the server.
+
+## Screenshots
+
+<table>
+  <tr>
+    <td width="50%"><img src="docs/images/workspace.png" alt="A sector workspace: the company basket, the results grid with cited companies ringed, and the chat with a Markdown answer"></td>
+    <td width="50%"><img src="docs/images/profile.png" alt="A company profile with its description, links and AI-generated problem card, next to the results grid and chat"></td>
+  </tr>
+  <tr>
+    <td align="center"><sub>The workspace: basket, results grid and chat</sub></td>
+    <td align="center"><sub>A company profile with its problem card</sub></td>
+  </tr>
+</table>
+
+## How it works
+
+```mermaid
+flowchart LR
+  yc[(yc-oss feed)] -->|daily cron / npm run refresh| ingest[Refresh + enrichment]
+  ingest -->|embeddings, problem cards| openai[OpenAI]
+  ingest -->|subcategory assignment| jev[TypeSafe Jev]
+  ingest --> db[(Postgres + pgvector)]
+  user((You)) -->|password gate| app[Next.js app on Vercel]
+  app -->|retrieve candidates| db
+  app -->|grounded answer + citations| openai
 ```
-- `backfill` shows its progress as it goes. It's safe to stop and run again, because finished work is kept. If any company fails, it exits with code 1; run it again to retry those companies.
-- To regenerate one sector's groups, run `npm run subcategories -- --sector healthcare`, then `npm run backfill`. Only the assignment is redone.
+
+1. **Ingest.** `refresh` loads the yc-oss feed into Postgres. Each company is embedded (`text-embedding-3-small`) and given a short **problem card** written from its own description (`gpt-6-luna`). It's also placed in AI-suggested problem groups by **Jev** (`jev-latest`).
+2. **Ask.** A question is embedded, and pgvector picks the closest companies in scope (sector, group, batch or selection). The answer model (`gpt-6.1-sol`) must answer from those descriptions only and cite company ids. Citations are checked against the candidates, and the cited companies join the grid.
+3. **Keep fresh.** Vercel Cron calls `/api/cron/refresh` daily. Enrichment is keyed by content hashes, so unchanged companies cost nothing.
+
+There's more depth in [docs/system-architecture-document.md](docs/system-architecture-document.md) and [docs/flow.md](docs/flow.md).
+
+## Tech stack
+
+| Layer | Choice |
+|---|---|
+| App | [Next.js 16](https://nextjs.org) (App Router, `cacheComponents`), React 19, TypeScript |
+| Styling | Tailwind CSS 4. Inter, Newsreader and Fragment Mono, self-hosted via `next/font` |
+| Database | Postgres with [pgvector](https://github.com/pgvector/pgvector), hosted on [Supabase](https://supabase.com), queried through [postgres.js](https://github.com/porsager/postgres) |
+| AI | [OpenAI](https://platform.openai.com) for answers, writing and embeddings; [TypeSafe](https://typesafe.ai) Jev for subcategory assignment |
+| Hosting | [Vercel](https://vercel.com), with Vercel Cron for the daily refresh |
+| Tests | [Vitest](https://vitest.dev) (unit, integration on a real Postgres, components) and [Playwright](https://playwright.dev) (end to end) |
+
+## Run your own Whatstir
+
+Everything below uses **your own** accounts and keys. The repository holds no secrets: `.env` is git-ignored, and [`.env.example`](.env.example) contains placeholders only.
+
+### Prerequisites
+
+- [Node.js](https://nodejs.org) 22 or newer
+- [Git](https://git-scm.com)
+- [Docker](https://www.docker.com) (optional; only for running the test suite)
+
+### 1. Get your own accounts and keys
+
+| You need | Where to get it | Used for |
+|---|---|---|
+| A Postgres database with pgvector | Create a free project at [supabase.com](https://supabase.com) | All data |
+| `OPENAI_API_KEY` | [platform.openai.com/api-keys](https://platform.openai.com/api-keys) | Answers, problem cards, embeddings |
+| `TYPESAFE_API_KEY` | [typesafe.ai](https://typesafe.ai) ([docs](https://docs.typesafe.ai/)) | Assigning companies to groups |
+| A Vercel account | [vercel.com](https://vercel.com) (the free Hobby plan is enough) | Hosting and the daily cron |
+
+> [!TIP]
+> In Supabase, open your project, click **Connect**, and copy the **Transaction pooler** connection string (port **6543**). Put your database password into it. The migrations enable the `vector` extension for you.
+
+### 2. Set up locally
+
+```sh
+git clone https://github.com/<you>/whatstir.git
+cd whatstir
+npm install
+cp .env.example .env        # then open .env and fill in your own values
+```
+
+Fill in `.env`:
+
+| Variable | Value |
+|---|---|
+| `DATABASE_URL` | Your Supabase transaction pooler URL |
+| `OPENAI_API_KEY` | Your OpenAI key |
+| `TYPESAFE_API_KEY` | Your TypeSafe key |
+| `APP_PASSWORD` | A passphrase of your choice. Leave it empty locally to switch the gate off |
+| `CRON_SECRET` | Any long random string, for example from `openssl rand -hex 32` |
+
+Every variable is described in [docs/environment-config-reference.md](docs/environment-config-reference.md).
+
+> [!CAUTION]
+> Never commit `.env`, and never prefix a key with `NEXT_PUBLIC_`: that would send it to the browser.
+
+### 3. Load the data
+
+```sh
+npm run migrate                  # create the schema (and enable pgvector)
+npm run refresh -- --load-only   # load ~6.4k companies from yc-oss (seconds, no AI)
+npm run subcategories            # name each sector's problem groups (one model call per sector)
+npm run backfill                 # embeddings, groups, problem cards and founders for everything
+npm run dev                      # http://localhost:3000
+```
+
+- `backfill` shows its progress. It's safe to stop and run again, because finished work is kept. If any company fails (a timeout, say), it exits with code 1; run it again to retry only those.
+- Don't want founders scraped from YC company pages? Set `FOUNDERS_FETCH=off` before the backfill.
+- To regenerate one sector's groups, run `npm run subcategories -- --sector healthcare`, then `npm run backfill`.
+
+### 4. Deploy to your own Vercel
+
+1. **Push your copy to GitHub.** A private repository works.
+2. **Import it in Vercel:** **Add New → Project**, pick the repository, and keep the **Next.js** preset and the default root directory.
+3. **Add environment variables** under **Settings → Environment Variables**. Tick **Production**, and **Preview** too if you want preview deployments to work:
+
+   | Variable | Value |
+   |---|---|
+   | `DATABASE_URL` | The same Supabase pooler URL |
+   | `OPENAI_API_KEY` | Your OpenAI key |
+   | `TYPESAFE_API_KEY` | Your TypeSafe key |
+   | `APP_PASSWORD` | A long passphrase. **Required** once the site is public |
+   | `CRON_SECRET` | A *different* random string from your local one |
+
+   Leave `AI_FAKE`, `YC_SOURCE_URL` and `TEST_DATABASE_URL` unset. They're for tests only.
+4. **Deploy.** [`vercel.json`](vercel.json) pins the functions to `iad1` (Washington, D.C.), which suits a database in `us-east-1`. If your Supabase project is in another region, change `regions` to the Vercel region nearest to it.
+5. **The daily refresh is automatic.** `vercel.json` registers `/api/cron/refresh` at 11:00 UTC. Check it under **Settings → Cron Jobs**. Vercel sends your `CRON_SECRET` with each call, and requests without it get `401`.
+
+> [!IMPORTANT]
+> Load and enrich the data from your own machine (step 3) before or right after the first deploy. A full backfill takes longer than a server function may run, while daily refreshes are small.
+
+### 5. Check your deployment
+
+A read-only smoke suite checks a live deployment: the password gate, cron protection, treemap counts, a sector's basket and groups, a profile, notes and `/admin`. It asks nothing and writes nothing.
+
+```sh
+SMOKE_URL=https://<your-app>.vercel.app SMOKE_PASSWORD=<your APP_PASSWORD> npm run test:e2e:smoke
+```
+
+The day after you deploy, `/admin` should list a `cron` run with status **OK**.
+
+## What it costs to run
+
+These are rough figures from the author's own deployment, at current API prices. Check your providers' pricing.
+
+| What | About |
+|---|---|
+| First full load (~6.4k companies: embeddings, groups, problem cards) | $1.40 |
+| Daily refresh (only new or changed companies) | $0.01 a day |
+| One question | $0.01–0.025 |
+| Supabase free tier, Vercel Hobby | $0 |
 
 ## Development
+
 ```sh
-npm run dev            # http://localhost:3000
-npm run db:test:up     # start the test database (Docker, port 54329)
+npm run dev            # dev server on http://localhost:3000
+npm run db:test:up     # start the test database (Docker, pgvector on port 54329)
 npm test               # Vitest: unit, integration (real Postgres) and component tests
 npm run test:e2e       # Playwright against a production build
-npm run ci             # typecheck, lint, Vitest, Playwright: the same checks as the required CI check
+npm run ci             # typecheck, lint, Vitest and Playwright, the same as the CI check
 ```
-Tests never call OpenAI, Jev or YC: Vitest sets `AI_FAKE=1` and `FOUNDERS_FETCH=off`.
 
-## Deploy (Supabase + Vercel)
-1. **Database.** Create a Supabase project. Under Database → Extensions, enable `vector`. Copy the **transaction pooler** connection string (port 6543) into `.env` as `DATABASE_URL`.
-2. **Load and enrich, from your machine** (it needs no time limit):
-   ```sh
-   npm run migrate
-   npm run refresh -- --load-only
-   npm run subcategories
-   npm run backfill        # re-run until it exits 0; finished work is kept
-   ```
-   This needs `OPENAI_API_KEY` and `TYPESAFE_API_KEY` in `.env`.
-3. **Vercel.** `vercel.json` pins the server functions to `iad1`, next to a us-east-1 database. Import the GitHub repo as a Vercel project with the Next.js preset. Set these environment variables for Production: `DATABASE_URL` (the same pooler URL), `OPENAI_API_KEY`, `TYPESAFE_API_KEY`, `APP_PASSWORD` (a long passphrase) and `CRON_SECRET` (`openssl rand -hex 32`). Leave `AI_FAKE`, `FOUNDERS_FETCH` and `YC_SOURCE_URL` unset. Deploy.
-4. **Cron.** `vercel.json` registers `/api/cron/refresh` at 11:00 UTC daily. Check it under Settings → Cron Jobs. Vercel sends `CRON_SECRET` as a Bearer token.
-5. **Smoke test** (read-only):
-   ```sh
-   SMOKE_URL=https://<your-app>.vercel.app SMOKE_PASSWORD=<APP_PASSWORD> npm run test:e2e:smoke
-   ```
-   It checks the gate, that cron refuses requests without the secret, the treemap counts against the database, the largest sector's basket and groups, a profile, session restore, /notes and /admin. It asks nothing and writes nothing.
-6. **The first scheduled run:** the next day, /admin should show a `cron` run with status OK.
+Tests never call OpenAI, Jev or YC. Vitest sets `AI_FAKE=1` and `FOUNDERS_FETCH=off`, and the e2e suite serves the feed from a local fixture server. Test conventions are in [CLAUDE.md](CLAUDE.md).
 
-## Workflow
-`main` is protected. Every change goes through a GitHub issue, then a branch, then tests, then a pull request, and is merged only once the `ci` check passes. See [CLAUDE.md](CLAUDE.md).
+<details>
+<summary><strong>How changes reach <code>main</code></strong></summary>
+
+`main` is protected. Every change starts as a GitHub issue, gets its own branch (`issue-<n>-<slug>`), and adds tests for each item in the issue's test plan. It reaches `main` through a pull request, squash-merged once the `ci` check passes. The design docs in `docs/` are kept current with the code.
+
+</details>
+
+## Project layout
+
+```text
+app/            Next.js routes: pages, API route handlers, the login page
+components/     React components (Workspace, Basket, ResultsGrid, Chat, Treemap, Tooltips, …)
+lib/            Server logic: ingestion, enrichment, retrieval, answers, sessions, notes
+db/migrations/  SQL migrations (run with npm run migrate)
+scripts/        CLI entry points: migrate, refresh, subcategories, backfill
+e2e/            Playwright end-to-end tests and a local feed server
+smoke/          Read-only checks for a live deployment
+test/           Test helpers and the 37-company fixture
+docs/           Requirements, architecture, API, schema, decisions and design
+proxy.ts        The password gate (Next 16's renamed middleware)
+vercel.json     Region and the daily cron
+```
+
+## Documentation
+
+| Document | What's in it |
+|---|---|
+| [Product requirements](docs/product-requirements-document.md) | Goals, scope and acceptance criteria |
+| [System architecture](docs/system-architecture-document.md) | Boundaries and data flows |
+| [Technical design](docs/technical-design-document.md) | Implementation-level design |
+| [API specification](docs/api-specification.md) | Every endpoint, with request and response shapes |
+| [Database schema](docs/database-schema.md) | Tables, constraints and access control |
+| [Data extraction](docs/data-extraction-specification.md) | Ingestion and enrichment rules |
+| [Environment and config](docs/environment-config-reference.md) | Every variable and setting |
+| [UI/UX and design language](docs/ui-ux-wireframes.md) | Screens, states and the visual style |
+| [Decision log](docs/decision.md) | What was decided, and why |
+
+## Credits
+
+- Company data: [yc-oss/api](https://github.com/yc-oss/api), an open-source mirror of the public [Y Combinator directory](https://www.ycombinator.com/companies). Logos are linked from YC's CDN.
+- Hero photo: ["Rolling green hills shrouded in morning fog"](https://unsplash.com/photos/rolling-green-hills-shrouded-in-morning-fog-tCU_rbybwMg) by Zetong Li on Unsplash, under the [Unsplash License](https://unsplash.com/license). It's stored in [`public/`](public/landscape-hills.jpg).
+- Visual style adapted from a design on [styles.refero.design](https://styles.refero.design).
+- Typefaces: [Inter](https://rsms.me/inter/), [Newsreader](https://fonts.google.com/specimen/Newsreader) and [Fragment Mono](https://fonts.google.com/specimen/Fragment+Mono), under the SIL Open Font License.
+
+<div align="center">
+<sub>Made by Shivam · Not affiliated with Y Combinator</sub>
+</div>
