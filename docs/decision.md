@@ -97,6 +97,10 @@ Listed in the order they were made. Decisions 1–14 are recorded in §16 of [in
 60. **E2E refreshes read a local feed server** (`YC_SOURCE_URL`, started by Playwright's global setup), which can be switched to answer 500. Tests never touch the internet.
 61. **Specs that change app-wide state (admin, chat, notes, selection) run in a one-worker `serial` Playwright project.** `--repeat-each` copies of a serial group otherwise run concurrently and fight over the same paused flag, refresh slot, session or notes.
 
+62. **Light is the default theme; dark is an explicit choice** (the owner's request), replacing "follow the system colour scheme". Dark tokens sit under `:root[data-theme="dark"]`, and Tailwind's `dark:` variant is redefined to match. The choice is stored per browser in `localStorage`, not on the server, since there are no accounts.
+63. **Pages use the full window width** (the owner's request), replacing the `max-w-5xl` and 1400 px containers. Gutters keep content off the edges, and the workspace columns are proportional. The 404 page alone stays centred, since it's a single message.
+64. **Suggested questions are templates, not AI-generated.** Three per action, worded for the current scope or selection, in `lib/suggestions.ts`. They cost nothing, are instant and predictable, and can't invent companies. Clicking one asks it straight away.
+
 ## Open items
 
 - **A. Founder data.** Founders come from YC company pages. Check YC's terms before production use. Until then, the founder fetch can be switched off with `FOUNDERS_FETCH=off`.

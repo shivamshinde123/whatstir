@@ -47,6 +47,7 @@
 - **New session:** asks inline ("Clear the grid?" Cancel / Start over).
 - **Basket ghosts:** logos of companies already in the grid stay in the basket, faded.
 - **Error:** the reply bubble shows "Couldn't answer. [Retry]".
+- **Suggestions:** an empty conversation shows 3 starter questions as large buttons under the intro. Once the conversation has started they shrink to a scrollable row of chips above the Ask / Explore / Challenge switch. They match the action and scope ("Which Healthcare companies sell to small businesses?", or comparison questions for a selection). One click asks; they're disabled while an answer is pending.
 
 ## 3. Profile panel (slides over the basket)
 ```
@@ -148,8 +149,9 @@ The interface should look clean and calm, the way apple.com does. The `apple-des
 - **Colour.**
   - Light mode: white and `#f5f5f7` surfaces, `#1d1d1f` text, `#6e6e73` for secondary text, and a single accent, `#0071e3`. Errors use `--danger` (`#d70015` in light mode, `#ff453a` in dark).
   - Dark mode: true black, `#1c1c1e` surfaces, and `#2997ff` as the accent.
+  - **Light is the default, whatever the system setting.** Dark is the owner's choice: a moon/sun switch at the right of the header (`ThemeToggle`, `role="switch"`). The choice is saved in the browser and applied by an inline script before the first paint, so dark never flashes white.
   - Secondary text uses `text-secondary` so it stays readable. `text-tertiary` is only for decoration that carries no information.
-- **Space.** Generous whitespace, content inside a `max-w-5xl` column, and 16 px side margins on phones. No horizontal scrolling at 375 px.
+- **Space.** Pages use the full window width, with 16 / 24 / 32 px side gutters (phone / tablet / desktop) and generous whitespace between sections; there's no fixed-width centre column. The workspace's basket and chat columns grow with the window (`minmax(300px, 22%)` and `minmax(340px, 27%)`), and /notes lays notes out in 2–3 columns. No horizontal scrolling at 375 px.
 - **Surfaces.**
   - Cards have an 18 px radius and a soft `shadow-card`, and no heavy borders.
   - Navigation and toolbars use the translucent `material` class, with content scrolling underneath.

@@ -3,6 +3,7 @@
 import { useEffect, useRef, useState } from "react";
 import type { Action } from "@/lib/answer";
 import type { Message } from "@/lib/session";
+import { suggestionsFor } from "@/lib/suggestions";
 
 const ACTIONS: { id: Action; label: string; placeholder: (scope: string) => string }[] = [
   { id: "ask", label: "Ask", placeholder: (s) => `Ask about ${s} companies…` },
@@ -29,6 +30,7 @@ export default function Chat({
   sendError,
   notice,
   scopeName,
+  selection = false,
   onClearScope,
   onAsk,
   onRetry,
@@ -42,6 +44,8 @@ export default function Chat({
   /** A one-off problem to report, such as a failed New session. */
   notice?: string | null;
   scopeName: string;
+  /** True while questions are about selected companies (changes the suggestions). */
+  selection?: boolean;
   /** Shown as × on the scope chip when the scope is a selection: back to the sector or group. */
   onClearScope?: () => void;
   onAsk: (text: string, action: Action) => void;
@@ -59,13 +63,18 @@ export default function Chat({
     if (list.current) list.current.scrollTop = list.current.scrollHeight;
   }, [messages.length, pending, sendError]);
 
+  const send = (text: string) => {
+    setFailedAction(action);
+    onAsk(text, action);
+  };
   const submit = () => {
     const text = draft.trim();
     if (!text || pending) return;
     setDraft("");
-    setFailedAction(action);
-    onAsk(text, action);
+    send(text);
   };
+  const suggestions = suggestionsFor(action, scopeName, selection);
+  const empty = !messages.length && !pending && !sendError;
 
   return (
     <div className="flex h-full min-h-0 flex-col">
@@ -124,9 +133,23 @@ export default function Chat({
         </p>
       )}
       <ol ref={list} aria-label="Conversation" className="flex min-h-24 flex-1 flex-col gap-3 overflow-y-auto px-4 py-4">
-        {!messages.length && !pending && (
-          <li className="m-auto max-w-[16rem] text-center text-sm text-text-secondary">
-            Ask about the problems these companies solve. Answers cite real companies, which then join the grid.
+        {empty && (
+          <li className="m-auto w-full max-w-sm text-center">
+            <p className="text-sm text-text-secondary">
+              Ask about the problems these companies solve. Answers cite real companies, which then join the grid.
+            </p>
+            <div role="group" aria-label="Suggestions" className="mt-4 flex flex-col gap-2">
+              {suggestions.map((s) => (
+                <button
+                  key={s}
+                  type="button"
+                  onClick={() => send(s)}
+                  className="pressable rounded-xl bg-bg px-3 py-2.5 text-left text-sm transition-colors hover:bg-accent/10"
+                >
+                  {s}
+                </button>
+              ))}
+            </div>
           </li>
         )}
         {messages.map((m, i) =>
@@ -182,6 +205,26 @@ export default function Chat({
         )}
       </ol>
 
+      {!empty && (
+        <div
+          role="group"
+          aria-label="Suggestions"
+          className="flex gap-1.5 overflow-x-auto px-3 pb-2 pt-1 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
+        >
+          {suggestions.map((s) => (
+            <button
+              key={s}
+              type="button"
+              disabled={!!pending}
+              onClick={() => send(s)}
+              title={s}
+              className="pressable max-w-64 shrink-0 truncate rounded-full border border-separator bg-bg px-3 py-1 text-caption transition-colors hover:bg-accent/10 disabled:opacity-40"
+            >
+              {s}
+            </button>
+          ))}
+        </div>
+      )}
       <div role="group" aria-label="Action" className="mx-3 mt-1 flex rounded-full bg-bg p-0.5 text-sm">
         {ACTIONS.map((a) => (
           <button

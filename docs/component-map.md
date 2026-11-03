@@ -11,7 +11,8 @@
 ## UI components (`components/`)
 | Component | Props / role | Talks to |
 |---|---|---|
-| `SiteHeader` | The translucent top bar with a link home, plus a Sign out form (posting to `/api/logout`) when the gate is on. | — |
+| `SiteHeader` | The full-width translucent top bar: a link home, Notes, Admin, the `ThemeToggle`, and a Sign out form (posting to `/api/logout`) when the gate is on. | — |
+| `ThemeToggle` | The light/dark switch (`role="switch"`, "Dark theme"). Sets `data-theme` on `<html>` through `lib/theme.ts` and saves the choice in `localStorage` (`whatstir-theme`); a `MutationObserver` keeps it in step with the page. | — |
 | `HomeView` (client) | The landing page: fetches the data, handles loading, error and empty states, the coverage line, the All/Active toggle, the map/list switch, and measures the container. | `GET /api/sectors` |
 | `Treemap` | Draws the laid-out `Tile[]` as absolutely positioned links with labels, the compact and tiny variants, and sector tints (`lib/sector-style.ts`). | — |
 | `Workspace` (client) | The three-column layout. Owns the selected subcategory, the name filter and the open profile, including putting focus back afterwards. The session, tiles and messages are added in #9 and #10. | `GET /api/sectors/:id` |

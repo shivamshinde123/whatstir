@@ -108,7 +108,7 @@ export default function AdminView() {
   return (
     <>
       <SiteHeader showSignOut={gate} />
-      <main className="mx-auto w-full max-w-5xl flex-1 px-4 pb-16 pt-10 sm:px-6">
+      <main className="w-full flex-1 px-4 pb-16 pt-10 sm:px-6 lg:px-8">
         <h1 className="text-headline">Data refresh</h1>
         <p className="mt-1 text-text-secondary">Companies are re-read from yc-oss every day, then embedded, grouped and summarised.</p>
 

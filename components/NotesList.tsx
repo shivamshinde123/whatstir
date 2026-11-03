@@ -229,7 +229,7 @@ export default function NotesList({ companyId, onGate }: { companyId?: number; o
       )}
       {state.kind === "ready" &&
         (state.notes.length ? (
-          <ul aria-label="Notes" className="mt-3 space-y-2">
+          <ul aria-label="Notes" className={`mt-3 grid gap-2 ${companyId === undefined ? "md:grid-cols-2 2xl:grid-cols-3" : ""}`}>
             {state.notes.map((n) => (
               <NoteItem
                 key={n.id}

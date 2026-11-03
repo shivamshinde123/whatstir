@@ -1,5 +1,9 @@
 import type { Metadata } from "next";
 import "./globals.css";
+import { THEME_KEY } from "@/lib/theme";
+
+// Runs before first paint, so a saved dark choice never flashes the light theme.
+const applySavedTheme = `try{if(localStorage.getItem(${JSON.stringify(THEME_KEY)})==="dark")document.documentElement.dataset.theme="dark"}catch(e){}`;
 
 export const metadata: Metadata = {
   title: "Whatstir",
@@ -8,7 +12,11 @@ export const metadata: Metadata = {
 
 export default function RootLayout({ children }: LayoutProps<"/">) {
   return (
-    <html lang="en" className="h-full">
+    // The script above may set data-theme before React hydrates.
+    <html lang="en" className="h-full" suppressHydrationWarning>
+      <head>
+        <script dangerouslySetInnerHTML={{ __html: applySavedTheme }} />
+      </head>
       <body className="flex min-h-full flex-col">{children}</body>
     </html>
   );

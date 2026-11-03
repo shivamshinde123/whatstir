@@ -32,11 +32,11 @@ test.describe("home page", () => {
     expect(overflow).toBe(0);
   });
 
-  test("follows the dark colour scheme", async ({ page }) => {
+  test("stays light when the system prefers dark (dark is a choice: see theme-layout.spec)", async ({ page }) => {
     await page.emulateMedia({ colorScheme: "dark" });
     await page.goto("/");
     const bg = await page.evaluate(() => getComputedStyle(document.body).backgroundColor);
-    expect(bg).toBe("rgb(0, 0, 0)");
+    expect(bg).toBe("rgb(255, 255, 255)");
   });
 
   test("shows a visible focus ring for keyboard users", async ({ page }) => {
