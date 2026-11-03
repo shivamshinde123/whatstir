@@ -1,7 +1,23 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
+import type { Action } from "@/lib/answer";
 import type { Message } from "@/lib/session";
+
+const ACTIONS: { id: Action; label: string; placeholder: (scope: string) => string }[] = [
+  { id: "ask", label: "Ask", placeholder: (s) => `Ask about ${s} companies…` },
+  { id: "explore", label: "Explore", placeholder: () => "Describe a problem to explore…" },
+  { id: "challenge", label: "Challenge", placeholder: () => "Describe your idea to challenge…" },
+];
+const ACTION_TAG: Partial<Record<Action, string>> = { explore: "Explore", challenge: "Challenge" };
+
+/** "Explore" / "Challenge" label on a bubble; nothing for a plain question. */
+const Tag = ({ action }: { action: Action }) =>
+  ACTION_TAG[action] ? (
+    <span data-testid="action-tag" className="mb-0.5 block text-caption font-semibold uppercase tracking-wide opacity-75">
+      {ACTION_TAG[action]}
+    </span>
+  ) : null;
 
 /**
  * The research conversation: message list, scope chip, question box, a "thinking" bubble while
@@ -13,6 +29,7 @@ export default function Chat({
   sendError,
   notice,
   scopeName,
+  onClearScope,
   onAsk,
   onRetry,
   onReset,
@@ -25,12 +42,16 @@ export default function Chat({
   /** A one-off problem to report, such as a failed New session. */
   notice?: string | null;
   scopeName: string;
-  onAsk: (text: string) => void;
+  /** Shown as × on the scope chip when the scope is a selection: back to the sector or group. */
+  onClearScope?: () => void;
+  onAsk: (text: string, action: Action) => void;
   /** Resend a question whose answer failed. */
-  onRetry: (text: string, scope: Message["scope"]) => void;
+  onRetry: (text: string, action: Action, scope: Message["scope"]) => void;
   onReset: () => void;
 }) {
   const [draft, setDraft] = useState("");
+  const [action, setAction] = useState<Action>("ask");
+  const [failedAction, setFailedAction] = useState<Action>("ask");
   const [confirming, setConfirming] = useState(false);
   const list = useRef<HTMLOListElement>(null);
 
@@ -42,7 +63,8 @@ export default function Chat({
     const text = draft.trim();
     if (!text || pending) return;
     setDraft("");
-    onAsk(text);
+    setFailedAction(action);
+    onAsk(text, action);
   };
 
   return (
@@ -83,6 +105,16 @@ export default function Chat({
           <span data-testid="scope" className="truncate font-medium">
             {scopeName}
           </span>
+          {onClearScope && (
+            <button
+              type="button"
+              onClick={onClearScope}
+              aria-label="Stop asking about the selection"
+              className="pressable -mr-1 ml-0.5 rounded-full px-1 text-text-secondary hover:text-text"
+            >
+              ×
+            </button>
+          )}
         </span>
       </p>
 
@@ -99,7 +131,8 @@ export default function Chat({
         )}
         {messages.map((m, i) =>
           m.role === "user" ? (
-            <li key={m.id} className="ml-8 self-end rounded-2xl rounded-br-md bg-accent px-3 py-2 text-sm text-white">
+            <li key={m.id} data-action={m.action} className="ml-8 self-end rounded-2xl rounded-br-md bg-accent px-3 py-2 text-sm text-white">
+              <Tag action={m.action} />
               {m.content}
             </li>
           ) : m.status === "error" ? (
@@ -109,7 +142,7 @@ export default function Chat({
                 <button
                   type="button"
                   disabled={!!pending}
-                  onClick={() => onRetry(messages[i - 1].content, messages[i - 1].scope)}
+                  onClick={() => onRetry(messages[i - 1].content, messages[i - 1].action, messages[i - 1].scope)}
                   className="pressable font-medium text-link hover:underline disabled:opacity-50"
                 >
                   Retry
@@ -117,7 +150,8 @@ export default function Chat({
               )}
             </li>
           ) : (
-            <li key={m.id} className="mr-8 rounded-2xl rounded-bl-md bg-bg px-3 py-2 text-sm">
+            <li key={m.id} data-action={m.action} className="mr-8 rounded-2xl rounded-bl-md bg-bg px-3 py-2 text-sm">
+              <Tag action={m.action} />
               <p className="whitespace-pre-wrap">{m.content}</p>
               {m.companyIds.length > 0 && (
                 <p className="mt-1 text-caption text-text-secondary">
@@ -140,7 +174,7 @@ export default function Chat({
             <li className="ml-8 self-end rounded-2xl rounded-br-md bg-accent/60 px-3 py-2 text-sm text-white">{sendError}</li>
             <li role="group" aria-label="Failed answer" className="mr-8 rounded-2xl rounded-bl-md bg-bg px-3 py-2 text-sm">
               <span className="text-danger">Couldn&apos;t send that.</span>{" "}
-              <button type="button" onClick={() => onAsk(sendError)} className="pressable font-medium text-link hover:underline">
+              <button type="button" onClick={() => onAsk(sendError, failedAction)} className="pressable font-medium text-link hover:underline">
                 Retry
               </button>
             </li>
@@ -148,8 +182,21 @@ export default function Chat({
         )}
       </ol>
 
+      <div role="group" aria-label="Action" className="mx-3 mt-1 flex rounded-full bg-bg p-0.5 text-sm">
+        {ACTIONS.map((a) => (
+          <button
+            key={a.id}
+            type="button"
+            aria-pressed={action === a.id}
+            onClick={() => setAction(a.id)}
+            className="pressable flex-1 rounded-full py-1 text-text-secondary transition-colors aria-pressed:bg-surface aria-pressed:font-medium aria-pressed:text-text aria-pressed:shadow-sm"
+          >
+            {a.label}
+          </button>
+        ))}
+      </div>
       <form
-        className="flex items-end gap-2 border-t border-separator p-3"
+        className="flex items-end gap-2 p-3"
         onSubmit={(e) => {
           e.preventDefault();
           submit();
@@ -166,16 +213,18 @@ export default function Chat({
           }}
           rows={2}
           maxLength={2000}
-          placeholder={`Ask about ${scopeName} companies…`}
+          placeholder={ACTIONS.find((a) => a.id === action)!.placeholder(scopeName)}
           aria-label="Question"
+          id="question"
           className="min-h-11 flex-1 resize-none rounded-xl border border-separator bg-bg px-3 py-2 text-sm outline-none focus:border-accent"
         />
         <button
           type="submit"
           disabled={!draft.trim() || !!pending}
-          className="pressable h-9 rounded-full bg-accent px-4 text-sm font-medium text-white disabled:opacity-40"
+          aria-label="Send"
+          className="pressable flex size-9 shrink-0 items-center justify-center rounded-full bg-accent text-lg font-semibold text-white disabled:opacity-40"
         >
-          Ask
+          ↑
         </button>
       </form>
     </div>

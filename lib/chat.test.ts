@@ -182,6 +182,28 @@ describe("postMessage", () => {
     expect((await ask("q")).status).toBe(409);
   });
 
+  it("challenge with a selection: the candidates are exactly the selected companies, with challenge rules", async () => {
+    const spy = vi.fn(realAnswer);
+    const r = await ask(`my idea [ids:${B},${C},${D}]`, { action: "challenge", selectedCompanyIds: [C, B] }, { answer: spy });
+    const req = spy.mock.calls[0][0] as AnswerRequest;
+    expect(req.action).toBe("challenge");
+    expect(req.candidates.map((c) => c.id)).toEqual([C, B]);
+    if (r.status !== 200) throw new Error();
+    // D was scripted but isn't selected, so it can't reach the answer or the grid.
+    expect(r.body.message).toMatchObject({ action: "challenge", companyIds: [B, C] });
+    expect(r.body.userMessage.action).toBe("challenge");
+    expect(await grid()).toEqual([B, C]);
+  });
+
+  it("explore is saved and answered with its own action", async () => {
+    const spy = vi.fn(realAnswer);
+    const r = await ask(`clinic no-shows [ids:${A}]`, { action: "explore" }, { answer: spy });
+    expect((spy.mock.calls[0][0] as AnswerRequest).action).toBe("explore");
+    if (r.status !== 200) throw new Error();
+    expect(r.body.message.action).toBe("explore");
+    expect(r.body.message.content).toMatch(/^\(explore\)/);
+  });
+
   it("rejects a subcategory from another sector", async () => {
     const other = Number((await sql`insert into subcategories (sector_id, slug, name, kind)
       values ('fintech', 'x', 'X', 'problem') returning id`)[0].id);
@@ -198,6 +220,11 @@ describe("parseMessageInput", () => {
     });
   });
 
+  it.each(["ask", "explore", "challenge"])("accepts the %s action", (action) => {
+    const r = parseMessageInput({ text: "q", action });
+    expect(r.ok && r.value.action).toBe(action);
+  });
+
   it("dedupes selected ids", () => {
     const r = parseMessageInput({ text: "q", selectedCompanyIds: [3, 3, 1] });
     expect(r.ok && r.value.selectedCompanyIds).toEqual([3, 1]);
@@ -210,7 +237,8 @@ describe("parseMessageInput", () => {
     [{ text: 5 }, /Type a question/],
     [{ text: "x".repeat(MAX_QUESTION_CHARS + 1) }, /under 2000/],
     [{ text: "q", action: "shout" }, /Unknown action/],
-    [{ text: "q", action: "explore" }, /Unknown action/], // arrives with #12
+    [{ text: "q", action: "Explore" }, /Unknown action/],
+    [{ text: "q", action: 1 }, /Unknown action/],
     [{ text: "q", subcategoryId: "3" }, /positive integer/],
     [{ text: "q", subcategoryId: 0 }, /positive integer/],
     [{ text: "q", selectedCompanyIds: "1,2" }, /list of company ids/],

@@ -73,7 +73,7 @@ Listed in the order they were made. Decisions 1–14 are recorded in §16 of [in
     - *Why:* with `cacheComponents` and partial prerendering, the static shell starts streaming with a 200 before the page can call `notFound()`, and `dynamicParams` isn't available. The proxy already sits in front of every request and knows the 9 ids without touching the database.
 44. **Logos are decorative images (`alt=""`)** because the company name is always visible beside them. This supersedes the earlier rule of `alt="<name> logo"`, which would make screen readers announce every company twice.
 
-45. **Explore and Challenge are rejected with a 400 until #12.** `ACTIONS` in `lib/chat.ts` lists what the API accepts, and the prompt rules for both are already written in `lib/answer.ts`.
+45. **Explore and Challenge were rejected with a 400 until #12** (superseded by decision 54). `ACTIONS` in `lib/chat.ts` lists what the API accepts, and the prompt rules for both are already written in `lib/answer.ts`.
 46. **An answer that fails keeps the user's message and stores an assistant message with `status: "error"`.** Failed replies are left out of the history sent to the model. Retrying sends the question again as a new message, so there's no "edit and replace" flow.
 47. **Positions in the grid are consecutive.** Only companies new to the grid get positions, under a row lock on the session. This supersedes the earlier `ON CONFLICT` approach, which left gaps and, without a lock, could silently drop a tile if two answers chose the same position.
 
@@ -86,6 +86,11 @@ Listed in the order they were made. Decisions 1–14 are recorded in §16 of [in
 
 52. **Notes have no separate detail page.** A note on /notes links to its company with `/sector/:sectorId?company=:id`, and the workspace opens that profile when it loads. Notes are listed most recently edited first. General notes (no company) can be written on /notes.
 53. **Note deletion asks inline ("Delete this note?" Cancel / Delete)** rather than with `confirm()`, the same as New session (decision 50). Deletion is permanent; there is no undo or trash.
+
+54. **Explore and Challenge are actions on the same chat, chosen with a switch above the question box.** They aren't separate screens. The action is saved on the messages, shown as a tag, and reused by Retry.
+55. **Selection is client-side and not saved.** "Ask about these" is an explicit opt-in to selection scope, shown in the chip with × to leave it. Ticking tiles alone doesn't change what questions are about.
+56. **Compare uses a native `<dialog>` with `showModal()`.** That gives focus trapping, Esc to close, an inert background, and focus returning to Compare without extra code.
+57. **The send button is "Send" (↑),** because "Ask" now names an action in the switch.
 
 ## Open items
 

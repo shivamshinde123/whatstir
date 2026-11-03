@@ -127,6 +127,9 @@ test("keyboard: Tab between tiles, Enter opens the profile, Esc returns to the t
   await open(page);
   await ask(page, "keys [ids:6,17]");
   await tiles(page).first().focus();
+  await page.keyboard.press("Tab"); // each tile is followed by its selection checkbox
+  await expect(page.getByRole("checkbox", { name: "Select iCracked" })).toBeFocused();
+  await expect(page.getByRole("checkbox", { name: "Select iCracked" })).toHaveCSS("opacity", "1"); // visible on focus
   await page.keyboard.press("Tab");
   await expect(tiles(page).nth(1)).toBeFocused();
   await page.keyboard.press("Enter");

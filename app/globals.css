@@ -116,3 +116,11 @@ body {
     transform: none;
   }
 }
+
+/* Compare dialog: materialises (fade + slight scale) rather than sliding. */
+@keyframes compare-in {
+  from {
+    opacity: 0;
+    transform: scale(0.97);
+  }
+}
