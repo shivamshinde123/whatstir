@@ -38,6 +38,24 @@ test("shows the schedule, the state and the pending count; reachable from the he
   await expect(page.getByTestId("pending")).toHaveText("0"); // global setup enriched everything
 });
 
+test("shows which AI provider and models the deployment uses", async ({ page, request }) => {
+  await open(page);
+  const ai = page.getByTestId("ai-config");
+  // The e2e servers use the defaults (OpenAI) with fake answers.
+  await expect(ai).toContainText("OpenAI");
+  await expect(ai).toContainText("answers gpt-6.1-sol · writing gpt-6-luna · embeddings text-embedding-3-small · groups jev-latest");
+  await expect(ai).toContainText("fake (AI_FAKE)");
+  const status = await (await request.get("/api/admin/refresh")).json();
+  expect(status.ai).toEqual({
+    provider: "openai",
+    fake: true,
+    answer: "gpt-6.1-sol",
+    write: "gpt-6-luna",
+    embed: "text-embedding-3-small",
+    assign: "jev-latest",
+  });
+});
+
 test("Pause shows as paused, Resume as active, and it survives a reload", async ({ page }) => {
   await open(page);
   await page.getByRole("button", { name: "Pause" }).click();

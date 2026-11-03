@@ -6,6 +6,8 @@ const PORT = 3100;
 /** A second server of the same build with the password gate switched on. */
 const GATED_PORT = 3101;
 export const E2E_PASSWORD = "e2e-password";
+// The default provider and models, whatever a local .env says, so /admin's AI line is predictable.
+const AI_DEFAULTS = { AI_PROVIDER: "openai", AI_MODEL_ANSWER: "", AI_MODEL_WRITE: "", AI_MODEL_EMBED: "", JEV_MODEL: "" };
 const SHARED_STATE = /(admin|batch|chat|notes|selection)\.spec\.ts/;
 
 export default defineConfig({
@@ -48,14 +50,14 @@ export default defineConfig({
       url: `http://localhost:${PORT}`,
       reuseExistingServer: !process.env.CI,
       timeout: 180_000,
-      env: { APP_PASSWORD: "", DATABASE_URL: E2E_DATABASE_URL, AI_FAKE: "1", FOUNDERS_FETCH: "off", YC_SOURCE_URL: FEED_SOURCE_URL, CRON_SECRET: "e2e-cron" },
+      env: { APP_PASSWORD: "", DATABASE_URL: E2E_DATABASE_URL, AI_FAKE: "1", ...AI_DEFAULTS, FOUNDERS_FETCH: "off", YC_SOURCE_URL: FEED_SOURCE_URL, CRON_SECRET: "e2e-cron" },
     },
     {
       command: `npm run start -- -p ${GATED_PORT}`,
       url: `http://localhost:${GATED_PORT}/login`,
       reuseExistingServer: !process.env.CI,
       timeout: 60_000,
-      env: { APP_PASSWORD: E2E_PASSWORD, DATABASE_URL: E2E_DATABASE_URL, AI_FAKE: "1", FOUNDERS_FETCH: "off", YC_SOURCE_URL: FEED_SOURCE_URL, CRON_SECRET: "e2e-cron" },
+      env: { APP_PASSWORD: E2E_PASSWORD, DATABASE_URL: E2E_DATABASE_URL, AI_FAKE: "1", ...AI_DEFAULTS, FOUNDERS_FETCH: "off", YC_SOURCE_URL: FEED_SOURCE_URL, CRON_SECRET: "e2e-cron" },
     },
   ],
 });

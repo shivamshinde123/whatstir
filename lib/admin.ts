@@ -1,5 +1,7 @@
 import type { Sql } from "postgres";
+import { isFake, MODELS, provider } from "./ai";
 import { countPending } from "./enrich";
+import { jevModel } from "./jev";
 
 /** Must match vercel.json: daily at 11:00 UTC (06:00 Eastern in winter, 07:00 in summer). */
 export const CRON_SCHEDULE = "0 11 * * *";
@@ -27,7 +29,21 @@ export interface Settings {
   minConfidence: number;
 }
 
+/** Which provider and models this deployment uses, or why the configuration is invalid. */
+export type AiConfig =
+  | { provider: string; fake: boolean; answer: string; write: string; embed: string; assign: string }
+  | { error: string };
+
+export function aiConfig(): AiConfig {
+  try {
+    return { provider: provider(), fake: isFake(), answer: MODELS.answer, write: MODELS.write, embed: MODELS.embed, assign: jevModel() };
+  } catch (e) {
+    return { error: e instanceof Error ? e.message : String(e) };
+  }
+}
+
 export interface RefreshStatus extends Settings {
+  ai: AiConfig;
   schedule: string;
   /** The next time the cron will fire (it runs, or records a skip if paused). */
   nextRun: string;
@@ -90,6 +106,7 @@ export async function getRefreshStatus(sql: Sql, now = new Date()): Promise<Refr
   const runs = rows.map(toRun);
   return {
     ...settings,
+    ai: aiConfig(),
     schedule: CRON_SCHEDULE,
     nextRun: nextRunAfter(now).toISOString(),
     lastRun: runs[0] ?? null,

@@ -5,7 +5,11 @@ All variables live in `.env` at the repository root. Start from `.env.example` (
 | Variable | Required | Used by | Notes |
 |---|---|---|---|
 | `DATABASE_URL` | yes | server, scripts | The Supabase **transaction pooler** URL (port 6543). The client is created with `prepare: false`, which the pooler requires. |
-| `OPENAI_API_KEY` | yes | chat, writing jobs, embeddings | Server only. |
+| `AI_PROVIDER` | no | `lib/ai.ts` | `openai` (default) or `openrouter`. Chooses where answers, writing and embeddings go (decision 74). Anything else is an error, which `/admin` shows. |
+| `OPENAI_API_KEY` | with `openai` | chat, writing jobs, embeddings | Server only. The SDK also honours `OPENAI_BASE_URL`. |
+| `OPENROUTER_API_KEY` | with `openrouter` | the same | Server only. Requests go to `https://openrouter.ai/api/v1`. |
+| `AI_MODEL_ANSWER`, `AI_MODEL_WRITE`, `AI_MODEL_EMBED` | no | `lib/ai.ts` | Override the answer, writing and embedding models. Blank means the provider's default (below). Answer and writing models must support structured outputs (JSON schema). The embedding model must return 1536 dimensions, or embedding fails with a clear error. |
+| `JEV_MODEL` | no | `lib/jev.ts` | Overrides `jev-latest`, for example to pin a version. |
 | `TYPESAFE_API_KEY` | yes | Jev assignment | The SDK reads it automatically. |
 | `APP_PASSWORD` | on deploy | `proxy.ts` | Leave blank to switch the gate off, which is only acceptable locally. |
 | `CRON_SECRET` | on deploy | `/api/cron/refresh` | Vercel Cron sends it as `Authorization: Bearer <secret>`. |
@@ -27,7 +31,16 @@ These live in the `app_settings` table so they can change without a redeploy:
 ## Fixed settings
 
 - **Refresh schedule:** set in `vercel.json` as `0 11 * * *` UTC. That is 06:00 New York time in winter (EST) and 07:00 in summer (EDT), because Vercel Cron only runs in UTC. Changing it means a redeploy.
-- **Model ids:** `gpt-6.1-sol`, `gpt-6-luna`, `text-embedding-3-small` and `jev-latest` are constants in `lib/ai.ts`.
+- **Default models** (`lib/ai.ts`, overridable with `AI_MODEL_*`; `/admin` shows the ones in use):
+
+  | Role | `openai` | `openrouter` |
+  |---|---|---|
+  | Answers | `gpt-6.1-sol` | `openai/gpt-6.1-sol` |
+  | Writing (problem cards, group names) | `gpt-6-luna` | `openai/gpt-6-luna` |
+  | Embeddings | `text-embedding-3-small` | `openai/text-embedding-3-small` |
+  | Group assignment (TypeSafe, not routed) | `jev-latest` | `jev-latest` |
+
+- **Switching the embedding model** changes the vector space, so every company must be re-embedded: `update companies set embedded_hash = null;` then `npm run backfill`. The OpenRouter default is the same model as OpenAI's, so moving between providers with the defaults needs no re-embedding.
 
 ## Secrets
 

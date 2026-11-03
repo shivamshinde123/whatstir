@@ -27,7 +27,8 @@ const commentedOnly = ["AI_FAKE", "YC_SOURCE_URL"];
 
 describe(".env.example", () => {
   it("documents every variable the code reads, including the ones the SDKs read implicitly", () => {
-    const used = new Set(["OPENAI_API_KEY", "TYPESAFE_API_KEY"]);
+    // Read implicitly by the SDKs, or through process.env[name] in lib/ai.ts.
+    const used = new Set(["OPENAI_API_KEY", "TYPESAFE_API_KEY", "AI_MODEL_ANSWER", "AI_MODEL_WRITE", "AI_MODEL_EMBED"]);
     for (const file of [...sources("lib"), ...sources("scripts"), ...sources("app"), "proxy.ts", "test/db.ts"]) {
       for (const m of read(file).matchAll(/process\.env\.([A-Z_]+)/g)) used.add(m[1]);
     }
@@ -38,10 +39,12 @@ describe(".env.example", () => {
   });
 
   it("holds placeholders only: secrets are empty, and only safe local defaults are filled in", () => {
-    for (const key of ["DATABASE_URL", "OPENAI_API_KEY", "TYPESAFE_API_KEY", "APP_PASSWORD", "CRON_SECRET"]) {
+    for (const key of ["DATABASE_URL", "OPENAI_API_KEY", "OPENROUTER_API_KEY", "TYPESAFE_API_KEY", "APP_PASSWORD", "CRON_SECRET"]) {
       expect(entries[key], key).toBe("");
     }
     expect(entries.FOUNDERS_FETCH).toBe("off");
+    expect(entries.AI_PROVIDER).toBe("openai");
+    for (const key of ["AI_MODEL_ANSWER", "AI_MODEL_WRITE", "AI_MODEL_EMBED", "JEV_MODEL"]) expect(entries[key], key).toBe("");
     expect(entries.TEST_DATABASE_URL).toMatch(/^postgres:\/\/postgres:postgres@localhost:54329\//);
     expect(example).not.toMatch(/sk-[A-Za-z0-9_-]{10,}|supabase\.com|[0-9a-f]{32,}/);
   });

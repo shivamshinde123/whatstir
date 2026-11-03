@@ -132,6 +132,13 @@ Listed in the order they were made. Decisions 1–14 are recorded in §16 of [in
       - Admins are not subject to the review rule, because GitHub doesn't let anyone approve their own PR. The owner merges their own PRs with `--admin`, and outside contributors can't push at all, so their changes arrive as fork PRs that only the owner can approve.
     - *CI hardening:* the workflow runs on `pull_request` (never `pull_request_target`) with a read-only token and no secrets. First-time contributors' CI runs need the owner's approval.
 
+74. **The AI provider and models are settings, and OpenRouter is supported** (the owner's request, so Whatstir isn't tied to one vendor).
+    - *Why OpenRouter works with little code:* it speaks the OpenAI API. The same `openai` SDK is pointed at `https://openrouter.ai/api/v1` with `OPENROUTER_API_KEY`, and model ids gain a vendor prefix (`openai/gpt-6.1-sol`, `anthropic/…`, `google/…`). Its embeddings endpoint is OpenAI-compatible and accepts `dimensions`.
+    - *Structured outputs:* on OpenRouter, `structured()` uses Chat Completions with `response_format: json_schema` (strict) instead of the Responses API, because OpenRouter's Responses endpoint is still in beta and Chat Completions is what every structured-output model there supports. It also sends `provider: { require_parameters: true }`, so a request is only routed to a provider that honours the schema, never to one that ignores it. OpenAI keeps the Responses API, so the existing deployment behaves exactly as before.
+    - *Embeddings stay 1536-dimensional:* the `vector(1536)` column and the HNSW index fix the size. Requests ask for 1536, OpenRouter gets `encoding_format: "float"`, and a model that returns another size fails loudly instead of silently breaking search. Switching embedding models means re-embedding everything (see the environment reference).
+    - *Jev stays on TypeSafe:* group assignment uses Jev's typed choices with probabilities, which OpenRouter doesn't offer. Only its model id is configurable (`JEV_MODEL`).
+    - *Config lives in env vars, not the database:* models rarely change, keys must be server-side env vars anyway, and env vars keep a fork's setup in one place (`.env.example`). `/admin` shows what's in use.
+
 ## Open items
 
 - **A. Founder data.** Founders come from YC company pages. YC's terms of use forbid scraping, so the fetch is now off by default (decision 73); `FOUNDERS_FETCH=on` opts in for private use.

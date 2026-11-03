@@ -4,7 +4,7 @@ import path from "node:path";
 import type { Sql } from "postgres";
 import { afterAll, afterEach, beforeAll, beforeEach, describe, expect, it, vi } from "vitest";
 import { createTestDb, resetData } from "@/test/db";
-import { nameGroups, writeCard } from "./ai";
+import { fakeEmbedding, nameGroups, writeCard } from "./ai";
 import { countPending, enrich } from "./enrich";
 import { run } from "./refresh";
 import { SECTOR_IDS } from "./sector";
@@ -142,6 +142,23 @@ describe("enrich", () => {
     const embed = vi.fn();
     expect(await go({ deps: { embed } })).toMatchObject({ processed: 1, enriched: 1, pending: 0 });
     expect(embed).not.toHaveBeenCalled();
+  });
+
+  it("records the configured writing model on each problem card (e.g. an OpenRouter model)", async () => {
+    await seedGroups();
+    vi.stubEnv("AI_FAKE", "");
+    vi.stubEnv("AI_PROVIDER", "openrouter");
+    vi.stubEnv("AI_MODEL_WRITE", "anthropic/claude-sonnet-5.5");
+    const card = { customer: null, problem: "p", workaround: null, solution: null };
+    const s = await go({
+      deps: {
+        embed: async (texts) => texts.map(fakeEmbedding),
+        assign: async (_c, groups) => [{ subcategoryId: groups.find((g) => g.kind === "unclassified")!.id, confidence: null, explanation: "test" }],
+        writeCard: async () => ({ ...card, evidence: { ...card } }),
+      },
+    });
+    expect(s).toMatchObject({ enriched: TOTAL, failed: 0 });
+    expect(await sql`select distinct model from problem_cards`).toEqual([{ model: "anthropic/claude-sonnet-5.5" }]);
   });
 
   it("marks every company in a batch failed when the embedding call fails, and retries next run", async () => {

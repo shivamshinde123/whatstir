@@ -93,7 +93,7 @@ The mapping (`toAssignments`) gives each company exactly one of {a problem group
 
 ## Problem cards (`gpt-6-luna`)
 
-The card is written with one Responses API call (`openai` SDK 7). It uses `text.format = { type: "json_schema", name: "problem_card", strict: true }`, and the result is read from `output_text`. `gpt-6-luna` receives the company's own text and must return JSON with `customer`, `problem`, `workaround`, `solution` and `evidence`. Each field must be supported by a quote from that text, or be `null`. It must not use outside knowledge. Any field whose evidence quote can't be found in the company's text is replaced with `null` before saving.
+The card is written with one structured call (`openai` SDK 7): the Responses API on OpenAI, or Chat Completions with `response_format: json_schema` on OpenRouter (decision 74). The model is `AI_MODEL_WRITE` if set, and the one used is saved in `problem_cards.model`. On OpenAI the call uses `text.format = { type: "json_schema", name: "problem_card", strict: true }`, and the result is read from `output_text`. `gpt-6-luna` receives the company's own text and must return JSON with `customer`, `problem`, `workaround`, `solution` and `evidence`. Each field must be supported by a quote from that text, or be `null`. It must not use outside knowledge. Any field whose evidence quote can't be found in the company's text is replaced with `null` before saving.
 
 ## Provenance
 

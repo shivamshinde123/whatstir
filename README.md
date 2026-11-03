@@ -9,7 +9,7 @@ Pick a sector, ask questions in plain English, and watch the companies each answ
 ![Next.js 16](https://img.shields.io/badge/Next.js-16-0a1d08?logo=nextdotjs&logoColor=white)
 ![React 19](https://img.shields.io/badge/React-19-4a6d47?logo=react&logoColor=white)
 ![Postgres + pgvector](https://img.shields.io/badge/Postgres-pgvector-2b6b5e?logo=postgresql&logoColor=white)
-![OpenAI](https://img.shields.io/badge/OpenAI-answers%20%26%20embeddings-2b390a?logo=openai&logoColor=white)
+![OpenAI or OpenRouter](https://img.shields.io/badge/AI-OpenAI%20%7C%20OpenRouter-2b390a?logo=openai&logoColor=white)
 ![Deploy on Vercel](https://img.shields.io/badge/Deploy-Vercel-0a1d08?logo=vercel&logoColor=white)
 ![Tests](https://img.shields.io/badge/tests-Vitest%20%2B%20Playwright-80581c)
 ![License: MIT](https://img.shields.io/badge/license-MIT-4a6d47)
@@ -73,7 +73,7 @@ Pick a sector, ask questions in plain English, and watch the companies each answ
 ```mermaid
 flowchart LR
   yc[(yc-oss feed)] -->|daily cron / npm run refresh| ingest[Refresh + enrichment]
-  ingest -->|embeddings, problem cards| openai[OpenAI]
+  ingest -->|embeddings, problem cards| openai[OpenAI or OpenRouter]
   ingest -->|subcategory assignment| jev[TypeSafe Jev]
   ingest --> db[(Postgres + pgvector)]
   user((You)) -->|password gate| app[Next.js app on Vercel]
@@ -81,8 +81,8 @@ flowchart LR
   app -->|grounded answer + citations| openai
 ```
 
-1. **Ingest.** `refresh` loads the yc-oss feed into Postgres. Each company is embedded (`text-embedding-3-small`) and given a short **problem card** written from its own description (`gpt-6-luna`). It's also placed in AI-suggested problem groups by **Jev** (`jev-latest`).
-2. **Ask.** A question is embedded, and pgvector picks the closest companies in scope (sector, group, batch or selection). The answer model (`gpt-6.1-sol`) must answer from those descriptions only and cite company ids. Citations are checked against the candidates, and the cited companies join the grid.
+1. **Ingest.** `refresh` loads the yc-oss feed into Postgres. Each company is embedded (`text-embedding-3-small` by default) and given a short **problem card** written from its own description (`gpt-6-luna` by default). It's also placed in AI-suggested problem groups by **Jev** (`jev-latest`).
+2. **Ask.** A question is embedded, and pgvector picks the closest companies in scope (sector, group, batch or selection). The answer model (`gpt-6.1-sol` by default; any structured-output model through OpenRouter) must answer from those descriptions only and cite company ids. Citations are checked against the candidates, and the cited companies join the grid.
 3. **Keep fresh.** Vercel Cron calls `/api/cron/refresh` daily. Enrichment is keyed by content hashes, so unchanged companies cost nothing.
 
 There's more depth in [docs/system-architecture-document.md](docs/system-architecture-document.md) and [docs/flow.md](docs/flow.md).
@@ -94,7 +94,7 @@ There's more depth in [docs/system-architecture-document.md](docs/system-archite
 | App | [Next.js 16](https://nextjs.org) (App Router, `cacheComponents`), React 19, TypeScript |
 | Styling | Tailwind CSS 4. Inter, Newsreader and Fragment Mono, self-hosted via `next/font` |
 | Database | Postgres with [pgvector](https://github.com/pgvector/pgvector), hosted on [Supabase](https://supabase.com), queried through [postgres.js](https://github.com/porsager/postgres) |
-| AI | [OpenAI](https://platform.openai.com) for answers, writing and embeddings; [TypeSafe](https://typesafe.ai) Jev for subcategory assignment |
+| AI | [OpenAI](https://platform.openai.com), or any of [OpenRouter](https://openrouter.ai)'s models, for answers, writing and embeddings; [TypeSafe](https://typesafe.ai) Jev for subcategory assignment |
 | Hosting | [Vercel](https://vercel.com), with Vercel Cron for the daily refresh |
 | Tests | [Vitest](https://vitest.dev) (unit, integration on a real Postgres, components) and [Playwright](https://playwright.dev) (end to end) |
 
@@ -113,7 +113,7 @@ Everything below uses **your own** accounts and keys. The repository holds no se
 | You need | Where to get it | Used for |
 |---|---|---|
 | A Postgres database with pgvector | Create a free project at [supabase.com](https://supabase.com) | All data |
-| `OPENAI_API_KEY` | [platform.openai.com/api-keys](https://platform.openai.com/api-keys) | Answers, problem cards, embeddings |
+| `OPENAI_API_KEY` **or** `OPENROUTER_API_KEY` | [platform.openai.com/api-keys](https://platform.openai.com/api-keys), or [openrouter.ai/keys](https://openrouter.ai/keys) | Answers, problem cards, embeddings |
 | `TYPESAFE_API_KEY` | [typesafe.ai](https://typesafe.ai) ([docs](https://docs.typesafe.ai/)) | Assigning companies to groups |
 | A Vercel account | [vercel.com](https://vercel.com) (the free Hobby plan is enough) | Hosting and the daily cron |
 
@@ -134,12 +134,38 @@ Fill in `.env`:
 | Variable | Value |
 |---|---|
 | `DATABASE_URL` | Your Supabase transaction pooler URL |
-| `OPENAI_API_KEY` | Your OpenAI key |
+| `AI_PROVIDER` | `openai` (default) or `openrouter` |
+| `OPENAI_API_KEY` | Your OpenAI key (with `openai`) |
+| `OPENROUTER_API_KEY` | Your OpenRouter key (with `openrouter`) |
 | `TYPESAFE_API_KEY` | Your TypeSafe key |
 | `APP_PASSWORD` | A passphrase of your choice. Leave it empty locally to switch the gate off |
 | `CRON_SECRET` | Any long random string, for example from `openssl rand -hex 32` |
 
 Every variable is described in [docs/environment-config-reference.md](docs/environment-config-reference.md).
+
+#### Choosing a provider and models
+
+By default Whatstir calls OpenAI directly. To use [OpenRouter](https://openrouter.ai) instead (one key, hundreds of models from OpenAI, Anthropic, Google and others), set:
+
+```sh
+AI_PROVIDER=openrouter
+OPENROUTER_API_KEY=<your OpenRouter key>
+# Optional examples; check https://openrouter.ai/models for current ids and "structured outputs" support
+AI_MODEL_ANSWER=anthropic/claude-sonnet-5.5
+AI_MODEL_WRITE=openai/gpt-6.1-terra
+AI_MODEL_EMBED=openai/text-embedding-3-small
+```
+
+| Setting | Default on OpenAI | Default on OpenRouter | Must support |
+|---|---|---|---|
+| `AI_MODEL_ANSWER` | `gpt-6.1-sol` | `openai/gpt-6.1-sol` | Structured outputs (JSON schema) |
+| `AI_MODEL_WRITE` | `gpt-6-luna` | `openai/gpt-6-luna` | Structured outputs (JSON schema) |
+| `AI_MODEL_EMBED` | `text-embedding-3-small` | `openai/text-embedding-3-small` | 1536-dimensional output |
+
+`/admin` shows the provider and models a deployment is using.
+
+> [!WARNING]
+> Changing the **embedding** model changes every vector, so re-embed everything afterwards: run `update companies set embedded_hash = null;` in your database, then `npm run backfill`. Moving between OpenAI and OpenRouter with the default embedding model needs no re-embedding.
 
 > [!CAUTION]
 > Never commit `.env`, and never prefix a key with `NEXT_PUBLIC_`: that would send it to the browser.
@@ -167,7 +193,9 @@ npm run dev                      # http://localhost:3000
    | Variable | Value |
    |---|---|
    | `DATABASE_URL` | The same Supabase pooler URL |
-   | `OPENAI_API_KEY` | Your OpenAI key |
+   | `AI_PROVIDER` | `openai` or `openrouter` (leave unset for OpenAI) |
+   | `OPENAI_API_KEY` or `OPENROUTER_API_KEY` | The key for your provider |
+   | `AI_MODEL_*`, `JEV_MODEL` | Optional model overrides |
    | `TYPESAFE_API_KEY` | Your TypeSafe key |
    | `APP_PASSWORD` | A long passphrase. **Required** once the site is public |
    | `CRON_SECRET` | A *different* random string from your local one |
@@ -191,7 +219,7 @@ The day after you deploy, `/admin` should list a `cron` run with status **OK**.
 
 ## What it costs to run
 
-These are rough figures from the author's own deployment, at current API prices. Check your providers' pricing.
+These are rough figures from the author's own deployment, using OpenAI's default models at current prices. Other models through OpenRouter can cost much less, or more. Check your provider's pricing.
 
 | What | About |
 |---|---|

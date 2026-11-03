@@ -19,7 +19,7 @@ function duration(r: Run): string {
 }
 
 const STATUS_STYLE: Record<Run["status"], string> = {
-  ok: "bg-[color-mix(in_srgb,#34c759_16%,transparent)] text-[color-mix(in_srgb,#248a3d_85%,var(--text))]",
+  ok: "bg-[color-mix(in_srgb,var(--link)_16%,transparent)] text-[color-mix(in_srgb,var(--link)_85%,var(--text))]",
   failed: "bg-[color-mix(in_srgb,var(--danger)_14%,transparent)] text-danger",
   skipped: "bg-surface text-text-secondary",
   running: "bg-accent/15 text-link",
@@ -166,6 +166,18 @@ export default function AdminView() {
                 <p className="text-sm text-text-secondary">{s.pending === 1 ? "company" : "companies"}</p>
               </Stat>
             </section>
+
+            <p data-testid="ai-config" className={`mt-3 text-sm ${"error" in s.ai ? "text-danger" : "text-text-secondary"}`}>
+              {"error" in s.ai ? (
+                <>AI configuration: {s.ai.error}</>
+              ) : (
+                <>
+                  <span className="text-tag mr-2">{s.ai.provider === "openrouter" ? "OpenRouter" : "OpenAI"}</span>
+                  answers {s.ai.answer} · writing {s.ai.write} · embeddings {s.ai.embed} · groups {s.ai.assign}
+                  {s.ai.fake && " · fake (AI_FAKE)"}
+                </>
+              )}
+            </p>
 
             <section aria-label="Controls" className="mt-6 flex flex-wrap items-end gap-3">
               <button

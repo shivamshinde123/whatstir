@@ -75,7 +75,7 @@ describe("embed", () => {
   it("batches requests (300 texts → 2 requests) and keeps input order", async () => {
     const create = vi.fn(async ({ input }: { input: string[] }) => ({
       // Return out of order to prove we sort by index.
-      data: input.map((t, index) => ({ index, embedding: [Number(t)] })).reverse(),
+      data: input.map((t, index) => ({ index, embedding: [Number(t), ...new Array(EMBED_DIM - 1).fill(0)] })).reverse(),
     }));
     realWith({ embeddings: { create } } as unknown as OpenAI);
     const texts = Array.from({ length: 300 }, (_, i) => String(i));
