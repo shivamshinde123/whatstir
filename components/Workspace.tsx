@@ -173,8 +173,8 @@ export default function Workspace({ sectorId, sectorName }: { sectorId: string; 
 
   return (
     <>
-      <SiteHeader showSignOut={data?.gate} wide />
-      <main className="mx-auto flex w-full max-w-[1400px] flex-1 flex-col px-4 pb-8 pt-6 sm:px-6">
+      <SiteHeader showSignOut={data?.gate} />
+      <main className="flex w-full flex-1 flex-col px-4 pb-8 pt-6 sm:px-6 lg:px-8">
         <Link href="/" className="text-sm text-link hover:underline">
           ‹ All sectors
         </Link>
@@ -204,7 +204,7 @@ export default function Workspace({ sectorId, sectorName }: { sectorId: string; 
               selected={subcategory}
               onSelect={setSubcategory}
             />
-            <div className="mt-4 grid gap-4 lg:h-[calc(100dvh-18rem)] lg:min-h-[520px] lg:grid-cols-[320px_minmax(0,1fr)_360px]">
+            <div className="mt-4 grid gap-4 lg:h-[calc(100dvh-18rem)] lg:min-h-[520px] lg:grid-cols-[minmax(300px,22%)_minmax(0,1fr)_minmax(340px,27%)]">
               <section
                 aria-label="Company basket"
                 className="relative h-[55vh] overflow-hidden rounded-[var(--radius-card)] bg-surface lg:h-auto"
@@ -243,6 +243,7 @@ export default function Workspace({ sectorId, sectorName }: { sectorId: string; 
                   sendError={sendError}
                   notice={notice}
                   scopeName={scopeName}
+                  selection={selectionScope}
                   onClearScope={selectionScope ? () => setAskSelected(false) : undefined}
                   onAsk={ask}
                   onRetry={retry}

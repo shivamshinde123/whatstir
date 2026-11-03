@@ -59,6 +59,21 @@ test("[A,B] then [B,C]: one grid of 3, only C is new and only C flies in from th
   await expect(page.locator("[data-flight]")).toHaveCount(0); // flights clean up after landing
 });
 
+test("a suggested question asks itself with one click and fills the grid", async ({ page }) => {
+  await open(page);
+  const suggested = page.getByRole("group", { name: "Suggestions" }).getByRole("button");
+  await expect(suggested).toHaveCount(3);
+  await expect(suggested.first()).toHaveText("Which Consumer companies sell to small businesses?");
+  await suggested.first().click();
+  await expect(page.getByRole("status")).toHaveCount(0);
+  const conversation = page.getByRole("list", { name: "Conversation" });
+  await expect(conversation.getByText("Which Consumer companies sell to small businesses?", { exact: true })).toBeVisible();
+  await expect(page.getByText(/^\(ask\) In Consumer: /)).toBeVisible();
+  await expect(tiles(page)).toHaveCount(3); // the fake cites its first 3 candidates
+  // Still offered as chips once the conversation has started.
+  await expect(page.getByRole("group", { name: "Suggestions" }).getByRole("button")).toHaveCount(3);
+});
+
 test("a no-match answer shows the message and leaves the grid unchanged", async ({ page }) => {
   await open(page);
   await ask(page, "first [ids:6]");

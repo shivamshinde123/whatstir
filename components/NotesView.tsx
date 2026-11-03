@@ -10,7 +10,7 @@ export default function NotesView() {
   return (
     <>
       <SiteHeader showSignOut={gate} />
-      <main className="mx-auto w-full max-w-2xl flex-1 px-4 pb-16 pt-10 sm:px-6">
+      <main className="w-full flex-1 px-4 pb-16 pt-10 sm:px-6 lg:px-8">
         <h1 className="text-headline">Notes</h1>
         <p className="mb-6 mt-1 text-text-secondary">Everything you&apos;ve saved, across all sectors.</p>
         <NotesList onGate={setGate} />

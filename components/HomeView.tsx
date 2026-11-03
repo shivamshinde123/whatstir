@@ -66,7 +66,7 @@ export default function HomeView() {
   return (
     <>
       <SiteHeader showSignOut={data?.gate} />
-      <main className="mx-auto flex w-full max-w-5xl flex-1 flex-col px-4 pb-12 pt-10 sm:px-6 sm:pt-14">
+      <main className="flex w-full flex-1 flex-col px-4 pb-12 pt-10 sm:px-6 sm:pt-14 lg:px-8">
         <h1 className="text-headline">Explore startups by sector</h1>
         <p className="mt-2 text-text-secondary" aria-live="polite">
           {data && !empty
@@ -103,7 +103,7 @@ export default function HomeView() {
         </div>
 
         {/* Always mounted so it can be measured; the states render inside it. */}
-        <div ref={mapRef} hidden={asList && !!data && !empty} className="mt-4 h-[min(62vh,560px)] w-full">
+        <div ref={mapRef} hidden={asList && !!data && !empty} className="mt-4 h-[max(420px,calc(100dvh-19rem))] w-full">
           {state.kind === "loading" && (
             <div className="grid h-full grid-cols-3 grid-rows-2 gap-1.5" aria-label="Loading sectors" role="status">
               {Array.from({ length: 6 }, (_, i) => (

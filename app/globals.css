@@ -1,5 +1,8 @@
 @import "tailwindcss";
 
+/* Light is the default; dark is the owner's explicit choice (ThemeToggle sets data-theme). */
+@custom-variant dark (&:where([data-theme="dark"], [data-theme="dark"] *));
+
 /* Apple-style foundations. See docs/ui-ux-wireframes.md, "Design language". */
 
 :root {
@@ -16,24 +19,23 @@
   --shadow-card: 0 4px 24px rgb(0 0 0 / 0.06);
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --bg: #000000;
-    --surface: #1c1c1e;
-    --text: #f5f5f7;
-    --text-secondary: #a1a1a6;
-    --text-tertiary: #6e6e73;
-    --separator: rgb(255 255 255 / 0.12);
-    --accent: #2997ff;
-    --link: #2997ff;
-    --danger: #ff453a;
-    --material: rgb(22 22 23 / 0.72);
-    --shadow-card: 0 4px 24px rgb(0 0 0 / 0.4);
-  }
+:root[data-theme="dark"] {
+  --bg: #000000;
+  --surface: #1c1c1e;
+  --text: #f5f5f7;
+  --text-secondary: #a1a1a6;
+  --text-tertiary: #6e6e73;
+  --separator: rgb(255 255 255 / 0.12);
+  --accent: #2997ff;
+  --link: #2997ff;
+  --danger: #ff453a;
+  --material: rgb(22 22 23 / 0.72);
+  --shadow-card: 0 4px 24px rgb(0 0 0 / 0.4);
 }
 
 @media (prefers-reduced-transparency: reduce) {
-  :root {
+  :root,
+  :root[data-theme="dark"] {
     --material: var(--bg);
   }
 }
@@ -56,8 +58,12 @@
 }
 
 html {
-  color-scheme: light dark;
+  color-scheme: light;
   -webkit-text-size-adjust: 100%;
+}
+
+html[data-theme="dark"] {
+  color-scheme: dark;
 }
 
 body {

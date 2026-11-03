@@ -861,3 +861,84 @@ describe("selection, compare, and actions", () => {
 
   const posts = () => fetchMock.mock.calls.filter(([u]) => String(u).startsWith("/api/sessions/"));
 });
+
+describe("suggested questions", () => {
+  const renderReady = async () => {
+    render(<Workspace sectorId="healthcare" sectorName="Healthcare" />);
+    await screen.findByText("3 companies");
+  };
+  const suggestions = () => within(screen.getByRole("group", { name: "Suggestions" })).getAllByRole("button");
+  const sent = () => fetchMock.mock.calls.filter(([u]) => String(u).startsWith("/api/sessions/")).map(([, init]) => JSON.parse(init.body));
+
+  it("an empty conversation offers 3 questions about the sector; clicking one asks it", async () => {
+    await renderReady();
+    expect(suggestions().map((b) => b.textContent)).toEqual([
+      "Which Healthcare companies sell to small businesses?",
+      "What customer problems do Healthcare companies solve most often?",
+      "Which Healthcare companies launched since 2022, and what do they do?",
+    ]);
+    fireEvent.click(suggestions()[1]);
+    await waitFor(() => expect(sent()).toHaveLength(1));
+    expect(sent()[0]).toEqual({
+      text: "What customer problems do Healthcare companies solve most often?",
+      action: "ask",
+      subcategoryId: null,
+      selectedCompanyIds: [],
+    });
+    expect(await screen.findByText("Answer to What customer problems do Healthcare companies solve most often?")).toBeInTheDocument();
+    expect(screen.getByLabelText("Question")).toHaveValue(""); // a suggestion doesn't touch the draft
+  });
+
+  it("follow the action switch and the scope", async () => {
+    await renderReady();
+    fireEvent.click(within(screen.getByRole("group", { name: "Action" })).getByRole("button", { name: "Challenge" }));
+    expect(suggestions()[0]).toHaveTextContent(/^My idea: an AI assistant that does routine Healthcare paperwork/);
+    fireEvent.click(suggestions()[0]);
+    await waitFor(() => expect(sent()).toHaveLength(1));
+    expect(sent()[0].action).toBe("challenge");
+
+    fireEvent.click(screen.getByRole("button", { name: "Scheduling 2" }));
+    fireEvent.click(within(screen.getByRole("group", { name: "Action" })).getByRole("button", { name: "Ask" }));
+    expect(suggestions()[0]).toHaveTextContent("Which Scheduling companies sell to small businesses?");
+    fireEvent.click(suggestions()[0]);
+    await waitFor(() => expect(sent()).toHaveLength(2));
+    expect(sent()[1].subcategoryId).toBe(3);
+  });
+
+  it("stay available as chips once the conversation has started, and pause while an answer is pending", async () => {
+    await renderReady();
+    fireEvent.click(suggestions()[0]);
+    await screen.findByText("Answer to Which Healthcare companies sell to small businesses?");
+    // Still offered, now as a compact row (only one suggestion group at a time).
+    expect(screen.getAllByRole("group", { name: "Suggestions" })).toHaveLength(1);
+    expect(suggestions()).toHaveLength(3);
+
+    let release!: () => void;
+    const gate = new Promise<void>((r) => (release = r));
+    const original = fetchMock.getMockImplementation() as (url: string, init?: RequestInit) => Promise<Response>;
+    fetchMock.mockImplementation(async (url: string, init?: RequestInit) => {
+      if (String(url).startsWith("/api/sessions/")) await gate;
+      return original(url, init);
+    });
+    fireEvent.click(suggestions()[2]);
+    await screen.findByRole("status");
+    expect(suggestions().every((b) => (b as HTMLButtonElement).disabled)).toBe(true);
+    release();
+    await waitFor(() => expect(screen.queryByRole("status")).toBeNull());
+    expect(suggestions().some((b) => (b as HTMLButtonElement).disabled)).toBe(false);
+  });
+
+  it("switch to comparison questions while asking about a selection", async () => {
+    await renderReady();
+    fireEvent.change(screen.getByLabelText("Question"), { target: { value: "seed [ids:10,11]" } });
+    fireEvent.click(screen.getByRole("button", { name: "Send" }));
+    await waitFor(() => expect(document.querySelectorAll("[data-tile-id]")).toHaveLength(2));
+    fireEvent.click(screen.getByRole("checkbox", { name: "Select Acme Health" }));
+    fireEvent.click(screen.getByRole("checkbox", { name: "Select Bolt Clinic" }));
+    fireEvent.click(screen.getByRole("button", { name: "Ask about these" }));
+    expect(suggestions()[0]).toHaveTextContent("How do these companies differ in who they sell to?");
+    fireEvent.click(suggestions()[0]);
+    await waitFor(() => expect(sent()).toHaveLength(2));
+    expect(sent()[1]).toMatchObject({ selectedCompanyIds: [10, 11], action: "ask" });
+  });
+});
