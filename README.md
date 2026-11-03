@@ -32,5 +32,24 @@ npm run ci             # typecheck, lint, Vitest, Playwright: the same checks as
 ```
 Tests never call OpenAI, Jev or YC: Vitest sets `AI_FAKE=1` and `FOUNDERS_FETCH=off`.
 
+## Deploy (Supabase + Vercel)
+1. **Database.** Create a Supabase project. Under Database → Extensions, enable `vector`. Copy the **transaction pooler** connection string (port 6543) into `.env` as `DATABASE_URL`.
+2. **Load and enrich, from your machine** (it needs no time limit):
+   ```sh
+   npm run migrate
+   npm run refresh -- --load-only
+   npm run subcategories
+   npm run backfill        # re-run until it exits 0; finished work is kept
+   ```
+   This needs `OPENAI_API_KEY` and `TYPESAFE_API_KEY` in `.env`.
+3. **Vercel.** `vercel.json` pins the server functions to `iad1`, next to a us-east-1 database. Import the GitHub repo as a Vercel project with the Next.js preset. Set these environment variables for Production: `DATABASE_URL` (the same pooler URL), `OPENAI_API_KEY`, `TYPESAFE_API_KEY`, `APP_PASSWORD` (a long passphrase) and `CRON_SECRET` (`openssl rand -hex 32`). Leave `AI_FAKE`, `FOUNDERS_FETCH` and `YC_SOURCE_URL` unset. Deploy.
+4. **Cron.** `vercel.json` registers `/api/cron/refresh` at 11:00 UTC daily. Check it under Settings → Cron Jobs. Vercel sends `CRON_SECRET` as a Bearer token.
+5. **Smoke test** (read-only):
+   ```sh
+   SMOKE_URL=https://<your-app>.vercel.app SMOKE_PASSWORD=<APP_PASSWORD> npm run test:e2e:smoke
+   ```
+   It checks the gate, that cron refuses requests without the secret, the treemap counts against the database, the largest sector's basket and groups, a profile, session restore, /notes and /admin. It asks nothing and writes nothing.
+6. **The first scheduled run:** the next day, /admin should show a `cron` run with status OK.
+
 ## Workflow
 `main` is protected. Every change goes through a GitHub issue, then a branch, then tests, then a pull request, and is merged only once the `ci` check passes. See [CLAUDE.md](CLAUDE.md).
