@@ -28,6 +28,11 @@ export function isCorrectPassword(attempt: unknown, password: string): boolean {
   return typeof attempt === "string" && attempt.length > 0 && safeEqual(attempt, password);
 }
 
+/** Vercel Cron sends `Authorization: Bearer $CRON_SECRET`. With no secret set, nothing passes. */
+export function isCronAuthorized(header: string | null, secret: string | undefined): boolean {
+  return !!secret && !!header && safeEqual(header, `Bearer ${secret}`);
+}
+
 /** Paths reachable without the cookie. Cron checks its own CRON_SECRET. */
 export function isPublicPath(pathname: string): boolean {
   return (

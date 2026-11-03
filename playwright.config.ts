@@ -1,10 +1,12 @@
 import { defineConfig, devices } from "@playwright/test";
 import { E2E_DATABASE_URL } from "./e2e/db-urls";
+import { FEED_SOURCE_URL } from "./e2e/feed-server";
 
 const PORT = 3100;
 /** A second server of the same build with the password gate switched on. */
 const GATED_PORT = 3101;
 export const E2E_PASSWORD = "e2e-password";
+const SHARED_STATE = /(admin|chat|notes|selection)\.spec\.ts/;
 
 export default defineConfig({
   testDir: "./e2e",
@@ -22,7 +24,15 @@ export default defineConfig({
   projects: [
     {
       name: "chromium",
-      testIgnore: /gate\.spec\.ts/,
+      testIgnore: [/gate\.spec\.ts/, SHARED_STATE],
+      use: { ...devices["Desktop Chrome"], baseURL: `http://localhost:${PORT}` },
+    },
+    {
+      // Specs that change app-wide state (a sector's session, notes, the refresh slot and the
+      // paused flag). One worker, so neither different files nor --repeat-each copies overlap.
+      name: "serial",
+      testMatch: SHARED_STATE,
+      workers: 1,
       use: { ...devices["Desktop Chrome"], baseURL: `http://localhost:${PORT}` },
     },
     {
@@ -38,14 +48,14 @@ export default defineConfig({
       url: `http://localhost:${PORT}`,
       reuseExistingServer: !process.env.CI,
       timeout: 180_000,
-      env: { APP_PASSWORD: "", DATABASE_URL: E2E_DATABASE_URL, AI_FAKE: "1", FOUNDERS_FETCH: "off" },
+      env: { APP_PASSWORD: "", DATABASE_URL: E2E_DATABASE_URL, AI_FAKE: "1", FOUNDERS_FETCH: "off", YC_SOURCE_URL: FEED_SOURCE_URL, CRON_SECRET: "e2e-cron" },
     },
     {
       command: `npm run start -- -p ${GATED_PORT}`,
       url: `http://localhost:${GATED_PORT}/login`,
       reuseExistingServer: !process.env.CI,
       timeout: 60_000,
-      env: { APP_PASSWORD: E2E_PASSWORD, DATABASE_URL: E2E_DATABASE_URL, AI_FAKE: "1", FOUNDERS_FETCH: "off" },
+      env: { APP_PASSWORD: E2E_PASSWORD, DATABASE_URL: E2E_DATABASE_URL, AI_FAKE: "1", FOUNDERS_FETCH: "off", YC_SOURCE_URL: FEED_SOURCE_URL, CRON_SECRET: "e2e-cron" },
     },
   ],
 });

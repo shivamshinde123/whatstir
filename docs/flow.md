@@ -64,10 +64,17 @@ The Ask / Explore / Challenge switch sets `action` on the next POST. Retry reuse
 - Refresh runs never touch `notes`. A company that drops out of the source is only marked `missing_since`, so its notes stay attached.
 
 ## Refresh
+Entry points:
+- **Vercel Cron**, `0 11 * * *` (`vercel.json`) → `GET /api/cron/refresh` → `isCronAuthorized` → `run({ trigger: "cron" })` → the summary as JSON.
+- **Admin "Refresh now"** → `POST /api/admin/refresh` → `claimRun()` (409 if taken) → 202 `{ runId }` → `after(() => run({ trigger: "manual", runId }))`. The admin page polls `GET /api/admin/refresh` every 2 s while `running`.
+- **Pause / Resume / threshold** → `PATCH /api/admin/settings` → `app_settings`.
+- **Scripts:** `npm run refresh`.
+
 ```
-refresh.run(trigger)
+refresh.run(trigger, runId?)
+ ├─ runId given (already claimed)? skip the next two steps
  ├─ if cron && paused → record 'skipped'
- ├─ fail stale 'running' rows; insert 'running' row (unique index = lock) → else record 'skipped'
+ ├─ claimRun: fail stale 'running' rows; insert 'running' row (unique index = lock) → else record 'skipped'
  ├─ fetch all.json (retry network/5xx ×2) → validate (array, ≥90% of stored count)
  ├─ diff by id + source_hash
  ├─ BEGIN; upsert; mark missing; COMMIT

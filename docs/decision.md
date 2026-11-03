@@ -92,6 +92,11 @@ Listed in the order they were made. Decisions 1–14 are recorded in §16 of [in
 56. **Compare uses a native `<dialog>` with `showModal()`.** That gives focus trapping, Esc to close, an inert background, and focus returning to Compare without extra code.
 57. **The send button is "Send" (↑),** because "Ask" now names an action in the switch.
 
+58. **The schedule is fixed at 11:00 UTC daily in `vercel.json`.** That is 06:00 Eastern in winter and 07:00 in summer, because Vercel cron runs in UTC. The admin page can pause it but not change the interval; changing it is a redeploy. The spec's "change the interval" is deferred, since Vercel Cron has no runtime API.
+59. **A manual refresh claims the run slot before answering, then runs inside `after()`.** That lets the API return 202 with a run id, or 409, straight away. `run()` accepts that pre-claimed `runId`.
+60. **E2E refreshes read a local feed server** (`YC_SOURCE_URL`, started by Playwright's global setup), which can be switched to answer 500. Tests never touch the internet.
+61. **Specs that change app-wide state (admin, chat, notes, selection) run in a one-worker `serial` Playwright project.** `--repeat-each` copies of a serial group otherwise run concurrently and fight over the same paused flag, refresh slot, session or notes.
+
 ## Open items
 
 - **A. Founder data.** Founders come from YC company pages. Check YC's terms before production use. Until then, the founder fetch can be switched off with `FOUNDERS_FETCH=off`.

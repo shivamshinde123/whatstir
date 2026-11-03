@@ -117,13 +117,24 @@ Outbound links open in a new tab with `rel="noopener"`, so the research session 
 ```
 A centred card on a `surface` page in light mode. In dark mode the page is black and the card is `#1c1c1e`, because elevated surfaces are lighter in dark mode. A wrong password clears the field and keeps you on the page.
 
-## 5. Admin
+## 5. Admin (`/admin`, linked from the header)
 ```
-Refresh: daily 11:00 UTC  ·  [Pause]  [Refresh now]
-Last success: Nov 2 11:00 (+3 new, 12 changed) · Pending enrichment: 0
-Jev min confidence: [0.5]
-Recent runs table: trigger, start, status, added, updated, error
+Data refresh
+Companies are re-read from yc-oss every day, then embedded, grouped and summarised.
+┌ Scheduled refresh ┐┌ Last run ──────────┐┌ Last success ─┐┌ Waiting for enrichment ┐
+│ Active            ││ [Failed] Nov 2 …   ││ Nov 2, 11:00  ││ 0                      │
+│ Daily at 11:00 UTC││ Source returned    ││ 3 new ·       ││ companies              │
+│ · next Nov 3 …    ││ HTTP 500           ││ 12 changed    ││                        │
+└───────────────────┘└────────────────────┘└───────────────┘└────────────────────────┘
+[Refresh now] [Pause]                       Jev confidence threshold (0–1) [0.5] [Save]
+
+Recent runs
+Started | Trigger | Status | Took | Source | New | Changed | Enriched | Pending | Error
 ```
+- **Paused:** the state reads "Paused" in red with "Daily checks are skipped." The button becomes Resume.
+- **Running:** the button reads "Refreshing…" and is disabled, and the page refreshes itself every 2 s until the run ends.
+- Status pills: OK green, Failed red, Skipped grey, Running blue. A run's error is shown in red, in its row and in the Last run card.
+- On phones the cards stack and the runs table scrolls sideways inside its own box.
 
 ## Design language (Apple-style, the owner's requirement)
 

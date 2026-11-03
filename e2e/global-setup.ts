@@ -7,6 +7,7 @@ import { enrich } from "../lib/enrich";
 import { run } from "../lib/refresh";
 import { generateSubcategories } from "../lib/subcategories";
 import { E2E_DATABASE_URL, TEST_SERVER_URL } from "./db-urls";
+import { startFeedServer } from "./feed-server";
 
 /** CircuitHub (id 5): one founder with a verified LinkedIn, one without. */
 export const E2E_FOUNDERS = [
@@ -16,7 +17,8 @@ export const E2E_FOUNDERS = [
 
 /**
  * Recreates the e2e database: the 37-record fixture, fake-AI subcategories and enrichment
- * (embeddings, assignments, problem cards), plus two founders. No network calls.
+ * (embeddings, assignments, problem cards), plus two founders. No network calls. Also starts
+ * the local feed server that refreshes read from; the returned function stops it.
  */
 export default async function globalSetup() {
   process.env.AI_FAKE = "1";
@@ -51,4 +53,7 @@ export default async function globalSetup() {
   } finally {
     await sql.end();
   }
+
+  const feed = await startFeedServer();
+  return () => new Promise<void>((resolve) => feed.close(() => resolve()));
 }
