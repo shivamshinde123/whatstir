@@ -129,7 +129,7 @@ Listed in the order they were made. Decisions 1–14 are recorded in §16 of [in
       - New pushes dismiss earlier approvals, and the last push needs an approval.
       - Conversations must be resolved, and the `ci` check must pass on an up-to-date branch.
       - Linear history; no force pushes or deletions.
-      - Admins are not subject to the review rule, because GitHub doesn't let anyone approve their own PR. The owner merges their own PRs with `--admin`, and outside contributors can't push at all, so their changes arrive as fork PRs that only the owner can approve.
+      - Admins are not subject to the review rule, because GitHub doesn't let anyone approve their own PR. The owner merges their own PRs (GitHub lets an admin merge without the approval they can't give themselves). Outside contributors can't push at all, so their changes arrive as fork PRs that only the owner can approve. AI agents working on the repo open PRs and stop; the owner reviews and merges.
     - *CI hardening:* the workflow runs on `pull_request` (never `pull_request_target`) with a read-only token and no secrets. First-time contributors' CI runs need the owner's approval.
 
 74. **The AI provider and models are settings, and OpenRouter is supported** (the owner's request, so Whatstir isn't tied to one vendor).
