@@ -158,9 +158,16 @@ test.describe("collapsible basket", () => {
     await expect(page.getByLabel("Question")).toBeVisible();
     const before = { basket: await width(page, "Company basket"), results: await width(page, "Results"), chat: await width(page, "Chat") };
 
-    await page.getByRole("button", { name: "Collapse the company list" }).click();
+    const collapse = page.getByRole("button", { name: "Collapse the company list" });
+    // Easy to spot (#60): a labelled pill whose fill stands out from the basket card.
+    await expect(collapse).toHaveText(/Collapse/);
+    expect((await collapse.boundingBox())!.width).toBeGreaterThanOrEqual(60);
+    const bg = (sel: string) => page.locator(sel).first().evaluate((el) => getComputedStyle(el).backgroundColor);
+    expect(await collapse.evaluate((el) => getComputedStyle(el).backgroundColor)).not.toBe(await bg('section[aria-label="Company basket"]'));
+    await collapse.click();
     const rail = page.getByRole("button", { name: "Show the company list" });
     await expect(rail).toBeVisible();
+    expect(await bg("[data-rail-chevron]")).toBe("rgb(10, 29, 8)"); // forest ink
     await expect(page.getByRole("list", { name: "Companies in this sector" })).toBeHidden();
     await expect.poll(() => width(page, "Company basket")).toBeLessThan(60); // the 3rem rail, after the transition
     expect(await width(page, "Results")).toBeGreaterThan(before.results + 100);
