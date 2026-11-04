@@ -4,6 +4,8 @@ All notable changes to Whatstir are recorded here. The format follows [Keep a Ch
 
 ## [Unreleased]
 
+## [2.2.0] - 2026-11-03
+
 ### Added
 - **Collapse the company list.** On desktop, the first column of a sector folds into a slim rail on the left, giving the grid and chat more room. The choice is remembered, and opening a profile brings it back (#58). The collapse control is a labelled pill, and the rail's arrow sits in a dark circle, so both are easy to spot (#60).
 
@@ -68,7 +70,8 @@ The first public release.
 - The workspace fills one screen on desktop, with a compact header (#35).
 - `docs/intial_idea.md` was renamed `docs/initial_idea.md` (#46).
 
-[Unreleased]: https://github.com/shivamshinde123/whatstir/compare/v2.1.0...HEAD
+[Unreleased]: https://github.com/shivamshinde123/whatstir/compare/v2.2.0...HEAD
+[2.2.0]: https://github.com/shivamshinde123/whatstir/releases/tag/v2.2.0
 [2.1.0]: https://github.com/shivamshinde123/whatstir/releases/tag/v2.1.0
 [2.0.0]: https://github.com/shivamshinde123/whatstir/releases/tag/v2.0.0
 [1.0.0]: https://github.com/shivamshinde123/whatstir/releases/tag/v1.0.0
