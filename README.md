@@ -25,6 +25,7 @@ Pick a sector, ask questions in plain English, and watch the companies each answ
 
 ## Contents
 
+- [Demo video](#demo-video)
 - [Features](#features)
 - [Screenshots](#screenshots)
 - [How it works](#how-it-works)
@@ -43,6 +44,14 @@ Pick a sector, ask questions in plain English, and watch the companies each answ
 - [Contributing](#contributing)
 - [License](#license)
 - [Credits](#credits)
+
+## Demo video
+
+A three-and-a-half-minute tour, from the problem Whatstir solves to how it works: the sector map, filters, groups, asking questions, profiles, compare and notes.
+
+https://github.com/user-attachments/assets/ffe0e2e5-434d-4f02-be8f-5d640ac7faa6
+
+<sub>Music: "Inspired" by Kevin MacLeod ([incompetech.com](https://incompetech.com)), licensed under [CC BY 4.0](https://creativecommons.org/licenses/by/4.0/).</sub>
 
 ## Features
 
@@ -290,6 +299,7 @@ Contributions are welcome! Start with [CONTRIBUTING.md](CONTRIBUTING.md), which 
 - Company data: [yc-oss/api](https://github.com/yc-oss/api), an open-source mirror of the public [Y Combinator directory](https://www.ycombinator.com/companies). Logos are linked from YC's CDN.
 - Hero photo: ["Rolling green hills shrouded in morning fog"](https://unsplash.com/photos/rolling-green-hills-shrouded-in-morning-fog-tCU_rbybwMg) by Zetong Li on Unsplash, under the [Unsplash License](https://unsplash.com/license). It's stored in [`public/`](public/landscape-hills.jpg).
 - Visual style adapted from a design on [styles.refero.design](https://styles.refero.design).
+- Demo video music: "Inspired" by Kevin MacLeod ([incompetech.com](https://incompetech.com)), under [CC BY 4.0](https://creativecommons.org/licenses/by/4.0/).
 - Typefaces: [Inter](https://rsms.me/inter/), [Newsreader](https://fonts.google.com/specimen/Newsreader) and [Fragment Mono](https://fonts.google.com/specimen/Fragment+Mono), under the SIL Open Font License.
 
 <div align="center">

@@ -4,6 +4,9 @@ All notable changes to Whatstir are recorded here. The format follows [Keep a Ch
 
 ## [Unreleased]
 
+### Added
+- **A demo video in the README.** A three-and-a-half-minute tour of Whatstir plays at the top of the README (#63).
+
 ## [2.2.0] - 2026-11-03
 
 ### Added
