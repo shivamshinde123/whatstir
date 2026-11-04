@@ -293,9 +293,15 @@ export default function Workspace({ sectorId, sectorName }: { sectorId: string; 
                     aria-expanded="false"
                     aria-controls="company-basket"
                     title="Show the company list"
-                    className="pressable hidden h-full w-full flex-col items-center gap-3 pt-4 text-text-secondary transition-colors hover:bg-bg/60 hover:text-text lg:flex"
+                    className="pressable group hidden h-full w-full flex-col items-center gap-3 pt-3 text-text transition-colors hover:bg-bg/60 lg:flex"
                   >
-                    <span aria-hidden="true">›</span>
+                    <span
+                      aria-hidden="true"
+                      data-rail-chevron
+                      className="flex size-7 items-center justify-center rounded-full bg-accent text-base leading-none text-bg transition-transform group-hover:translate-x-0.5 motion-reduce:transition-none"
+                    >
+                      ›
+                    </span>
                     <span aria-hidden="true" className="text-tag [writing-mode:vertical-rl]">
                       Companies · {fmt.format(inScope.length)}
                     </span>

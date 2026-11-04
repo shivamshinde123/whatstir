@@ -47,9 +47,10 @@ export default function Basket({
             aria-expanded="true"
             aria-controls="company-basket"
             title="Collapse the company list"
-            className="pressable hidden size-7 items-center justify-center self-center rounded-full text-text-secondary transition-colors hover:bg-bg hover:text-text lg:inline-flex"
+            className="pressable hidden h-7 items-center gap-1 self-center rounded-full bg-bg px-2.5 text-sm font-medium text-text ring-1 ring-text-tertiary/60 transition-colors hover:bg-separator hover:ring-text-secondary lg:inline-flex"
           >
-            <span aria-hidden="true">‹</span>
+            <span aria-hidden="true" className="text-base leading-none">‹</span>
+            Collapse
           </button>
         )}
       </div>

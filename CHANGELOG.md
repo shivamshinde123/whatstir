@@ -5,7 +5,7 @@ All notable changes to Whatstir are recorded here. The format follows [Keep a Ch
 ## [Unreleased]
 
 ### Added
-- **Collapse the company list.** On desktop, the first column of a sector folds into a slim rail on the left, giving the grid and chat more room. The choice is remembered, and opening a profile brings it back (#58).
+- **Collapse the company list.** On desktop, the first column of a sector folds into a slim rail on the left, giving the grid and chat more room. The choice is remembered, and opening a profile brings it back (#58). The collapse control is a labelled pill, and the rail's arrow sits in a dark circle, so both are easy to spot (#60).
 
 ### Changed
 - **Suggested questions show only in an empty conversation.** The row of suggestion chips above Ask / Explore / Challenge no longer appears once you've asked something (#56).

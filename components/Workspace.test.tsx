@@ -1050,12 +1050,16 @@ describe("collapsible basket (decision 80)", () => {
     expect(collapse).toHaveAttribute("aria-expanded", "true");
     expect(collapse).toHaveAttribute("aria-controls", "company-basket");
     expect(collapse).toHaveClass("hidden", "lg:inline-flex"); // desktop only
+    // A labelled pill, not a bare chevron (#60).
+    expect(collapse).toHaveTextContent("Collapse");
+    expect(collapse).toHaveClass("bg-bg", "ring-1", "text-text");
     fireEvent.click(collapse);
 
     const rail = screen.getByRole("button", { name: "Show the company list" });
     expect(rail).toHaveAttribute("aria-expanded", "false");
     expect(rail).toHaveTextContent("Companies · 3");
     expect(rail).toHaveClass("hidden", "lg:flex"); // phones keep the stacked basket
+    expect(rail.querySelector("[data-rail-chevron]")).toHaveClass("bg-accent", "rounded-full");
     expect(wrapper()).toHaveClass("lg:hidden");
     expect(section()).toHaveAttribute("data-collapsed", "true");
     expect(section().parentElement!.className).toContain("lg:grid-cols-[3rem_minmax(0,3fr)_minmax(0,4fr)]");
