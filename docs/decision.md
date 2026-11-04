@@ -131,7 +131,7 @@ Listed in the order they were made. Decisions 1–14 are recorded in §16 of [in
       - Linear history; no force pushes or deletions.
       - Admins are not subject to the review rule, because GitHub doesn't let anyone approve their own PR. The owner merges their own PRs (GitHub lets an admin merge without the approval they can't give themselves). Outside contributors can't push at all, so their changes arrive as fork PRs that only the owner can approve. AI agents working on the repo open PRs and stop; the owner reviews and merges.
     - *CI hardening:* the workflow runs on `pull_request` (never `pull_request_target`) with a read-only token and no secrets. First-time contributors' CI runs need the owner's approval.
-    - *No link to the owner's deployment anywhere* (the owner's request): not in the repo's About/website field, the docs or the code. Anyone who wants a live copy deploys their own. `vercel.json` sets `github.silent`, so Vercel's bot doesn't post preview links on pull requests, and a test fails if any tracked file names a real `*.vercel.app` address.
+    - *No link to the owner's deployment anywhere* (the owner's request): not in the repo's About/website field, the docs or the code. Anyone who wants a live copy deploys their own. Vercel's GitHub integration refills an empty website field with the production address after a deploy, so the field points at the repo's own setup guide (`#run-your-own-whatstir`) instead, and the old Vercel bot comments with preview links were deleted. `vercel.json` sets `github.silent`, so Vercel's bot doesn't post preview links on pull requests, and a test fails if any tracked file names a real `*.vercel.app` address.
 
 74. **The AI provider and models are settings, and OpenRouter is supported** (the owner's request, so Whatstir isn't tied to one vendor).
     - *Why OpenRouter works with little code:* it speaks the OpenAI API. The same `openai` SDK is pointed at `https://openrouter.ai/api/v1` with `OPENROUTER_API_KEY`, and model ids gain a vendor prefix (`openai/gpt-6.1-sol`, `anthropic/…`, `google/…`). Its embeddings endpoint is OpenAI-compatible and accepts `dimensions`.
@@ -167,6 +167,13 @@ Listed in the order they were made. Decisions 1–14 are recorded in §16 of [in
     - *Cost:* one extra small call per web search that names any sector company.
 
 79. **Suggested questions appear only before the first question** (the owner's request: the chip row above Ask / Explore / Challenge was clutter once a conversation had started). The compact row is gone, and New session brings the starters back. The selection-specific comparison suggestions were removed with it: a selection needs grid tiles, which only exist after a question, so they could never show.
+
+80. **The company basket collapses to a rail on desktop** (the owner's request: more room for the results grid and chat).
+    - *Controls:* a ‹ button in the basket header folds the first column into a 3rem rail, and clicking the rail (› plus a vertical "Companies · N") brings it back. Both carry `aria-expanded` and `aria-controls`. The grid's columns animate between `3fr 3fr 4fr` and `3rem 3fr 4fr` (no animation with reduced motion).
+    - *Remembered per browser* in `localStorage` (`whatstir-basket-collapsed`), read after mount so server and client renders match. It's a per-viewer convenience, so it isn't stored on the server.
+    - *Opening a profile expands it,* because the profile panel lives in the basket column.
+    - *Flights* start from the rail while the list is hidden.
+    - *Phones* keep the stacked layout and get no collapse control, even if collapse was chosen on desktop.
 
 ## Open items
 

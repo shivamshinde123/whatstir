@@ -148,3 +148,41 @@ test.describe("full-width layout", () => {
     }
   });
 });
+
+test.describe("collapsible basket", () => {
+  test.use({ viewport: { width: 1440, height: 900 } });
+  const width = async (page: Page, name: string) => (await page.locator(`section[aria-label="${name}"]`).boundingBox())!.width;
+
+  test("folds the first column into a rail, gives the space to the grid and chat, and remembers it", async ({ page }) => {
+    await page.goto("/sector/b2b");
+    await expect(page.getByLabel("Question")).toBeVisible();
+    const before = { basket: await width(page, "Company basket"), results: await width(page, "Results"), chat: await width(page, "Chat") };
+
+    await page.getByRole("button", { name: "Collapse the company list" }).click();
+    const rail = page.getByRole("button", { name: "Show the company list" });
+    await expect(rail).toBeVisible();
+    await expect(page.getByRole("list", { name: "Companies in this sector" })).toBeHidden();
+    await expect.poll(() => width(page, "Company basket")).toBeLessThan(60); // the 3rem rail, after the transition
+    expect(await width(page, "Results")).toBeGreaterThan(before.results + 100);
+    expect(await width(page, "Chat")).toBeGreaterThan(before.chat + 100);
+
+    await page.reload();
+    await expect(page.getByRole("button", { name: "Show the company list" })).toBeVisible();
+
+    await page.getByRole("button", { name: "Show the company list" }).click();
+    await expect(page.getByRole("list", { name: "Companies in this sector" })).toBeVisible();
+    await expect.poll(() => width(page, "Company basket")).toBeGreaterThan(before.basket - 2);
+    expect(await width(page, "Company basket")).toBeLessThan(before.basket + 2);
+  });
+
+  test("phones keep the basket, with no collapse control", async ({ page }) => {
+    await page.setViewportSize({ width: 375, height: 800 });
+    await page.goto("/sector/b2b");
+    await page.evaluate(() => localStorage.setItem("whatstir-basket-collapsed", "1")); // even if chosen on desktop
+    await page.reload();
+    await expect(page.getByRole("list", { name: "Companies in this sector" })).toBeVisible();
+    await expect(page.getByRole("button", { name: "Collapse the company list" })).toBeHidden();
+    await expect(page.getByRole("button", { name: "Show the company list" })).toBeHidden();
+    await page.evaluate(() => localStorage.removeItem("whatstir-basket-collapsed"));
+  });
+});

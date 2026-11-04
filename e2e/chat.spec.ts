@@ -300,3 +300,19 @@ test("companies a web answer names join the grid and are ringed", async ({ page 
   await expect(page.getByRole("region", { name: "From the web" })).toContainText("Added 2 companies from these results to the grid.");
   await expect(page.locator('li[data-action="ask"]').last()).toContainText("Cites 3 companies");
 });
+
+test("with the basket collapsed, a cited logo still flies in, from the rail", async ({ page }) => {
+  await page.setViewportSize({ width: 1440, height: 900 });
+  await open(page);
+  await page.getByRole("button", { name: "Collapse the company list" }).click();
+  const rail = (await page.getByRole("button", { name: "Show the company list" }).boundingBox())!;
+  await ask(page, "Tell me about iCracked [ids:6]");
+  await expect(tiles(page)).toHaveCount(1);
+  const flights = (await anims(page)).filter((a) => a.flight && a.transform);
+  expect(flights).toHaveLength(1);
+  const tile = (await page.locator('[data-tile-id="6"] [data-logo]').boundingBox())!;
+  // The clone starts at the rail's centre, so it travels from the left edge.
+  expect(tile.x + flights[0].dx).toBeLessThan(rail.x + rail.width);
+  await page.getByRole("button", { name: "Show the company list" }).click();
+  await page.evaluate(() => localStorage.removeItem("whatstir-basket-collapsed"));
+});

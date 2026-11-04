@@ -18,6 +18,8 @@ type Data = SectorWorkspace & { gate: boolean };
 type State = { kind: "loading" } | { kind: "error" } | { kind: "ready"; data: Data };
 
 const NONE: ReadonlySet<number> = new Set();
+/** Per-browser: whether the basket column is folded into a rail (decision 80). */
+export const BASKET_COLLAPSED_KEY = "whatstir-basket-collapsed";
 
 const fmt = new Intl.NumberFormat("en-US");
 
@@ -37,6 +39,7 @@ export default function Workspace({ sectorId, sectorName }: { sectorId: string; 
   const [selected, setSelected] = useState<number[]>([]);
   const [askSelected, setAskSelected] = useState(false);
   const [comparing, setComparing] = useState(false);
+  const [basketCollapsed, setBasketCollapsedState] = useState(false);
   /** A YC batch carried over from the home page's filter (?batch=); narrows the basket only. */
   const [batch, setBatchState] = useState<string | null>(null);
   // Questions go to the selection only while "Ask about these" is on and something is selected.
@@ -68,6 +71,25 @@ export default function Workspace({ sectorId, sectorName }: { sectorId: string; 
     // eslint-disable-next-line react-hooks/set-state-in-effect -- initial fetch on mount
     void load();
   }, [load]);
+
+  // Read the saved choice after mount, so the server render and hydration always match.
+  useEffect(() => {
+    try {
+      // eslint-disable-next-line react-hooks/set-state-in-effect -- restoring a saved preference on mount
+      if (localStorage.getItem(BASKET_COLLAPSED_KEY) === "1") setBasketCollapsedState(true);
+    } catch {
+      // Storage can be unavailable (private mode); the basket simply starts open.
+    }
+  }, []);
+  const setBasketCollapsed = useCallback((collapsed: boolean) => {
+    setBasketCollapsedState(collapsed);
+    try {
+      if (collapsed) localStorage.setItem(BASKET_COLLAPSED_KEY, "1");
+      else localStorage.removeItem(BASKET_COLLAPSED_KEY);
+    } catch {
+      // Not saved; the choice still applies until reload.
+    }
+  }, []);
 
   const clearBatch = useCallback(() => {
     setBatchState(null);
@@ -183,11 +205,16 @@ export default function Workspace({ sectorId, sectorName }: { sectorId: string; 
   }, [session]);
   const collected = useMemo<ReadonlySet<number>>(() => new Set(session?.tiles.map((t) => t.companyId)), [session]);
 
-  const openProfile = useCallback((id: number, from: HTMLElement) => {
-    opener.current = from;
-    setProfileId(id);
-    setProfileOpen(true);
-  }, []);
+  const openProfile = useCallback(
+    (id: number, from: HTMLElement) => {
+      opener.current = from;
+      setProfileId(id);
+      setProfileOpen(true);
+      // The profile opens inside the basket column, so it has to be open to show it.
+      setBasketCollapsed(false);
+    },
+    [setBasketCollapsed],
+  );
   const closeProfile = useCallback(() => setProfileOpen(false), []);
 
   // Return focus to whatever opened the profile, once the panel has actually closed.
@@ -245,21 +272,48 @@ export default function Workspace({ sectorId, sectorName }: { sectorId: string; 
 
         {data && (
           <>
-            {/* Desktop: basket 30%, results 30%, chat 40%. */}
-            <div className="mt-3 grid gap-3 lg:min-h-0 lg:flex-1 lg:grid-cols-[minmax(0,3fr)_minmax(0,3fr)_minmax(0,4fr)] lg:grid-rows-[minmax(0,1fr)]">
+            {/* Desktop: basket 30%, results 30%, chat 40%; a collapsed basket is a 3rem rail. */}
+            <div
+              className={`mt-3 grid gap-3 lg:min-h-0 lg:flex-1 lg:grid-rows-[minmax(0,1fr)] lg:transition-[grid-template-columns] lg:duration-300 lg:ease-out motion-reduce:transition-none ${
+                basketCollapsed
+                  ? "lg:grid-cols-[3rem_minmax(0,3fr)_minmax(0,4fr)]"
+                  : "lg:grid-cols-[minmax(0,3fr)_minmax(0,3fr)_minmax(0,4fr)]"
+              }`}
+            >
               <section
                 aria-label="Company basket"
+                data-collapsed={basketCollapsed || undefined}
                 className="relative h-[55vh] overflow-hidden rounded-[var(--radius-card)] bg-surface lg:h-auto"
               >
-                <Basket
-                  companies={shown}
-                  collected={collected}
-                  inScope={inScope.length}
-                  query={query}
-                  onQuery={setQuery}
-                  selectedId={profileOpen ? profileId : null}
-                  onOpen={openProfile}
-                />
+                {basketCollapsed && (
+                  <button
+                    type="button"
+                    onClick={() => setBasketCollapsed(false)}
+                    aria-label="Show the company list"
+                    aria-expanded="false"
+                    aria-controls="company-basket"
+                    title="Show the company list"
+                    className="pressable hidden h-full w-full flex-col items-center gap-3 pt-4 text-text-secondary transition-colors hover:bg-bg/60 hover:text-text lg:flex"
+                  >
+                    <span aria-hidden="true">›</span>
+                    <span aria-hidden="true" className="text-tag [writing-mode:vertical-rl]">
+                      Companies · {fmt.format(inScope.length)}
+                    </span>
+                  </button>
+                )}
+                {/* On phones the basket is always shown; the rail is desktop-only. */}
+                <div id="company-basket" className={`h-full ${basketCollapsed ? "lg:hidden" : ""}`}>
+                  <Basket
+                    companies={shown}
+                    collected={collected}
+                    inScope={inScope.length}
+                    query={query}
+                    onQuery={setQuery}
+                    selectedId={profileOpen ? profileId : null}
+                    onOpen={openProfile}
+                    onCollapse={() => setBasketCollapsed(true)}
+                  />
+                </div>
                 <ProfilePanel companyId={profileId} open={profileOpen} onClose={closeProfile} />
               </section>
 

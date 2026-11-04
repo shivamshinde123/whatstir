@@ -51,7 +51,12 @@ function fly(grid: HTMLElement, ids: number[]) {
   }
 
   const basket = document.querySelector<HTMLElement>('[aria-label="Companies in this sector"]');
-  const area = basket?.getBoundingClientRect();
+  // A collapsed basket hides its list; then the flight starts from the rail (decision 80).
+  const listArea = basket?.getBoundingClientRect();
+  const area =
+    listArea && listArea.width > 0
+      ? listArea
+      : document.querySelector<HTMLElement>('section[aria-label="Company basket"]')?.getBoundingClientRect();
   tiles.forEach((tile, i) => {
     const logo = tile.querySelector<HTMLElement>("[data-logo]");
     if (!logo) return;

@@ -51,6 +51,7 @@
 - **Error:** the reply bubble shows "Couldn't answer. [Retry]".
 - **From the web:** when an answer used a web search, a block under it (after "Cites N companies") is headed **FROM THE WEB** in the mono tag style. It holds the web answer, a numbered list of source links that open in a new tab, and the caption "Web results aren't from the YC directory and can be wrong." If the search failed: "Couldn't search the web for “query”." Source links never become tiles, but companies from this sector that the web answer discusses do: they fly into the grid, are ringed, and the block says "Added N companies from these results to the grid".
 - **Follow-ups:** questions like "Tell me more about this company" work for the whole session: companies already in the grid stay available to every later question until New session.
+- **Collapsible basket (desktop):** a ‹ in the Companies header folds the first column into a slim rail on the left (› and a vertical "COMPANIES · N"); the grid and chat widen. Clicking the rail, or opening a company's profile, brings it back. The choice is remembered in the browser. Phones always show the basket.
 - **Suggestions:** only an empty conversation shows them: 3 starter questions as large buttons under the intro, matching the action and scope ("Which Healthcare companies sell to small businesses?"). One click asks. Once the first question is sent they're gone for the rest of the session (decision 79), and New session brings them back.
 
 ## 3. Profile panel (slides over the basket)
