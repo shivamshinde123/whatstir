@@ -18,6 +18,7 @@ export default function Basket({
   onQuery,
   selectedId,
   onOpen,
+  onCollapse,
 }: {
   companies: BasketCompany[];
   /** Companies already in the results grid; their logos stay behind as faded ghosts. */
@@ -28,14 +29,29 @@ export default function Basket({
   onQuery: (q: string) => void;
   selectedId: number | null;
   onOpen: (id: number, opener: HTMLElement) => void;
+  /** Desktop only: folds the basket into a slim rail (decision 80). */
+  onCollapse?: () => void;
 }) {
   return (
     <div className="flex h-full min-h-0 flex-col">
       <div className="flex items-baseline justify-between gap-2 px-4 pt-4">
         <h2 className="text-tag text-text-secondary">Companies</h2>
-        <span className="text-sm tabular-nums text-text-secondary" aria-live="polite">
+        <span className="ml-auto text-sm tabular-nums text-text-secondary" aria-live="polite">
           {companies.length === inScope ? fmt.format(inScope) : `${fmt.format(companies.length)} of ${fmt.format(inScope)}`}
         </span>
+        {onCollapse && (
+          <button
+            type="button"
+            onClick={onCollapse}
+            aria-label="Collapse the company list"
+            aria-expanded="true"
+            aria-controls="company-basket"
+            title="Collapse the company list"
+            className="pressable hidden size-7 items-center justify-center self-center rounded-full text-text-secondary transition-colors hover:bg-bg hover:text-text lg:inline-flex"
+          >
+            <span aria-hidden="true">‹</span>
+          </button>
+        )}
       </div>
       <div className="px-4 pb-3 pt-2">
         <input

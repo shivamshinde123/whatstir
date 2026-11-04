@@ -9,7 +9,7 @@ import SiteFooter from "./SiteFooter";
 import SubcategoryBar from "./SubcategoryBar";
 import CompareView from "./CompareView";
 import ResultsGrid, { CITED_CLASS, MAX_SELECTION, SELECTED_CLASS } from "./ResultsGrid";
-import Workspace from "./Workspace";
+import Workspace, { BASKET_COLLAPSED_KEY } from "./Workspace";
 
 const SUBS: SectorWorkspace["subcategories"] = [
   { id: 1, slug: "ai", name: "AI", description: "AI is central", kind: "ai", count: 2 },
@@ -1031,5 +1031,70 @@ describe("suggested questions", () => {
     render(<Workspace sectorId="healthcare" sectorName="Healthcare" />);
     expect(await screen.findByText("3 companies")).toBeInTheDocument();
     expect(screen.queryByRole("button", { name: /Show all batches/ })).toBeNull();
+  });
+});
+
+describe("collapsible basket (decision 80)", () => {
+  afterEach(() => localStorage.removeItem(BASKET_COLLAPSED_KEY));
+  const renderReady = async () => {
+    const view = render(<Workspace sectorId="healthcare" sectorName="Healthcare" />);
+    await screen.findByText("3 companies");
+    return view;
+  };
+  const wrapper = () => document.getElementById("company-basket")!;
+  const section = () => screen.getByRole("region", { name: "Company basket" });
+
+  it("folds into a rail and back, with matching ARIA", async () => {
+    await renderReady();
+    const collapse = screen.getByRole("button", { name: "Collapse the company list" });
+    expect(collapse).toHaveAttribute("aria-expanded", "true");
+    expect(collapse).toHaveAttribute("aria-controls", "company-basket");
+    expect(collapse).toHaveClass("hidden", "lg:inline-flex"); // desktop only
+    fireEvent.click(collapse);
+
+    const rail = screen.getByRole("button", { name: "Show the company list" });
+    expect(rail).toHaveAttribute("aria-expanded", "false");
+    expect(rail).toHaveTextContent("Companies · 3");
+    expect(rail).toHaveClass("hidden", "lg:flex"); // phones keep the stacked basket
+    expect(wrapper()).toHaveClass("lg:hidden");
+    expect(section()).toHaveAttribute("data-collapsed", "true");
+    expect(section().parentElement!.className).toContain("lg:grid-cols-[3rem_minmax(0,3fr)_minmax(0,4fr)]");
+
+    fireEvent.click(rail);
+    expect(screen.queryByRole("button", { name: "Show the company list" })).toBeNull();
+    expect(wrapper()).not.toHaveClass("lg:hidden");
+    expect(section()).not.toHaveAttribute("data-collapsed");
+    expect(section().parentElement!.className).toContain("lg:grid-cols-[minmax(0,3fr)_minmax(0,3fr)_minmax(0,4fr)]");
+  });
+
+  it("remembers the choice in this browser, and restores it on the next visit", async () => {
+    const first = await renderReady();
+    fireEvent.click(screen.getByRole("button", { name: "Collapse the company list" }));
+    expect(localStorage.getItem(BASKET_COLLAPSED_KEY)).toBe("1");
+    first.unmount();
+    await renderReady();
+    expect(screen.getByRole("button", { name: "Show the company list" })).toBeInTheDocument();
+    fireEvent.click(screen.getByRole("button", { name: "Show the company list" }));
+    expect(localStorage.getItem(BASKET_COLLAPSED_KEY)).toBeNull();
+  });
+
+  it("opens again when a company's profile is opened, since the profile lives in that column", async () => {
+    await renderReady();
+    fireEvent.change(screen.getByLabelText("Question"), { target: { value: "q [ids:10]" } });
+    fireEvent.click(screen.getByRole("button", { name: "Send" }));
+    await waitFor(() => expect(document.querySelectorAll("[data-tile-id]")).toHaveLength(1));
+    fireEvent.click(screen.getByRole("button", { name: "Collapse the company list" }));
+    expect(section()).toHaveAttribute("data-collapsed", "true");
+    fireEvent.click(document.querySelector<HTMLElement>('[data-tile-id="10"] button, [data-tile-id="10"]')!);
+    await waitFor(() => expect(section()).not.toHaveAttribute("data-collapsed"));
+  });
+
+  it("starts open when storage is unavailable", async () => {
+    const spy = vi.spyOn(Storage.prototype, "getItem").mockImplementation(() => {
+      throw new Error("blocked");
+    });
+    await renderReady();
+    expect(screen.getByRole("button", { name: "Collapse the company list" })).toBeInTheDocument();
+    spy.mockRestore();
   });
 });
