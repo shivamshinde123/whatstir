@@ -14,6 +14,8 @@ Pick a sector, ask questions in plain English, and watch the companies each answ
 ![Tests](https://img.shields.io/badge/tests-Vitest%20%2B%20Playwright-80581c)
 ![License: MIT](https://img.shields.io/badge/license-MIT-4a6d47)
 
+<a href="https://www.producthunt.com/products/whatstir?embed=true&amp;utm_source=badge-featured&amp;utm_medium=badge&amp;utm_campaign=badge-whatstir" target="_blank" rel="noopener noreferrer"><img alt="Whatstir - Explore YC startups by sector and the problems they solve | Product Hunt" width="250" height="54" src="https://api.producthunt.com/widgets/embed-image/v1/featured.svg?post_id=1308170&amp;theme=light&amp;t=1794087108402"></a>
+
 <img src="docs/images/home.png" alt="The Whatstir home page: a serif headline beside a misty landscape, and a treemap of YC sectors sized by company count" width="100%">
 
 </div>
