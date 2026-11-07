@@ -1,0 +1,196 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Whatstir — YC startups, by the problems they solve</title>
+<meta name="description" content="Explore about 6,400 Y Combinator startups by sector and by the customer problems they solve, through a chat that cites real companies.">
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700&family=Newsreader:opsz,wght@6..72,300&family=Fragment+Mono&display=swap" rel="stylesheet">
+<style>
+/* Design reference: Adaline via Refero Styles — a botanist's specimen journal beside a developer's terminal.
+   Same family as the Whatstir app itself (decision 72 in the repo). Light only, flat, 1px rings instead of shadows. */
+:root{
+  --linen:#f8f9f5;--bone:#eff2e8;--glow:#fdfefb;--mist:#e1e6df;--lichen:#c5ccb6;--eucalyptus:#c9d5c5;
+  --forest:#0a1d08;--olive:#2b390a;--leaf:#4a6d47;--teal:#2b6b5e;--crimson:#991e4b;--amber:#80581c;
+  --sage-gray:#6b7860;--sage-mist:#a5ac9f;--slate:#2a332a;
+  --foam:#729d92;--blush:#e3c9d0;--sand:#ad9d80;--rose:#c27c93;
+  --sans:Inter,"IBM Plex Sans",system-ui,sans-serif;--serif:Newsreader,Georgia,serif;--mono:"Fragment Mono","JetBrains Mono",ui-monospace,monospace;
+}
+*{box-sizing:border-box;margin:0}
+html{color-scheme:light}
+body{background:var(--linen);color:var(--forest);font:400 18px/1.44 var(--sans);letter-spacing:-.006em;-webkit-font-smoothing:antialiased}
+a{color:inherit}
+img{display:block;max-width:100%}
+.wrap{max-width:1200px;margin:0 auto;padding:0 24px}
+.tag{font:400 11px/1.3 var(--mono);letter-spacing:.08em;text-transform:uppercase;color:var(--sage-gray)}
+:focus-visible{outline:2px solid var(--leaf);outline-offset:2px}
+
+/* header: translucent material, like the app */
+.top{position:sticky;top:0;z-index:10;background:rgb(248 249 245/.8);backdrop-filter:saturate(180%) blur(20px);-webkit-backdrop-filter:saturate(180%) blur(20px);box-shadow:0 1px 0 var(--mist)}
+.top .wrap{height:64px;display:flex;align-items:center;justify-content:space-between}
+.word{font:500 21px var(--sans);letter-spacing:-.02em;text-decoration:none}
+.top nav{display:flex;gap:28px;font-size:15px}
+.top nav a{text-decoration:none;color:var(--olive)}
+.top nav a:hover{color:var(--leaf)}
+
+.btn{display:inline-flex;align-items:center;gap:10px;height:44px;padding:0 20px;border-radius:20px;font:500 15px var(--sans);text-decoration:none;transition:transform .1s ease-out}
+.btn:active{transform:scale(.97)}
+.btn.fill{background:var(--forest);color:var(--linen)}
+.btn.fill:hover{background:var(--olive)}
+.btn.ghost{box-shadow:inset 0 0 0 1px var(--lichen);color:var(--forest)}
+.btn.ghost:hover{background:var(--bone)}
+@media (prefers-reduced-motion:reduce){.btn:active{transform:none}}
+
+/* hero */
+.hero{padding:88px 0 56px}
+.hero .tag{margin-bottom:28px;display:flex;gap:14px;flex-wrap:wrap}
+.hero .tag span{padding:5px 9px;border-radius:6px;background:var(--bone);box-shadow:0 0 0 1px var(--mist)}
+h1{font:300 clamp(52px,9vw,108px)/.98 var(--serif);letter-spacing:-.032em;color:var(--olive);max-width:11ch}
+.lede{max-width:560px;margin:30px 0 34px;color:var(--sage-gray);font-size:20px;line-height:1.44}
+.lede b{color:var(--forest);font-weight:500}
+.ctas{display:flex;gap:12px;flex-wrap:wrap}
+
+.plate{position:relative;height:clamp(260px,42vw,520px);overflow:hidden;margin-top:72px}
+.plate img{width:100%;height:100%;object-fit:cover}
+.plate .cap{position:absolute;left:24px;bottom:18px;color:var(--linen);font:400 11px var(--mono);letter-spacing:.08em;text-transform:uppercase;text-shadow:0 1px 8px rgb(0 0 0/.35)}
+
+.shot{margin:-140px auto 0;position:relative;max-width:1100px;border-radius:12px;overflow:hidden;background:var(--glow);box-shadow:0 0 0 1px var(--mist)}
+.shot .bar{height:34px;display:flex;align-items:center;gap:6px;padding:0 14px;background:var(--bone);box-shadow:0 1px 0 var(--mist)}
+.shot .bar i{width:9px;height:9px;border-radius:50%;background:var(--lichen)}
+.shot .bar span{margin-left:12px}
+
+section{padding:96px 0}
+.head{display:grid;grid-template-columns:220px 1fr;gap:32px;margin-bottom:48px;align-items:baseline}
+h2{font:500 clamp(30px,4.4vw,53px)/1.1 var(--sans);letter-spacing:-.04em;max-width:18ch}
+h3{font:500 24px/1.15 var(--sans);letter-spacing:-.02em;margin:14px 0 10px}
+p{color:var(--sage-gray)}
+
+/* specimen cards */
+.specimens{display:grid;grid-template-columns:repeat(3,1fr);gap:16px}
+.spec{border-radius:10px;padding:22px 22px 26px;background:var(--bone);box-shadow:0 0 0 1px var(--mist);display:flex;flex-direction:column;min-height:260px}
+.spec .no{display:flex;justify-content:space-between}
+.spec p{font-size:16px;line-height:1.5}
+.spec .glyph{margin-top:auto;padding-top:20px;font:300 54px/1 var(--serif);color:var(--olive);opacity:.85}
+.spec.foam{background:#dfe9e5}.spec.blush{background:#f3e7ea}.spec.sand{background:#efe9df}.spec.euc{background:var(--eucalyptus)}
+.spec.dark{background:var(--slate);box-shadow:none}.spec.dark *{color:var(--linen)!important}.spec.dark p{opacity:.75}
+
+/* modes */
+.modes{display:grid;grid-template-columns:1fr 1fr;gap:56px;align-items:center}
+.seg{display:inline-flex;padding:4px;border-radius:12px;background:var(--bone);box-shadow:0 0 0 1px var(--mist);margin-bottom:22px}
+.seg button{border:0;background:none;font:500 15px var(--sans);color:var(--sage-gray);padding:9px 22px;border-radius:9px;cursor:pointer}
+.seg button[aria-selected=true]{background:var(--glow);color:var(--forest);box-shadow:0 0 0 1px var(--mist)}
+.mode-copy{min-height:120px}
+.mode-copy h3{margin-top:0}
+.prompt{margin-top:22px;display:flex;gap:10px;align-items:center;padding:12px 12px 12px 16px;border-radius:12px;background:var(--glow);box-shadow:0 0 0 1px var(--mist);color:var(--sage-mist);font-size:16px}
+.prompt span{flex:1}
+.prompt i{width:30px;height:30px;border-radius:50%;background:var(--sage-gray);display:grid;place-items:center;color:var(--linen);font-style:normal;font-size:14px}
+.cited{border-radius:12px;overflow:hidden;box-shadow:0 0 0 1px var(--mist)}
+
+/* steps */
+.steps{list-style:none;padding:0;counter-reset:s}
+.steps li{counter-increment:s;display:grid;grid-template-columns:220px 1fr;gap:32px;padding:26px 0;box-shadow:0 -1px 0 var(--mist)}
+.steps li::before{content:"step " counter(s,decimal-leading-zero);font:400 11px/2.2 var(--mono);letter-spacing:.08em;text-transform:uppercase;color:var(--leaf)}
+.steps h3{margin:0 0 6px;font-size:21px}
+.steps p{font-size:17px;max-width:62ch}
+
+.stack{display:flex;flex-wrap:wrap;gap:8px}
+.stack span{font:400 12px var(--mono);letter-spacing:.06em;text-transform:uppercase;padding:8px 12px;border-radius:8px;box-shadow:inset 0 0 0 1px var(--lichen);color:var(--olive)}
+.note{margin-top:36px;padding:18px 20px;border-radius:10px;background:var(--bone);box-shadow:0 0 0 1px var(--mist);font-size:15px;max-width:780px}
+.note b{color:var(--crimson);font-weight:500}
+
+footer{background:var(--slate);color:var(--eucalyptus);padding:56px 0}
+footer .wrap{display:flex;justify-content:space-between;gap:24px;flex-wrap:wrap;font-size:15px}
+footer .big{font:300 40px/1.05 var(--serif);color:var(--linen);max-width:16ch;margin-bottom:12px}
+footer a{color:var(--linen)}
+
+@media(max-width:900px){
+  .specimens{grid-template-columns:1fr 1fr}.modes{grid-template-columns:1fr;gap:32px}
+  .head,.steps li{grid-template-columns:1fr;gap:10px}.shot{margin-top:-60px}
+}
+@media(max-width:600px){.specimens{grid-template-columns:1fr}.top nav a:not(.gh){display:none}section{padding:72px 0}}
+</style>
+</head>
+<body>
+<header class="top"><div class="wrap">
+  <a class="word" href="#">Whatstir</a>
+  <nav><a href="#specimens">Features</a><a href="#modes">Ask</a><a href="#how">How it works</a><a class="gh" href="https://github.com/shivamshinde123/whatstir">GitHub</a></nav>
+</div></header>
+
+<main>
+<section class="hero"><div class="wrap">
+  <div class="tag"><span>~6,400 companies</span><span>9 sectors</span><span>cited answers</span></div>
+  <h1>What are startups stirring up?</h1>
+  <p class="lede">Explore Y Combinator startups by sector and by the <b>customer problems they solve</b>. Pick a sector, ask in plain English, and watch the companies each answer relies on collect in a grid.</p>
+  <div class="ctas">
+    <a class="btn fill" href="https://github.com/shivamshinde123/whatstir#run-your-own-whatstir">Run your own Whatstir</a>
+    <a class="btn ghost" href="https://github.com/shivamshinde123/whatstir">Read the source</a>
+  </div>
+</div>
+<div class="plate"><img src="https://raw.githubusercontent.com/shivamshinde123/whatstir/main/public/landscape-hills.jpg" alt="" loading="eager"><span class="cap">Plate I · the sector map</span></div>
+<div class="wrap"><figure class="shot">
+  <div class="bar"><i></i><i></i><i></i><span class="tag">whatstir / home</span></div>
+  <img src="https://raw.githubusercontent.com/shivamshinde123/whatstir/main/docs/images/home.png" alt="Whatstir home: a serif headline beside a landscape, and a treemap of YC sectors sized by company count" width="1440" height="900">
+</figure></div>
+</section>
+
+<section id="specimens"><div class="wrap">
+  <div class="head"><span class="tag">Specimens · 01–06</span><h2>The whole directory, filed by the problem it solves.</h2></div>
+  <div class="specimens">
+    <article class="spec"><div class="no tag"><span>01</span><span>treemap</span></div><h3>Sector map</h3><p>Every sector as a tile sized by company count. Filter to a batch like "Fall 2026" or to active companies only.</p><div class="glyph">▦</div></article>
+    <article class="spec foam"><div class="no tag"><span>02</span><span>basket</span></div><h3>The basket</h3><p>A sector as a wall of logos, narrowed by AI-suggested problem groups ("Scheduling", "Billing") or by name.</p><div class="glyph">❀</div></article>
+    <article class="spec blush"><div class="no tag"><span>03</span><span>citations</span></div><h3>Ringed citations</h3><p>Answers are written only from the companies' own descriptions. The companies they cite get a crimson ring in the grid.</p><div class="glyph">◎</div></article>
+    <article class="spec sand"><div class="no tag"><span>04</span><span>memory</span></div><h3>Follow-ups that remember</h3><p>Every company already discussed stays in context, so "tell me more about this one" just works.</p><div class="glyph">↺</div></article>
+    <article class="spec euc"><div class="no tag"><span>05</span><span>web</span></div><h3>From the web</h3><p>Funding or news questions get a separate, clearly labelled web section with source links.</p><div class="glyph">⌖</div></article>
+    <article class="spec dark"><div class="no tag"><span>06</span><span>workbench</span></div><h3>Profile, compare, note</h3><p>Open a company profile, put two side by side, and keep notes on the ones worth a second look.</p><div class="glyph">⁂</div></article>
+  </div>
+</div></section>
+
+<section id="modes" style="background:var(--bone);box-shadow:0 0 0 1px var(--mist)"><div class="wrap modes">
+  <div>
+    <span class="tag">Three ways to ask</span>
+    <h2 style="margin:12px 0 28px">One chat, three intents.</h2>
+    <div class="seg" role="tablist" aria-label="Chat modes">
+      <button role="tab" aria-selected="true" data-m="0">Ask</button><button role="tab" aria-selected="false" data-m="1">Explore</button><button role="tab" aria-selected="false" data-m="2">Challenge</button>
+    </div>
+    <div class="mode-copy" aria-live="polite"><h3 id="mt">Ask about a sector</h3><p id="md">Question a sector, a problem group, a batch, or a hand-picked selection of companies. The answer cites who it relied on.</p></div>
+    <div class="prompt"><span id="mp">Ask about Healthcare companies…</span><i aria-hidden="true">↑</i></div>
+  </div>
+  <figure class="cited"><img src="https://raw.githubusercontent.com/shivamshinde123/whatstir/main/docs/images/workspace.png" alt="The Healthcare workspace: company basket, ringed results and a cited answer" loading="lazy" width="1440" height="900"></figure>
+</div></section>
+
+<section id="how"><div class="wrap">
+  <div class="head"><span class="tag">Field notes</span><h2>How an answer is grown.</h2></div>
+  <ol class="steps">
+    <li><div><h3>Load the directory</h3><p>Company data from the open-source yc-oss mirror goes into Postgres, with pgvector embeddings and AI-written problem groups per sector.</p></div></li>
+    <li><div><h3>Choose a scope</h3><p>A sector, a batch, a problem group, or companies you picked. The scope travels with every question in the session.</p></div></li>
+    <li><div><h3>Answer from descriptions only</h3><p>Retrieval finds the relevant companies and the model answers from their own words. A schema check keeps every citation pointing at a real company.</p></div></li>
+    <li><div><h3>Reach past the data</h3><p>When a question is about news or funding, a second call searches the web through OpenRouter and returns a labelled section with links.</p></div></li>
+  </ol>
+</div></section>
+
+<section style="padding-top:0"><div class="wrap">
+  <div class="head"><span class="tag">Built with</span>
+    <div class="stack"><span>Next.js 16</span><span>React 19</span><span>Postgres + pgvector</span><span>OpenRouter</span><span>Vercel</span><span>Vitest</span><span>Playwright</span></div>
+  </div>
+  <p class="note"><b>Not affiliated with Y Combinator.</b> Whatstir is an independent project. Company data comes from yc-oss, an open-source mirror of the public YC directory.</p>
+</div></section>
+</main>
+
+<footer><div class="wrap">
+  <div><p class="big">Bring your own keys, grow your own copy.</p><a class="btn fill" style="background:var(--linen);color:var(--forest)" href="https://github.com/shivamshinde123/whatstir#run-your-own-whatstir">Setup guide</a></div>
+  <div style="align-self:end">Made by <a href="https://github.com/shivamshinde123">Shivam Shinde</a> · MIT License</div>
+</div></footer>
+
+<script>
+const modes=[
+ ["Ask about a sector","Question a sector, a problem group, a batch, or a hand-picked selection of companies. The answer cites who it relied on.","Ask about Healthcare companies…"],
+ ["Explore a problem","Describe a customer problem and see which companies are working on it, grouped by how they approach it.","Describe a problem to explore…"],
+ ["Challenge your idea","Describe your startup idea and get it tested against the companies already in the space.","Describe your idea to challenge…"]];
+document.querySelectorAll('.seg button').forEach(b=>b.addEventListener('click',()=>{
+  document.querySelectorAll('.seg button').forEach(x=>x.setAttribute('aria-selected',x===b));
+  const m=modes[b.dataset.m];mt.textContent=m[0];md.textContent=m[1];mp.textContent=m[2];
+}));
+</script>
+</body>
+</html>
