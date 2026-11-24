@@ -6,6 +6,7 @@ All notable changes to Whatstir are recorded here. The format follows [Keep a Ch
 
 ### Added
 - **A demo video in the README.** A three-and-a-half-minute tour of Whatstir plays at the top of the README (#63).
+- **A how-it-works slide deck.** `docs/diagrams/` has an eight-slide Excalidraw deck covering the refresh, enrichment, exploring, the company card and asking a question, plus a GIF of the company card scrolling (#65).
 
 ## [2.2.0] - 2026-11-03
 
