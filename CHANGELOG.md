@@ -9,6 +9,9 @@ All notable changes to Whatstir are recorded here. The format follows [Keep a Ch
 - **Repeat founders.** A new Founders page lists people who founded more than one YC company, matched by LinkedIn, with their companies in order and whether they stayed in one sector. Search by founder or company name, and compare a founder's companies side by side. Admin has a switch to turn founder fetching on and an Extract founders button to fill it in (#67).
 - **A how-it-works slide deck.** `docs/diagrams/` has an eight-slide Excalidraw deck covering the refresh, enrichment, exploring, the company card and asking a question, plus a GIF of the company card scrolling (#65).
 
+### Fixed
+- **Pages no longer hang on Supabase's transaction pooler.** Loading several companies at once (Compare) could wait forever, because queries were pipelined on one connection. Each connection now runs one query at a time (#67).
+
 ## [2.2.0] - 2026-11-03
 
 ### Added
