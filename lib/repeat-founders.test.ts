@@ -134,7 +134,7 @@ describe("getRepeatFounders", () => {
     });
   });
 
-  it("matches people by normalised LinkedIn profile, oldest company first, and counts sector changes", async () => {
+  it("matches people by normalised LinkedIn profile, newest company first, and counts sector changes", async () => {
     await company(1, "b2b", "Summer 2005");
     await company(2, "consumer", "Winter 2007");
     await company(3, "b2b", "Winter 2012");
@@ -164,7 +164,7 @@ describe("getRepeatFounders", () => {
     const r = await getRepeatFounders(sql);
     expect(r.founderRows).toBe(10);
     expect(r.people.map((p) => [p.key, p.companies.map((c) => c.id), p.changedSector])).toEqual([
-      ["justinkan", [1, 2, 3], true],
+      ["justinkan", [3, 2, 1], true],
       ["patlee", [5, 6], false],
     ]);
     // Named as on their most recent company.

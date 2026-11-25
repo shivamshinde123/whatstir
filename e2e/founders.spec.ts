@@ -40,21 +40,46 @@ test("switch founder fetching on in Admin, extract founders, then see repeat fou
   await sw.click();
   await expect(sw).toHaveAttribute("aria-checked", "false");
 
-  await page.getByRole("navigation", { name: "Main" }).getByRole("link", { name: "Founders" }).click();
+  await page.getByRole("navigation", { name: "Main" }).getByRole("link", { name: "Repeat founders" }).click();
   await expect(page).toHaveURL(/\/founders$/);
   await expect(page.getByRole("heading", { level: 1, name: "Repeat founders" })).toBeVisible();
 
-  // Rita: Tremendous (Fintech) then Quartzy (Healthcare), matched despite different URLs.
-  const rita = page.getByRole("list", { name: "Companies founded by Rita Repeat, oldest first" });
-  await expect(rita.getByRole("link")).toHaveText([/Tremendous.*Winter 2011 · Fintech/, /Quartzy.*Summer 2011 · Healthcare/]);
+  // Rita: Quartzy (Healthcare, Summer 2011) above Tremendous (Fintech, Winter 2011), matched despite different URLs.
+  const rita = page.getByRole("list", { name: "Companies founded by Rita Repeat, newest first" });
+  await expect(rita.getByRole("link")).toHaveText([/Quartzy.*Summer 2011 · Healthcare/, /Tremendous.*Winter 2011 · Fintech/]);
   await expect(page.getByText("2 companies · all B2B")).toBeVisible(); // Sam
   const summary = page.getByRole("region", { name: "Summary" });
   await expect(summary.getByText("Repeat founders").locator("xpath=following-sibling::p[1]")).toHaveText("2");
   await expect(summary.getByText("Changed sector").locator("xpath=following-sibling::p[1]")).toHaveText("1");
 
   await page.getByRole("radio", { name: "Same sector" }).click();
-  await expect(page.getByRole("link", { name: "Sam Same" })).toBeVisible();
-  await expect(page.getByRole("link", { name: "Rita Repeat" })).toHaveCount(0);
+  await expect(page.getByRole("heading", { name: "Sam Same" })).toBeVisible();
+  await expect(page.getByRole("heading", { name: "Rita Repeat" })).toHaveCount(0);
+
+  // Search by company name finds the founder; it combines with the sector filter.
+  await page.getByRole("radio", { name: "All" }).click();
+  const search = page.getByRole("searchbox", { name: "Search founders or companies" });
+  await search.fill("quartzy");
+  await expect(page.getByRole("heading", { name: "Rita Repeat" })).toBeVisible();
+  await expect(page.getByRole("heading", { name: "Sam Same" })).toHaveCount(0);
+  await search.fill("sam");
+  await expect(page.getByRole("heading", { name: "Sam Same" })).toBeVisible();
+  await expect(page.getByRole("heading", { name: "Rita Repeat" })).toHaveCount(0);
+  await search.fill("nobody at all");
+  await expect(page.getByText("No repeat founders match “nobody at all”.")).toBeVisible();
+  await search.fill("");
+
+  // Compare puts Rita's companies side by side, with their sectors.
+  await page.getByRole("button", { name: "Compare Rita Repeat's companies" }).click();
+  const dialog = page.getByRole("dialog", { name: "Compare 2 companies" });
+  await expect(dialog.getByRole("columnheader")).toHaveText(["Field", /Quartzy/, /Tremendous/]);
+  await expect(dialog.getByRole("row").filter({ has: page.getByRole("rowheader", { name: "Sector" }) }).getByRole("cell")).toHaveText([
+    "Healthcare",
+    "Fintech",
+  ]);
+  await page.keyboard.press("Escape");
+  await expect(dialog).toHaveCount(0);
+  await expect(page.getByRole("button", { name: "Compare Rita Repeat's companies" })).toBeFocused();
 
   // A company chip opens that company in its sector.
   await page.getByRole("radio", { name: "Changed sector" }).click();

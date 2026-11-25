@@ -180,6 +180,7 @@ Listed in the order they were made. Decisions 1–14 are recorded in §16 of [in
     - *Extract founders:* a founders-only pass, so filling in founders doesn't wait for the daily refresh or re-read yc-oss. It takes the single refresh slot under a new `founders` trigger, so it never overlaps a refresh, and stops at the usual 240 s budget. Pressing it again carries on. A founders pass isn't a "last success" of the refresh, because it doesn't read the source.
     - *Matching:* repeat founders are matched by LinkedIn profile only, normalised to the lower-case handle after `linkedin.com/in/` (the stored URLs vary by `www`, trailing slash and case). Founders without a LinkedIn URL are left out, because names collide ("Sam Smith"). On the owner's data this finds about 250 people; name matching would add about 30, with false positives.
     - *Shape:* `/founders` groups in TypeScript over about 11,000 rows rather than in SQL, so `linkedinKey` is the single definition of a match. Only live companies count.
+    - *Search and compare (added to #67 by the owner):* the page filters by founder or company name in the browser, since the whole list (about 250 people) is already loaded. Compare companies reuses the workspace's Compare modal for all of a person's companies (at most 4 in the data), which gained a Sector row so a sector change is visible side by side.
     - *Tests:* `YC_PAGES_URL` swaps the ycombinator.com origin, so e2e extraction reads stand-in pages from the local feed server.
 
 ## Open items

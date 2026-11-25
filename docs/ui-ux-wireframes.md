@@ -95,20 +95,25 @@ Outbound links open in a new tab with `rel="noopener"`, so the research session 
 
 ## 3c. Repeat founders (`/founders`, linked from the header)
 ```
-┌ Whatstir                       Notes  Founders  Admin ┐
-│ Repeat founders                                       │
-│ People who founded more than one YC company, matched  │
-│ by their LinkedIn profile.                            │
-│ ┌ Repeat founders ┐┌ Stayed in one ┐┌ Changed ┐┌ 3+ ┐ │
-│ │ 252             ││ 140           ││ 112     ││ 14 │ │
-│ └─────────────────┘└───────────────┘└─────────┘└────┘ │
-│ ( All | Same sector | Changed sector )                │
-│ Justin Kan   4 companies · changed sector             │
-│ [◼ Kiko  Summer 2005 · Consumer · Inactive] [◼ Twitch…]│
-└───────────────────────────────────────────────────────┘
+Repeat founders
+People who founded more than one YC company, matched by their LinkedIn profile.
+┌ Repeat founders ┐┌ Stayed in one sector ┐┌ Changed sector ┐┌ Founded 3 or more ┐
+│ 255             ││ 108                  ││ 147            ││ 14                │
+└─────────────────┘└──────────────────────┘└────────────────┘└───────────────────┘
+(🔍 Search founders or companies)  (All) (Same sector) (Changed sector)
+┌ Justin Kan        LinkedIn ↗ ┐┌ Pradeep Elankumaran  LinkedIn ↗ ┐┌ Sean Grove  …
+│ 4 companies · changed sector ││ 3 companies · all Consumer      ││
+│ [◼ Kiko  Summer 2005 · B2B…] ││ [◼ Kicksend  Summer 2011 · …]   ││
+│ [◼ Twitch  Winter 2007 · …]  ││ [◼ Farmstead …]                 ││
+│ [◼ Exec  Winter 2012 · …]    ││ [◼ jo  Spring 2026 · …]         ││
+│ Show 1 more                  ││                                 ││
+│ (     Compare companies     )││ (     Compare companies       ) ││
+└──────────────────────────────┘└─────────────────────────────────┘└──────
 ```
-- Each person's name links to their LinkedIn. Companies run oldest batch first, each a chip with logo, batch, sector and status that opens the company in its sector.
-- The summary cards stack two by two on phones; chips wrap.
+- One card per person: three columns on wide screens, two on tablets, one on phones. The name is a heading, and "LinkedIn ↗" opens their profile. There are no photos: Whatstir doesn't store founder pictures.
+- Companies run newest batch first (latest on top), as rows with logo, batch, sector and status. Each opens the company in its sector. A card shows 3; more fold behind "Show N more" / "Show less" (`aria-expanded`). A search that matches a folded company opens the card.
+- **Search** matches part of the founder's name or any of their company names, ignoring case, and combines with the sector filter. No match: "No repeat founders match “…”."
+- **Compare companies**, pinned to the card's bottom so buttons line up, opens the Compare modal (§4) with all of that person's companies, including a Sector row. Esc, × or the backdrop closes it, and focus returns to the button.
 - **No founder data:** "No founder data yet." with whether fetching is on, and a link to Admin. **Error:** "Couldn't load founders. Try again."
 
 ## 4. Compare (modal)

@@ -17,7 +17,7 @@ export interface RepeatFounder {
   key: string;
   name: string;
   linkedinUrl: string;
-  /** Oldest batch first. */
+  /** Newest batch first. */
   companies: RepeatCompany[];
   changedSector: boolean;
 }
@@ -41,12 +41,9 @@ type Row = {
   sector_name: string;
 };
 
-/** Oldest first; batches that aren't "Season YYYY" go last. */
-const byBatch = (a: RepeatCompany, b: RepeatCompany) => {
-  const ka = a.batch ? batchKey(a.batch) : -1;
-  const kb = b.batch ? batchKey(b.batch) : -1;
-  return (ka < 0 ? Infinity : ka) - (kb < 0 ? Infinity : kb) || a.id - b.id;
-};
+/** Newest batch first; batches that aren't "Season YYYY" (key -1) go last. */
+const byBatch = (a: RepeatCompany, b: RepeatCompany) =>
+  (b.batch ? batchKey(b.batch) : -1) - (a.batch ? batchKey(a.batch) : -1) || a.id - b.id;
 
 /**
  * People who founded two or more companies still in the source. Founders are matched by their
@@ -84,7 +81,7 @@ export async function getRepeatFounders(sql: Sql): Promise<RepeatFounders> {
     if (g.companies.size < 2) continue;
     const companies = [...g.companies.values()].sort(byBatch);
     // The name and link as written on their most recent company.
-    const latest = g.rows.find((r) => r.id === companies[companies.length - 1].id)!;
+    const latest = g.rows.find((r) => r.id === companies[0].id)!;
     people.push({
       key,
       name: latest.founder,

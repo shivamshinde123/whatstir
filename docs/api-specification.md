@@ -124,10 +124,10 @@ People who founded two or more companies still in the source, matched by their n
   "stats": { "repeatFounders": 252, "sameSector": 140, "changedSector": 112, "threePlus": 14 },
   "people": [ { "key": "justinkan", "name": "Justin Kan", "linkedinUrl": "https://www.linkedin.com/in/justinkan",
                 "changedSector": true,
-                "companies": [ { "id": 1, "name": "Kiko", "logoUrl": "…", "batch": "Summer 2005", "status": "Inactive",
-                                 "sectorId": "consumer", "sectorName": "Consumer" } ] } ] }
+                "companies": [ { "id": 1845, "name": "Atrium", "logoUrl": "…", "batch": "Winter 2018", "status": "Inactive",
+                                 "sectorId": "b2b", "sectorName": "B2B" } ] } ] }
 ```
-- `companies` are oldest batch first; batches that aren't "Season YYYY" go last. `people` are sorted by number of companies, then most recent batch.
+- `companies` are newest batch first; batches that aren't "Season YYYY" go last. `people` are sorted by number of companies, then most recent batch.
 - `founderRows` is every stored founder row; 0 means founder data hasn't been fetched. `enabled` says whether fetching is on.
 
 ## Admin

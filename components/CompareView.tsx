@@ -18,6 +18,7 @@ const ROWS: { label: string; cell: (p: CompanyProfile) => React.ReactNode }[] = 
   { label: "Problem", cell: (p) => p.problemCard?.problem ?? <Unknown /> },
   { label: "Workaround", cell: (p) => p.problemCard?.workaround ?? <Unknown /> },
   { label: "Solution", cell: (p) => p.problemCard?.solution ?? <Unknown /> },
+  { label: "Sector", cell: (p) => p.sector.name },
   { label: "Batch", cell: (p) => p.batch ?? <Unknown /> },
   { label: "Status", cell: (p) => (p.status ? <StatusBadge status={p.status} /> : <Unknown />) },
   {
@@ -34,7 +35,7 @@ const ROWS: { label: string; cell: (p: CompanyProfile) => React.ReactNode }[] = 
 ];
 
 /**
- * Side-by-side problem cards for 2–3 companies, in a native modal <dialog>: it traps focus,
+ * Side-by-side problem cards for 2–4 companies (a selection, or a repeat founder's companies), in a native modal <dialog>: it traps focus,
  * closes on Esc, and gives focus back to the Compare button when it closes.
  */
 export default function CompareView({ ids, onClose }: { ids: number[]; onClose: () => void }) {

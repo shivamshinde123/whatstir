@@ -780,8 +780,9 @@ describe("selection, compare, and actions", () => {
     expect(within(row("Batch")).getAllByRole("cell").map((c) => c.textContent)).toEqual(["Summer 2024", "Unknown"]);
     expect(within(row("Status")).getAllByRole("cell").map((c) => c.textContent)).toEqual(["Active", "Unknown"]);
     expect(within(row("Website")).getByRole("link")).toHaveAttribute("href", "https://acme.example");
-    // Bolt Clinic has nothing but its name: customer, problem, workaround, solution, batch, status, website.
-    const bolt = [...table.querySelectorAll("tbody tr")].map((r) => r.querySelectorAll("td")[1]);
+    // Bolt Clinic has nothing but its name and sector: customer, problem, workaround, solution, batch, status, website.
+    expect(within(row("Sector")).getAllByRole("cell").map((c) => c.textContent)).toEqual([PROFILE.sector.name, PROFILE.sector.name]);
+    const bolt = [...table.querySelectorAll("tbody tr")].filter((r) => r !== row("Sector")).map((r) => r.querySelectorAll("td")[1]);
     expect(bolt.every((c) => c.querySelector("[data-unknown]"))).toBe(true);
     expect(fetchMock).toHaveBeenCalledWith("/api/companies/12");
     expect(fetchMock).toHaveBeenCalledWith("/api/companies/11");
