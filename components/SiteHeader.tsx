@@ -11,11 +11,14 @@ export default function SiteHeader({ showSignOut = false }: { showSignOut?: bool
         <Link href="/" className="text-xl font-medium tracking-[-0.03em]">
           Whatstir
         </Link>
-        <div className="flex items-center gap-4 sm:gap-5">
-          <Link href="/notes" className="rounded-full px-3 py-1 text-sm transition-colors hover:bg-surface">
+        <div className="flex items-center gap-1 sm:gap-5">
+          <Link href="/notes" className="whitespace-nowrap rounded-full px-2 py-1 text-sm transition-colors hover:bg-surface sm:px-3">
             Notes
           </Link>
-          <Link href="/admin" className="rounded-full px-3 py-1 text-sm transition-colors hover:bg-surface">
+          <Link href="/founders" className="whitespace-nowrap rounded-full px-2 py-1 text-sm transition-colors hover:bg-surface sm:px-3">
+            Repeat founders
+          </Link>
+          <Link href="/admin" className="whitespace-nowrap rounded-full px-2 py-1 text-sm transition-colors hover:bg-surface sm:px-3">
             Admin
           </Link>
           {showSignOut && (

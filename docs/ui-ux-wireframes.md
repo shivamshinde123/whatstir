@@ -93,6 +93,29 @@ Outbound links open in a new tab with `rel="noopener"`, so the research session 
 - Edit happens in place. Delete asks inline: "Delete this note? Cancel / Delete".
 - **Empty:** "No notes yet." **Error:** "Couldn't load notes. Try again."
 
+## 3c. Repeat founders (`/founders`, linked from the header)
+```
+Repeat founders
+People who founded more than one YC company, matched by their LinkedIn profile.
+┌ Repeat founders ┐┌ Stayed in one sector ┐┌ Changed sector ┐┌ Founded 3 or more ┐
+│ 255             ││ 108                  ││ 147            ││ 14                │
+└─────────────────┘└──────────────────────┘└────────────────┘└───────────────────┘
+(🔍 Search founders or companies)  (All) (Same sector) (Changed sector)
+┌ Justin Kan        LinkedIn ↗ ┐┌ Pradeep Elankumaran  LinkedIn ↗ ┐┌ Sean Grove  …
+│ 4 companies · changed sector ││ 3 companies · all Consumer      ││
+│ [◼ Kiko  Summer 2005 · B2B…] ││ [◼ Kicksend  Summer 2011 · …]   ││
+│ [◼ Twitch  Winter 2007 · …]  ││ [◼ Farmstead …]                 ││
+│ [◼ Exec  Winter 2012 · …]    ││ [◼ jo  Spring 2026 · …]         ││
+│ Show 1 more                  ││                                 ││
+│ (     Compare companies     )││ (     Compare companies       ) ││
+└──────────────────────────────┘└─────────────────────────────────┘└──────
+```
+- One card per person: three columns on wide screens, two on tablets, one on phones. The name is a heading, and "LinkedIn ↗" opens their profile. There are no photos: Whatstir doesn't store founder pictures.
+- Companies run newest batch first (latest on top), as rows with logo, batch, sector and status. Each opens the company in its sector. A card shows 3; more fold behind "Show N more" / "Show less" (`aria-expanded`). A search that matches a folded company opens the card.
+- **Search** matches part of the founder's name or any of their company names, ignoring case, and combines with the sector filter. No match: "No repeat founders match “…”."
+- **Compare companies**, pinned to the card's bottom so buttons line up, opens the Compare modal (§4) with all of that person's companies, including a Sector row. Esc, × or the backdrop closes it, and focus returns to the button.
+- **No founder data:** "No founder data yet." with whether fetching is on, and a link to Admin. **Error:** "Couldn't load founders. Try again."
+
 ## 4. Compare (modal)
 ```
 ┌ Compare 2 companies ─────────────────────── × ┐
@@ -134,6 +157,11 @@ Companies are re-read from yc-oss every day, then embedded, grouped and summaris
 └───────────────────┘└────────────────────┘└───────────────┘└────────────────────────┘
 [Refresh now] [Pause]                       Jev confidence threshold (0–1) [0.5] [Save]
 
+┌ Founder data ─────────────────────────────── Fetch founders from YC pages (◯━) ┐
+│ Founders, titles and LinkedIn links are read from each company's YC page…      │
+│ [Extract founders]  37 companies need founders.                                 │
+└────────────────────────────────────────────────────────────────────────────────┘
+
 Recent runs
 Started | Trigger | Status | Took | Source | New | Changed | Enriched | Pending | Error
 ```
@@ -141,6 +169,7 @@ Started | Trigger | Status | Took | Source | New | Changed | Enriched | Pending 
 - **Running:** the button reads "Refreshing…" and is disabled, and the page refreshes itself every 2 s until the run ends.
 - Status pills: OK green, Failed red, Skipped grey, Running blue. A run's error is shown in red, in its row and in the Last run card.
 - On phones the cards stack and the runs table scrolls sideways inside its own box.
+- **Founder data:** the switch (`role="switch"`) is off by default. With `FOUNDERS_FETCH=on` it shows on and is disabled. Extract founders is disabled while the switch is off, a run is going, or nothing needs founders, and reads "Extracting…" during a founders pass. The pass appears in Recent runs with the trigger "Founders".
 
 ## Design language (sage "specimen" style, the owner's choice)
 

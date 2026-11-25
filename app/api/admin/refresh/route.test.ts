@@ -235,17 +235,28 @@ describe("GET /api/admin/refresh", () => {
 
 describe("PATCH /api/admin/settings", () => {
   it("saves paused and the Jev threshold (0 and 1 included), which enrichment then reads", async () => {
-    expect(await (await patch({ paused: true, minConfidence: 0.8 })).json()).toEqual({ paused: true, minConfidence: 0.8 });
-    expect(await (await patch({ minConfidence: 0 })).json()).toEqual({ paused: true, minConfidence: 0 });
-    expect(await (await patch({ minConfidence: 1, paused: false })).json()).toEqual({ paused: false, minConfidence: 1 });
+    const off = { foundersFetch: false };
+    expect(await (await patch({ paused: true, minConfidence: 0.8 })).json()).toEqual({ paused: true, minConfidence: 0.8, ...off });
+    expect(await (await patch({ minConfidence: 0 })).json()).toEqual({ paused: true, minConfidence: 0, ...off });
+    expect(await (await patch({ minConfidence: 1, paused: false })).json()).toEqual({ paused: false, minConfidence: 1, ...off });
     const rows = await sql`select key, jsonb_typeof(value) as t, value from app_settings order by key`;
     expect(rows).toEqual([
+      { key: "founders_fetch", t: "boolean", value: false },
       { key: "jev_min_confidence", t: "number", value: 1 },
       { key: "refresh_paused", t: "boolean", value: false },
     ]);
   });
 
+  it("switches founder fetching on and off", async () => {
+    expect(await (await patch({ foundersFetch: true })).json()).toMatchObject({ foundersFetch: true });
+    expect(await status()).toMatchObject({ foundersFetch: true, founders: { forced: false, enabled: true } });
+    expect(await (await patch({ foundersFetch: false })).json()).toMatchObject({ foundersFetch: false });
+    expect(await status()).toMatchObject({ founders: { enabled: false } });
+  });
+
   it.each([
+    [{ foundersFetch: "on" }, /true or false/],
+    [{ foundersFetch: null }, /true or false/],
     [{ minConfidence: -0.01 }, /from 0 to 1/],
     [{ minConfidence: 1.01 }, /from 0 to 1/],
     [{ minConfidence: "0.5" }, /from 0 to 1/],

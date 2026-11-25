@@ -8,6 +8,7 @@ Whatstir/
 │  ├─ admin/page.tsx               refresh controls
 │  ├─ login/page.tsx
 │  ├─ notes/page.tsx               every note (NotesView)
+│  ├─ founders/page.tsx            repeat founders (FoundersView)
 │  ├─ layout.tsx, globals.css
 │  └─ api/
 │     ├─ sectors/route.ts
@@ -17,7 +18,8 @@ Whatstir/
 │     ├─ sessions/[id]/messages/route.ts
 │     ├─ companies/[id]/route.ts
 │     ├─ notes/route.ts, notes/[id]/route.ts
-│     ├─ admin/refresh/route.ts, admin/settings/route.ts
+│     ├─ admin/refresh/route.ts, admin/settings/route.ts, admin/founders/route.ts
+│     ├─ founders/route.ts
 │     ├─ cron/refresh/route.ts
 │     └─ login/route.ts, logout/route.ts
 ├─ components/                     UI components (see component-map.md)

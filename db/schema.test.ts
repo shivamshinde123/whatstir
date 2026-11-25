@@ -41,6 +41,7 @@ describe("seed data", () => {
   it("seeds the default app settings", async () => {
     const rows = await sql`select key, value from app_settings order by key`;
     expect(rows).toEqual([
+      { key: "founders_fetch", value: false },
       { key: "jev_min_confidence", value: 0.5 },
       { key: "refresh_paused", value: false },
     ]);

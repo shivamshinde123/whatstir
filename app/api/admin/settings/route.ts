@@ -2,14 +2,14 @@ import { connection, NextResponse } from "next/server";
 import { parseSettings, updateSettings } from "@/lib/admin";
 import { db } from "@/lib/db";
 
-/** `{ paused?: boolean, minConfidence?: number in [0, 1] }` → the saved settings. */
+/** `{ paused?: boolean, minConfidence?: number in [0, 1], foundersFetch?: boolean }` → the saved settings. */
 export async function PATCH(request: Request) {
   await connection();
   let body: unknown;
   try {
     body = await request.json();
   } catch {
-    return NextResponse.json({ error: "Send JSON: { paused?, minConfidence? }" }, { status: 400 });
+    return NextResponse.json({ error: "Send JSON: { paused?, minConfidence?, foundersFetch? }" }, { status: 400 });
   }
   const parsed = parseSettings(body);
   if (!parsed.ok) return NextResponse.json({ error: parsed.error }, { status: 400 });

@@ -24,7 +24,7 @@ const entries = Object.fromEntries(
     .map((l) => [l.slice(0, l.indexOf("=")), l.slice(l.indexOf("=") + 1)]),
 );
 // Variables that are documented in a comment rather than set: they must stay unset outside tests.
-const commentedOnly = ["AI_FAKE", "YC_SOURCE_URL"];
+const commentedOnly = ["AI_FAKE", "YC_SOURCE_URL", "YC_PAGES_URL"];
 
 describe(".env.example", () => {
   it("documents every variable the code reads, including the ones the SDKs read implicitly", () => {
