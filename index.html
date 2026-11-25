@@ -44,10 +44,12 @@ img{display:block;max-width:100%;height:auto}
 
 /* hero */
 .hero{padding:88px 0 56px}
-.hero > .wrap > .tag{margin-bottom:28px;display:flex;gap:14px;flex-wrap:wrap}
-.hero > .wrap > .tag span{padding:5px 9px;border-radius:6px;background:var(--bone);box-shadow:0 0 0 1px var(--mist)}
-h1{font:300 clamp(52px,9vw,108px)/.98 var(--serif);letter-spacing:-.032em;color:var(--olive);max-width:11ch}
+.hero .wrap{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1.1fr);gap:56px;align-items:center}
+.hero-copy > .tag{margin-bottom:28px;display:flex;gap:14px;flex-wrap:wrap}
+.hero-copy > .tag span{padding:5px 9px;border-radius:6px;background:var(--bone);box-shadow:0 0 0 1px var(--mist)}
+h1{font:300 clamp(52px,6.4vw,92px)/.98 var(--serif);letter-spacing:-.032em;color:var(--olive);max-width:11ch}
 .lede{max-width:560px;margin:30px 0 34px;color:var(--sage-gray);font-size:20px;line-height:1.44}
+.hero .shot{margin:0}
 .lede b{color:var(--forest);font-weight:500}
 .ctas{display:flex;gap:12px;flex-wrap:wrap}
 
@@ -108,6 +110,7 @@ footer a{color:var(--linen)}
 @media(max-width:900px){
   .specimens{grid-template-columns:1fr 1fr}.modes{grid-template-columns:1fr;gap:32px}
   .head,.steps li{grid-template-columns:1fr;gap:10px}.shot{margin-top:40px}
+  .hero .wrap{grid-template-columns:1fr;gap:40px}
 }
 @media(max-width:600px){.specimens{grid-template-columns:1fr}.top nav a:not(.gh){display:none}section{padding:72px 0}}
 </style>
@@ -120,6 +123,7 @@ footer a{color:var(--linen)}
 
 <main>
 <section class="hero"><div class="wrap">
+  <div class="hero-copy">
   <div class="tag"><span>~6,400 companies</span><span>9 sectors</span><span>cited answers</span></div>
   <h1>What are startups stirring up?</h1>
   <p class="lede">Explore Y Combinator startups by sector and by the <b>customer problems they solve</b>. Pick a sector, ask in plain English, and watch the companies each answer relies on collect in a grid.</p>
@@ -128,11 +132,12 @@ footer a{color:var(--linen)}
     <a class="btn ghost" href="https://github.com/shivamshinde123/whatstir">Read the source</a>
   </div>
   <div class="ph-badge" style="margin-top:20px"><a href="https://www.producthunt.com/products/whatstir?embed=true&amp;utm_source=badge-featured&amp;utm_medium=badge&amp;utm_campaign=badge-whatstir" target="_blank" rel="noopener noreferrer"><img alt="Whatstir - Explore YC startups by sector and the problems they solve | Product Hunt" width="250" height="54" src="https://api.producthunt.com/widgets/embed-image/v1/featured.svg?post_id=1308170&amp;theme=light&amp;t=1794087108402"></a></div>
-</div>
-<div class="wrap"><figure class="shot">
+  </div>
+  <figure class="shot">
   <div class="bar"><i></i><i></i><i></i><span class="tag">whatstir / home</span></div>
   <img src="https://raw.githubusercontent.com/shivamshinde123/whatstir/main/docs/images/home.png" alt="Whatstir home: a serif headline beside a landscape, and a treemap of YC sectors sized by company count" width="1440" height="900">
-</figure></div>
+  </figure>
+</div>
 </section>
 
 <section id="demo" style="padding-top:0"><div class="wrap">
