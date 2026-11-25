@@ -56,6 +56,9 @@ h1{font:300 clamp(52px,9vw,108px)/.98 var(--serif);letter-spacing:-.032em;color:
 .shot .bar{height:34px;display:flex;align-items:center;gap:6px;padding:0 14px;background:var(--bone);box-shadow:0 1px 0 var(--mist)}
 .shot .bar i{width:9px;height:9px;border-radius:50%;background:var(--lichen)}
 .shot .bar span{margin-left:12px}
+.shot video{display:block;width:100%;height:auto;background:var(--linen)}
+.credit{margin-top:14px;font-size:13px;text-align:center}
+.credit a{color:inherit}
 
 section{padding:96px 0}
 .head{display:grid;grid-template-columns:220px 1fr;gap:32px;margin-bottom:48px;align-items:baseline}
@@ -112,7 +115,7 @@ footer a{color:var(--linen)}
 <body>
 <header class="top"><div class="wrap">
   <a class="word" href="#">Whatstir</a>
-  <nav><a href="#specimens">Features</a><a href="#modes">Ask</a><a href="#how">How it works</a><a class="gh" href="https://github.com/shivamshinde123/whatstir">GitHub</a></nav>
+  <nav><a href="#demo">Demo</a><a href="#specimens">Features</a><a href="#modes">Ask</a><a href="#how">How it works</a><a class="gh" href="https://github.com/shivamshinde123/whatstir">GitHub</a></nav>
 </div></header>
 
 <main>
@@ -131,6 +134,18 @@ footer a{color:var(--linen)}
   <img src="https://raw.githubusercontent.com/shivamshinde123/whatstir/main/docs/images/home.png" alt="Whatstir home: a serif headline beside a landscape, and a treemap of YC sectors sized by company count" width="1440" height="900">
 </figure></div>
 </section>
+
+<section id="demo" style="padding-top:0"><div class="wrap">
+  <div class="head"><span class="tag">Demo · 3:35</span><h2>A walk through the field.</h2></div>
+  <figure class="shot" style="margin-top:0">
+    <div class="bar"><i></i><i></i><i></i><span class="tag">whatstir / tour</span></div>
+    <video controls playsinline preload="none" poster="demo-poster.jpg" width="1280" height="720" aria-label="Whatstir demo: the sector map, filters, problem groups, asking questions, profiles, compare and notes">
+      <source src="demo.mp4" type="video/mp4">
+      <a href="demo.mp4">Download the demo video</a>
+    </video>
+  </figure>
+  <p class="credit">Music: "Inspired" by Kevin MacLeod (<a href="https://incompetech.com">incompetech.com</a>), licensed under <a href="https://creativecommons.org/licenses/by/4.0/">CC BY 4.0</a>.</p>
+</div></section>
 
 <section id="specimens"><div class="wrap">
   <div class="head"><span class="tag">Specimens · 01–06</span><h2>The whole directory, filed by the problem it solves.</h2></div>
