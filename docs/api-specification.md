@@ -115,6 +115,21 @@ A note:
 - `DELETE /api/notes/:id` returns **204** with no body.
 - An `:id` that isn't a positive integer, or doesn't exist, returns **404**. A database failure returns 500 with a plain message.
 
+## Founders
+
+### `GET /api/founders`
+People who founded two or more companies still in the source, matched by their normalised LinkedIn profile (decision 81).
+```json
+{ "founderRows": 12067, "enabled": true, "gate": false,
+  "stats": { "repeatFounders": 252, "sameSector": 140, "changedSector": 112, "threePlus": 14 },
+  "people": [ { "key": "justinkan", "name": "Justin Kan", "linkedinUrl": "https://www.linkedin.com/in/justinkan",
+                "changedSector": true,
+                "companies": [ { "id": 1, "name": "Kiko", "logoUrl": "…", "batch": "Summer 2005", "status": "Inactive",
+                                 "sectorId": "consumer", "sectorName": "Consumer" } ] } ] }
+```
+- `companies` are oldest batch first; batches that aren't "Season YYYY" go last. `people` are sorted by number of companies, then most recent batch.
+- `founderRows` is every stored founder row; 0 means founder data hasn't been fetched. `enabled` says whether fetching is on.
+
 ## Admin
 
 ### `GET /api/admin/refresh`
@@ -126,16 +141,21 @@ A note:
   "lastSuccess": { …a run with status "ok"… },
   "runs": [ …the 20 most recent runs, newest first… ] }
 ```
-- `pending` counts companies whose embedding, group assignment, problem card or founders aren't up to date with their source data.
+- `pending` counts companies whose embedding, group assignment, problem card or founders aren't up to date with their source data. Founders count only while founder fetching is on.
+- `foundersFetch` is the Admin switch. `founders` is `{ "forced": boolean, "enabled": boolean, "pending": number }`: `forced` means `FOUNDERS_FETCH=on` keeps fetching on, and `pending` counts live companies whose founders are out of date (whether or not fetching is on).
+- `lastSuccess` is the latest `ok` run that re-read the source, so a founders pass isn't counted.
 - `nextRun` is the next 11:00 UTC. It's shown even while paused, because the cron still fires and records a skip.
 - `gate` drives the Sign out link.
 
 ### `POST /api/admin/refresh`
 Claims the single refresh slot, then returns **202** `{ "runId" }`. The run itself continues after the response through `after()`, within `maxDuration = 300` (240 s for enrichment). Returns **409** `{ "error": "A refresh is already running." }` if a run holds the slot; a run left `running` for 15 minutes is taken over. Manual runs go ahead even while scheduled runs are paused.
 
+### `POST /api/admin/founders`
+Starts a founders-only pass (Admin → Extract founders). It claims the refresh slot as a `founders` run and returns **202** `{ "runId" }`. The pass fetches the YC page of every live company whose founders are out of date, within a 240 s budget, and records `enriched` (companies updated) and `pending` (still out of date) on the run. It's marked `failed` only when every fetch in the pass failed. Returns **400** `{ "error": "Turn on founder fetching first." }` while fetching is off, and **409** while a refresh or another pass holds the slot.
+
 ### `PATCH /api/admin/settings`
-Takes `{ "paused"?: boolean, "minConfidence"?: number }` and returns the saved `{ paused, minConfidence }`. These are stored in `app_settings` as `refresh_paused` and `jev_min_confidence`, as JSON booleans and numbers.
-- **400:** `paused` that isn't a boolean; `minConfidence` that isn't a finite number from 0 to 1 (both ends allowed); an unknown key; an empty object; or a body that isn't a JSON object.
+Takes `{ "paused"?: boolean, "minConfidence"?: number, "foundersFetch"?: boolean }` and returns the saved `{ paused, minConfidence, foundersFetch }`. These are stored in `app_settings` as `refresh_paused`, `jev_min_confidence` and `founders_fetch`, as JSON booleans and numbers.
+- **400:** `paused` or `foundersFetch` that isn't a boolean; `minConfidence` that isn't a finite number from 0 to 1 (both ends allowed); an unknown key; an empty object; or a body that isn't a JSON object.
 
 ## Cron
 

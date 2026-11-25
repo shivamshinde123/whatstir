@@ -2,7 +2,7 @@
 import { readFileSync } from "node:fs";
 import path from "node:path";
 import { afterEach, describe, expect, it, vi } from "vitest";
-import { fetchFounders, foundersEnabled, parseFounders } from "./founders";
+import { fetchFounders, foundersForced, linkedinKey, pageUrl, parseFounders } from "./founders";
 
 const PAGE = readFileSync(path.join(process.cwd(), "test", "fixtures", "yc-company-page.html"), "utf8");
 const page = (founders: unknown) =>
@@ -81,13 +81,46 @@ describe("fetchFounders", () => {
   });
 });
 
-describe("foundersEnabled", () => {
-  it("is off unless FOUNDERS_FETCH=on", () => {
+describe("foundersForced", () => {
+  it("is on only for FOUNDERS_FETCH=on exactly", () => {
     vi.stubEnv("FOUNDERS_FETCH", "on");
-    expect(foundersEnabled()).toBe(true);
+    expect(foundersForced()).toBe(true);
     for (const v of ["", "off", "true", "ON"]) {
       vi.stubEnv("FOUNDERS_FETCH", v);
-      expect(foundersEnabled(), v).toBe(false);
+      expect(foundersForced(), v).toBe(false);
+    }
+  });
+});
+
+describe("pageUrl", () => {
+  it("leaves YC URLs alone unless YC_PAGES_URL is set", () => {
+    vi.stubEnv("YC_PAGES_URL", "");
+    expect(pageUrl("https://www.ycombinator.com/companies/x")).toBe("https://www.ycombinator.com/companies/x");
+  });
+
+  it("swaps the ycombinator.com origin for YC_PAGES_URL", () => {
+    vi.stubEnv("YC_PAGES_URL", "http://localhost:3199/");
+    expect(pageUrl("https://www.ycombinator.com/companies/x")).toBe("http://localhost:3199/companies/x");
+    expect(pageUrl("https://ycombinator.com/companies/y")).toBe("http://localhost:3199/companies/y");
+    expect(pageUrl("https://example.com/companies/z")).toBe("https://example.com/companies/z");
+  });
+});
+
+describe("linkedinKey", () => {
+  it("gives one key per profile however the URL is written", () => {
+    for (const url of [
+      "https://www.linkedin.com/in/JustinKan/",
+      "https://linkedin.com/in/justinkan",
+      "http://www.linkedin.com/in/justinkan?trk=x",
+      "https://www.linkedin.com/in/justinkan#top",
+    ]) {
+      expect(linkedinKey(url), url).toBe("justinkan");
+    }
+  });
+
+  it("is null without a profile handle", () => {
+    for (const url of [null, undefined, "", "https://www.linkedin.com/company/acme", "https://example.com/in/x"]) {
+      expect(linkedinKey(url), String(url)).toBeNull();
     }
   });
 });

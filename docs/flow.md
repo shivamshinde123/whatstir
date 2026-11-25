@@ -77,7 +77,9 @@ The Ask / Explore / Challenge switch sets `action` on the next POST. Retry reuse
 Entry points:
 - **Vercel Cron**, `0 11 * * *` (`vercel.json`) → `GET /api/cron/refresh` → `isCronAuthorized` → `run({ trigger: "cron" })` → the summary as JSON.
 - **Admin "Refresh now"** → `POST /api/admin/refresh` → `claimRun()` (409 if taken) → 202 `{ runId }` → `after(() => run({ trigger: "manual", runId }))`. The admin page polls `GET /api/admin/refresh` every 2 s while `running`.
-- **Pause / Resume / threshold** → `PATCH /api/admin/settings` → `app_settings`.
+- **Pause / Resume / threshold / founder switch** → `PATCH /api/admin/settings` → `app_settings`.
+- **Extract founders** → `POST /api/admin/founders` → `foundersEnabled` (else 400) → `claimRun(sql, "founders")` (else 409) → 202, then `after()` → `runFounders` → `extractFounders`: while time left, pick ≤50 live companies whose `founders_hash` is stale → `fetchFounders` 4 at a time → `updateFounders` (replace the list, set `founders_hash`) → the run row gets `enriched` and `pending`.
+- **Repeat founders** → `/founders` → `FoundersView` → `GET /api/founders` → `getRepeatFounders`: founders with a LinkedIn URL on live companies, grouped by `linkedinKey`, kept when 2+ companies.
 - **Scripts:** `npm run refresh`.
 
 ```

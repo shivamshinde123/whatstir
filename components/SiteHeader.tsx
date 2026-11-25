@@ -15,6 +15,9 @@ export default function SiteHeader({ showSignOut = false }: { showSignOut?: bool
           <Link href="/notes" className="rounded-full px-3 py-1 text-sm transition-colors hover:bg-surface">
             Notes
           </Link>
+          <Link href="/founders" className="rounded-full px-3 py-1 text-sm transition-colors hover:bg-surface">
+            Founders
+          </Link>
           <Link href="/admin" className="rounded-full px-3 py-1 text-sm transition-colors hover:bg-surface">
             Admin
           </Link>

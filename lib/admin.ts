@@ -1,6 +1,7 @@
 import type { Sql } from "postgres";
 import { isFake, MODELS, webSearchEnabled } from "./ai";
-import { countPending } from "./enrich";
+import { countFoundersPending, countPending } from "./enrich";
+import { foundersForced } from "./founders";
 import { jevModel } from "./jev";
 
 /** Must match vercel.json: daily at 11:00 UTC (06:00 Eastern in winter, 07:00 in summer). */
@@ -11,7 +12,7 @@ const RECENT_RUNS = 20;
 
 export interface Run {
   id: number;
-  trigger: "cron" | "manual" | "script";
+  trigger: "cron" | "manual" | "script" | "founders";
   status: "running" | "ok" | "failed" | "skipped";
   startedAt: string;
   finishedAt: string | null;
@@ -27,6 +28,8 @@ export interface Settings {
   paused: boolean;
   /** Jev answers below this confidence aren't used for subcategory assignments. */
   minConfidence: number;
+  /** The Admin switch for fetching founders from YC pages (decision 73: off by default). */
+  foundersFetch: boolean;
 }
 
 /** The OpenRouter models this deployment uses, and whether OPENROUTER_API_KEY is set (never its value). */
@@ -62,6 +65,13 @@ export interface RefreshStatus extends Settings {
   /** Companies whose embedding, group assignment, card or founders aren't up to date. */
   pending: number;
   runs: Run[];
+  founders: {
+    /** FOUNDERS_FETCH=on: fetching is on whatever the switch says. */
+    forced: boolean;
+    enabled: boolean;
+    /** Companies whose founders are out of date. */
+    pending: number;
+  };
 }
 
 type RunRow = {
@@ -102,15 +112,21 @@ export function nextRunAfter(now: Date): Date {
 export async function getSettings(sql: Sql): Promise<Settings> {
   const rows = await sql<{ key: string; value: unknown }[]>`select key, value from app_settings`;
   const get = (k: string) => rows.find((r) => r.key === k)?.value;
-  return { paused: get("refresh_paused") === true, minConfidence: Number(get("jev_min_confidence") ?? 0.5) };
+  return {
+    paused: get("refresh_paused") === true,
+    minConfidence: Number(get("jev_min_confidence") ?? 0.5),
+    foundersFetch: get("founders_fetch") === true,
+  };
 }
 
 export async function getRefreshStatus(sql: Sql, now = new Date()): Promise<RefreshStatus> {
-  const [settings, rows, [success], pending] = await Promise.all([
+  const [settings, rows, [success], pending, foundersPending] = await Promise.all([
     getSettings(sql),
     sql<RunRow[]>`select * from refresh_runs order by id desc limit ${RECENT_RUNS}`,
-    sql<RunRow[]>`select * from refresh_runs where status = 'ok' order by id desc limit 1`,
+    // A founders pass doesn't re-read yc-oss, so it isn't the last successful refresh.
+    sql<RunRow[]>`select * from refresh_runs where status = 'ok' and trigger <> 'founders' order by id desc limit 1`,
     countPending(sql),
+    countFoundersPending(sql),
   ]);
   const runs = rows.map(toRun);
   return {
@@ -123,13 +139,16 @@ export async function getRefreshStatus(sql: Sql, now = new Date()): Promise<Refr
     running: runs.some((r) => r.status === "running"),
     pending,
     runs,
+    founders: { forced: foundersForced(), enabled: foundersForced() || settings.foundersFetch, pending: foundersPending },
   };
 }
 
-/** Validates a settings PATCH: `{ paused?: boolean, minConfidence?: number in [0, 1] }`. */
+/** Validates a settings PATCH: `{ paused?: boolean, minConfidence?: number in [0, 1], foundersFetch?: boolean }`. */
 export function parseSettings(input: unknown): { ok: true; value: Partial<Settings> } | { ok: false; error: string } {
-  if (!input || typeof input !== "object" || Array.isArray(input)) return { ok: false, error: "Send JSON: { paused?, minConfidence? }" };
-  const { paused, minConfidence, ...rest } = input as Record<string, unknown>;
+  if (!input || typeof input !== "object" || Array.isArray(input)) {
+    return { ok: false, error: "Send JSON: { paused?, minConfidence?, foundersFetch? }" };
+  }
+  const { paused, minConfidence, foundersFetch, ...rest } = input as Record<string, unknown>;
   const unknown = Object.keys(rest);
   if (unknown.length) return { ok: false, error: `Unknown setting: ${unknown[0]}` };
   const value: Partial<Settings> = {};
@@ -143,6 +162,10 @@ export function parseSettings(input: unknown): { ok: true; value: Partial<Settin
     }
     value.minConfidence = minConfidence;
   }
+  if (foundersFetch !== undefined) {
+    if (typeof foundersFetch !== "boolean") return { ok: false, error: "foundersFetch must be true or false." };
+    value.foundersFetch = foundersFetch;
+  }
   if (!Object.keys(value).length) return { ok: false, error: "Nothing to change." };
   return { ok: true, value };
 }
@@ -154,6 +177,10 @@ export async function updateSettings(sql: Sql, patch: Partial<Settings>): Promis
     }
     if (patch.minConfidence !== undefined) {
       await tx`update app_settings set value = ${tx.json(patch.minConfidence)} where key = 'jev_min_confidence'`;
+    }
+    if (patch.foundersFetch !== undefined) {
+      await tx`insert into app_settings (key, value) values ('founders_fetch', ${tx.json(patch.foundersFetch)})
+        on conflict (key) do update set value = excluded.value`;
     }
   });
   return getSettings(sql);

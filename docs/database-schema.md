@@ -74,10 +74,10 @@ Indexes: an HNSW index on `embedding` (`vector_cosine_ops`), plus indexes on `se
 ## Operations
 
 ### `refresh_runs`
-`id` bigserial PK, `trigger` (`cron`, `manual` or `script`), `started_at`, `finished_at`, `status` (`running`, `ok`, `failed` or `skipped`), `source_count`, `added`, `updated`, `enriched`, `pending`, `error` text. A partial unique index allows only one `running` row at a time (migration 002); that index is the refresh lock, see decision 33. Skipped runs are recorded too, with the reason in `error`.
+`id` bigserial PK, `trigger` (`cron`, `manual`, `script`, or `founders` for an Admin founders pass, migration 006), `started_at`, `finished_at`, `status` (`running`, `ok`, `failed` or `skipped`), `source_count`, `added`, `updated`, `enriched`, `pending`, `error` text. A partial unique index allows only one `running` row at a time (migration 002); that index is the refresh lock, see decision 33. Skipped runs are recorded too, with the reason in `error`.
 
 ### `app_settings`
-`key` text PK, `value` jsonb. See environment-config-reference.md.
+`key` text PK, `value` jsonb: `refresh_paused`, `jev_min_confidence` and `founders_fetch` (the Admin switch for founder fetching, migration 006, decision 81). See environment-config-reference.md.
 
 ### `schema_migrations`
 `name` text PK (the migration filename) and `applied_at`. `lib/migrate.ts` maintains it and runs each pending file in its own transaction, so a migration that fails leaves nothing behind and isn't recorded.

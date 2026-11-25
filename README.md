@@ -186,7 +186,7 @@ npm run dev                      # http://localhost:3000
 ```
 
 - `backfill` shows its progress. It's safe to stop and run again, because finished work is kept. If any company fails (a timeout, say), it exits with code 1; run it again to retry only those.
-- Founders aren't fetched by default, because that scrapes YC company pages (see [About the data](#about-the-data)). `FOUNDERS_FETCH=on` opts in for your own private use.
+- Founders aren't fetched by default, because that scrapes YC company pages (see [About the data](#about-the-data)). Turn on **Fetch founders from YC pages** on the Admin page (or set `FOUNDERS_FETCH=on`) and press **Extract founders** to opt in for your own private use. The Founders page then lists people who founded more than one company.
 - To regenerate one sector's groups, run `npm run subcategories -- --sector healthcare`, then `npm run backfill`.
 
 ### 4. Deploy to your own Vercel
@@ -282,7 +282,7 @@ vercel.json     Region and the daily cron
 Whatstir reads the public YC directory through [yc-oss](https://github.com/yc-oss/api), an unofficial mirror. YC's [Terms of Use](https://www.ycombinator.com/legal) forbid scraping and the commercial use of their site's content. The yc-oss data comes from that site, and the optional founder fetch scrapes YC company pages directly.
 
 - **Run your own copy for personal, non-commercial research,** and use the data at your own risk.
-- **The founder fetch is off by default.** Turn it on (`FOUNDERS_FETCH=on`) only for private use.
+- **The founder fetch is off by default.** Turn it on (the Admin switch, or `FOUNDERS_FETCH=on`) only for private use.
 - **Don't offer a hosted or paid service built on this data** without permission from Y Combinator.
 - Company names, descriptions and logos belong to their owners. AI-generated summaries can be wrong, and nothing here is investment advice.
 

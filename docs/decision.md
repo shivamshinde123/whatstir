@@ -175,8 +175,15 @@ Listed in the order they were made. Decisions 1–14 are recorded in §16 of [in
     - *Flights* start from the rail while the list is hidden.
     - *Phones* keep the stacked layout and get no collapse control, even if collapse was chosen on desktop.
 
+81. **Founder fetching is switched on from Admin, and repeat founders get their own page** (the owner's request, #67). This amends decision 73.
+    - *Switch:* `founders_fetch` in `app_settings`, off by default and shown on Admin with the note that YC's terms forbid scraping. `FOUNDERS_FETCH=on` still forces it on (the switch then shows on and locked), so existing deployments behave as before.
+    - *Extract founders:* a founders-only pass, so filling in founders doesn't wait for the daily refresh or re-read yc-oss. It takes the single refresh slot under a new `founders` trigger, so it never overlaps a refresh, and stops at the usual 240 s budget. Pressing it again carries on. A founders pass isn't a "last success" of the refresh, because it doesn't read the source.
+    - *Matching:* repeat founders are matched by LinkedIn profile only, normalised to the lower-case handle after `linkedin.com/in/` (the stored URLs vary by `www`, trailing slash and case). Founders without a LinkedIn URL are left out, because names collide ("Sam Smith"). On the owner's data this finds about 250 people; name matching would add about 30, with false positives.
+    - *Shape:* `/founders` groups in TypeScript over about 11,000 rows rather than in SQL, so `linkedinKey` is the single definition of a match. Only live companies count.
+    - *Tests:* `YC_PAGES_URL` swaps the ycombinator.com origin, so e2e extraction reads stand-in pages from the local feed server.
+
 ## Open items
 
-- **A. Founder data.** Founders come from YC company pages. YC's terms of use forbid scraping, so the fetch is now off by default (decision 73); `FOUNDERS_FETCH=on` opts in for private use.
+- **A. Founder data.** Founders come from YC company pages. YC's terms of use forbid scraping, so the fetch is now off by default (decision 73). The Admin switch or `FOUNDERS_FETCH=on` opts in for private use (decision 81).
 - **B. Logo reuse.** Logos are linked from YC's CDN rather than copied. Fine for personal use; revisit before any public release.
 - **C. Companies removed from the source.** They are marked `missing_since` and never deleted. Whether the UI should hide them is still open.

@@ -103,6 +103,17 @@ export default function AdminView() {
         }),
       () => "Threshold saved.",
     );
+  const setFoundersFetch = (foundersFetch: boolean) =>
+    act(
+      () =>
+        fetch("/api/admin/settings", {
+          method: "PATCH",
+          headers: { "content-type": "application/json" },
+          body: JSON.stringify({ foundersFetch }),
+        }),
+      () => (foundersFetch ? "Founder fetching is on." : "Founder fetching is off."),
+    );
+  const extractFounders = () => act(() => fetch("/api/admin/founders", { method: "POST" }), () => "Extracting founders.");
 
   const s = state.kind === "ready" ? state.status : null;
 
@@ -221,6 +232,57 @@ export default function AdminView() {
                 {message}
               </p>
             )}
+
+            <section aria-labelledby="founders-heading" className="mt-10 rounded-[var(--radius-card)] bg-surface p-4">
+              <div className="flex flex-wrap items-start justify-between gap-4">
+                <div className="max-w-2xl">
+                  <h2 id="founders-heading" className="font-semibold">
+                    Founder data
+                  </h2>
+                  <p className="mt-1 text-sm text-text-secondary">
+                    Founders, their titles and LinkedIn links are read from each company&apos;s YC page. YC&apos;s terms of use
+                    forbid scraping, so keep this to your own private research.
+                  </p>
+                </div>
+                <div className="flex items-center gap-3 text-sm">
+                  <span aria-hidden="true">Fetch founders from YC pages</span>
+                  <button
+                    type="button"
+                    role="switch"
+                    aria-checked={s.founders.enabled}
+                    aria-label="Fetch founders from YC pages"
+                    title={s.founders.forced ? "FOUNDERS_FETCH=on keeps this on" : undefined}
+                    disabled={busy || s.founders.forced}
+                    onClick={() => void setFoundersFetch(!s.founders.enabled)}
+                    className={`pressable relative h-6 w-11 shrink-0 rounded-full ring-1 ring-separator transition-colors disabled:opacity-40 ${
+                      s.founders.enabled ? "bg-accent" : "bg-bg"
+                    }`}
+                  >
+                    <span
+                      aria-hidden="true"
+                      className={`absolute top-0.5 size-5 rounded-full transition-[left] ${s.founders.enabled ? "left-[22px] bg-bg" : "left-0.5 bg-text-tertiary"}`}
+                    />
+                  </button>
+                </div>
+              </div>
+              <div className="mt-4 flex flex-wrap items-center gap-3">
+                <button
+                  type="button"
+                  onClick={() => void extractFounders()}
+                  disabled={busy || s.running || !s.founders.enabled || s.founders.pending === 0}
+                  className="pressable h-9 rounded-full bg-accent px-4 text-sm font-medium text-white disabled:opacity-40"
+                >
+                  {s.runs.some((r) => r.status === "running" && r.trigger === "founders") ? "Extracting…" : "Extract founders"}
+                </button>
+                <p data-testid="founders-pending" className="text-sm text-text-secondary">
+                  {s.founders.pending === 0
+                    ? "Every company's founders are up to date."
+                    : `${num.format(s.founders.pending)} ${s.founders.pending === 1 ? "company needs" : "companies need"} founders.`}
+                  {s.founders.forced && " FOUNDERS_FETCH=on keeps fetching on."}
+                  {!s.founders.enabled && s.founders.pending > 0 && " Turn fetching on to extract them."}
+                </p>
+              </div>
+            </section>
 
             <section aria-labelledby="runs-heading" className="mt-10">
               <h2 id="runs-heading" className="font-semibold">

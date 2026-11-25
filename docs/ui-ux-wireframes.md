@@ -93,6 +93,24 @@ Outbound links open in a new tab with `rel="noopener"`, so the research session 
 - Edit happens in place. Delete asks inline: "Delete this note? Cancel / Delete".
 - **Empty:** "No notes yet." **Error:** "Couldn't load notes. Try again."
 
+## 3c. Repeat founders (`/founders`, linked from the header)
+```
+┌ Whatstir                       Notes  Founders  Admin ┐
+│ Repeat founders                                       │
+│ People who founded more than one YC company, matched  │
+│ by their LinkedIn profile.                            │
+│ ┌ Repeat founders ┐┌ Stayed in one ┐┌ Changed ┐┌ 3+ ┐ │
+│ │ 252             ││ 140           ││ 112     ││ 14 │ │
+│ └─────────────────┘└───────────────┘└─────────┘└────┘ │
+│ ( All | Same sector | Changed sector )                │
+│ Justin Kan   4 companies · changed sector             │
+│ [◼ Kiko  Summer 2005 · Consumer · Inactive] [◼ Twitch…]│
+└───────────────────────────────────────────────────────┘
+```
+- Each person's name links to their LinkedIn. Companies run oldest batch first, each a chip with logo, batch, sector and status that opens the company in its sector.
+- The summary cards stack two by two on phones; chips wrap.
+- **No founder data:** "No founder data yet." with whether fetching is on, and a link to Admin. **Error:** "Couldn't load founders. Try again."
+
 ## 4. Compare (modal)
 ```
 ┌ Compare 2 companies ─────────────────────── × ┐
@@ -134,6 +152,11 @@ Companies are re-read from yc-oss every day, then embedded, grouped and summaris
 └───────────────────┘└────────────────────┘└───────────────┘└────────────────────────┘
 [Refresh now] [Pause]                       Jev confidence threshold (0–1) [0.5] [Save]
 
+┌ Founder data ─────────────────────────────── Fetch founders from YC pages (◯━) ┐
+│ Founders, titles and LinkedIn links are read from each company's YC page…      │
+│ [Extract founders]  37 companies need founders.                                 │
+└────────────────────────────────────────────────────────────────────────────────┘
+
 Recent runs
 Started | Trigger | Status | Took | Source | New | Changed | Enriched | Pending | Error
 ```
@@ -141,6 +164,7 @@ Started | Trigger | Status | Took | Source | New | Changed | Enriched | Pending 
 - **Running:** the button reads "Refreshing…" and is disabled, and the page refreshes itself every 2 s until the run ends.
 - Status pills: OK green, Failed red, Skipped grey, Running blue. A run's error is shown in red, in its row and in the Last run card.
 - On phones the cards stack and the runs table scrolls sideways inside its own box.
+- **Founder data:** the switch (`role="switch"`) is off by default. With `FOUNDERS_FETCH=on` it shows on and is disabled. Extract founders is disabled while the switch is off, a run is going, or nothing needs founders, and reads "Extracting…" during a founders pass. The pass appears in Recent runs with the trigger "Founders".
 
 ## Design language (sage "specimen" style, the owner's choice)
 

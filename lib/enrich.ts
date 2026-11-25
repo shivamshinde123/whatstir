@@ -50,8 +50,105 @@ const pendingWhere = (sql: Sql, founders: boolean) => sql`
     or (${founders}::boolean and founders_hash is distinct from source_hash))`;
 
 export async function countPending(sql: Sql): Promise<number> {
-  const [{ n }] = await sql`select count(*)::int as n from companies where ${pendingWhere(sql, foundersEnabled())}`;
+  const [{ n }] = await sql`select count(*)::int as n from companies where ${pendingWhere(sql, await foundersEnabled(sql))}`;
   return n;
+}
+
+/** Companies whose founders are out of date (whether or not fetching is switched on). */
+export async function countFoundersPending(sql: Sql): Promise<number> {
+  const [{ n }] = await sql`select count(*)::int as n from companies
+    where missing_since is null and founders_hash is distinct from source_hash`;
+  return n;
+}
+
+type FoundersTarget = { id: number; yc_url: string | null; source_hash: string };
+
+/** Fetches one company's founders and replaces its stored list (anyone no longer listed goes). */
+async function updateFounders(sql: Sql, c: FoundersTarget, fetchImpl: typeof fetchFounders, pageFetch?: typeof fetch) {
+  const list = c.yc_url ? await fetchImpl(c.yc_url, pageFetch) : [];
+  await sql.begin(async (tx) => {
+    const names = list.map((f) => f.name);
+    await tx`delete from founders where company_id = ${c.id} and not (name = any(${names}::text[]))`;
+    for (const f of list) {
+      await tx`insert into founders (company_id, name, title, linkedin_url, source_url)
+        values (${c.id}, ${f.name}, ${f.title}, ${f.linkedin_url}, ${c.yc_url})
+        on conflict (company_id, name) do update set title = excluded.title,
+          linkedin_url = excluded.linkedin_url, source_url = excluded.source_url, refreshed_at = now()`;
+    }
+    await tx`update companies set founders_hash = ${c.source_hash} where id = ${c.id}`;
+  });
+}
+
+export interface FoundersSummary {
+  processed: number;
+  enriched: number;
+  failed: number;
+  /** Companies whose founders are still out of date after this pass. */
+  pending: number;
+  errors: { companyId: number; message: string }[];
+}
+
+/**
+ * The founders step on its own (Admin → Extract founders): fetches founders for every company whose
+ * list is out of date, until the time budget runs out. Callers check that fetching is switched on.
+ */
+export async function extractFounders(opts: {
+  sql: Sql;
+  timeBudgetMs: number;
+  fetchImpl?: typeof fetch;
+  concurrency?: number;
+  deps?: { fetchFounders?: typeof fetchFounders };
+}): Promise<FoundersSummary> {
+  const { sql, concurrency = 4 } = opts;
+  const fetchImpl = opts.deps?.fetchFounders ?? fetchFounders;
+  const deadline = Date.now() + opts.timeBudgetMs;
+  const summary: FoundersSummary = { processed: 0, enriched: 0, failed: 0, pending: 0, errors: [] };
+  const attempted: number[] = [];
+  while (Date.now() < deadline) {
+    const batch = await sql<FoundersTarget[]>`select id, yc_url, source_hash from companies
+      where missing_since is null and founders_hash is distinct from source_hash
+        and not (id = any(${attempted}::int[]))
+      order by id limit 50`;
+    if (!batch.length) break;
+    attempted.push(...batch.map((c) => c.id));
+    for (let i = 0; i < batch.length && Date.now() < deadline; i += concurrency) {
+      const slice = batch.slice(i, i + concurrency);
+      await Promise.all(
+        slice.map(async (c) => {
+          try {
+            await updateFounders(sql, c, fetchImpl, opts.fetchImpl);
+            summary.enriched++;
+          } catch (e) {
+            summary.failed++;
+            summary.errors.push({ companyId: c.id, message: e instanceof Error ? e.message : String(e) });
+          }
+        }),
+      );
+      summary.processed += slice.length;
+    }
+  }
+  summary.pending = await countFoundersPending(sql);
+  return summary;
+}
+
+/**
+ * Runs a founders pass under a refresh-slot row already claimed with claimRun(sql, "founders"),
+ * and records how it went on that row.
+ */
+export async function runFounders(sql: Sql, runId: number, opts: Omit<Parameters<typeof extractFounders>[0], "sql"> = { timeBudgetMs: 240_000 }) {
+  try {
+    const s = await extractFounders({ ...opts, sql });
+    if (s.errors.length) console.warn(`founders ${runId}: ${s.errors.length} errors`, s.errors.slice(0, 5));
+    // A pass where every fetch failed is a failure (YC down, blocked); otherwise errors retry next time.
+    const error = s.processed > 0 && s.failed === s.processed ? s.errors[0].message : null;
+    await sql`update refresh_runs set status = ${error ? "failed" : "ok"}, finished_at = now(),
+      enriched = ${s.enriched}, pending = ${s.pending}, error = ${error} where id = ${runId}`;
+    return s;
+  } catch (e) {
+    await sql`update refresh_runs set status = 'failed', finished_at = now(),
+      error = ${e instanceof Error ? e.message : String(e)} where id = ${runId}`;
+    throw e;
+  }
 }
 
 /**
@@ -71,7 +168,7 @@ export async function enrich(opts: {
   const { sql, batchSize = 50, concurrency = 4 } = opts;
   const deps = { ...defaultDeps, ...opts.deps };
   const deadline = Date.now() + opts.timeBudgetMs;
-  const founders = foundersEnabled();
+  const founders = await foundersEnabled(sql);
   const summary: EnrichSummary = { processed: 0, enriched: 0, failed: 0, waiting: 0, pending: 0, errors: [] };
 
   const [setting] = await sql`select value from app_settings where key = 'jev_min_confidence'`;
@@ -120,18 +217,7 @@ export async function enrich(opts: {
     const work = async (c: Pending) => {
       if (founders && c.founders_hash !== c.source_hash) {
         try {
-          const list = c.yc_url ? await deps.fetchFounders(c.yc_url, opts.fetchImpl) : [];
-          await sql.begin(async (tx) => {
-            const names = list.map((f) => f.name);
-            await tx`delete from founders where company_id = ${c.id} and not (name = any(${names}::text[]))`;
-            for (const f of list) {
-              await tx`insert into founders (company_id, name, title, linkedin_url, source_url)
-                values (${c.id}, ${f.name}, ${f.title}, ${f.linkedin_url}, ${c.yc_url})
-                on conflict (company_id, name) do update set title = excluded.title,
-                  linkedin_url = excluded.linkedin_url, source_url = excluded.source_url, refreshed_at = now()`;
-            }
-            await tx`update companies set founders_hash = ${c.source_hash} where id = ${c.id}`;
-          });
+          await updateFounders(sql, c, deps.fetchFounders, opts.fetchImpl);
         } catch (e) {
           fail(c.id, "founders", e);
         }

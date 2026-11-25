@@ -30,6 +30,11 @@ describe("parseSettings", () => {
     expect(parseSettings({ paused: true })).toEqual({ ok: true, value: { paused: true } });
     expect(parseSettings({ minConfidence: 0.25, paused: false })).toEqual({ ok: true, value: { minConfidence: 0.25, paused: false } });
   });
+  it("accepts foundersFetch as a boolean only", () => {
+    expect(parseSettings({ foundersFetch: true })).toEqual({ ok: true, value: { foundersFetch: true } });
+    expect(parseSettings({ foundersFetch: false })).toEqual({ ok: true, value: { foundersFetch: false } });
+    for (const v of ["true", 1, null, "on"]) expect(parseSettings({ foundersFetch: v }).ok, String(v)).toBe(false);
+  });
   it("rejects NaN and Infinity", () => {
     expect(parseSettings({ minConfidence: NaN }).ok).toBe(false);
     expect(parseSettings({ minConfidence: Infinity }).ok).toBe(false);

@@ -7,13 +7,9 @@ import { enrich } from "../lib/enrich";
 import { run } from "../lib/refresh";
 import { generateSubcategories } from "../lib/subcategories";
 import { E2E_DATABASE_URL, TEST_SERVER_URL } from "./db-urls";
-import { startFeedServer } from "./feed-server";
+import { E2E_FOUNDERS, startFeedServer } from "./feed-server";
 
-/** CircuitHub (id 5): one founder with a verified LinkedIn, one without. */
-export const E2E_FOUNDERS = [
-  { name: "Andrew Seddon", title: "Founder/CEO", linkedin: "https://www.linkedin.com/in/seddonandrew/" },
-  { name: "Ada Example", title: "CTO", linkedin: null },
-];
+export { E2E_FOUNDERS };
 
 /**
  * Recreates the e2e database: the 37-record fixture, fake-AI subcategories and enrichment

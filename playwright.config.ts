@@ -1,6 +1,6 @@
 import { defineConfig, devices } from "@playwright/test";
 import { E2E_DATABASE_URL } from "./e2e/db-urls";
-import { FEED_SOURCE_URL } from "./e2e/feed-server";
+import { FEED_SOURCE_URL, FEED_URL } from "./e2e/feed-server";
 
 const PORT = 3100;
 /** A second server of the same build with the password gate switched on. */
@@ -9,7 +9,7 @@ export const E2E_PASSWORD = "e2e-password";
 // The default models and no real key, whatever a local .env says: /admin's AI line is predictable,
 // and the e2e servers can never spend real OpenRouter credit even if AI_FAKE were dropped.
 const AI_DEFAULTS = { OPENROUTER_API_KEY: "", AI_MODEL_ANSWER: "", AI_MODEL_WRITE: "", AI_MODEL_EMBED: "", JEV_MODEL: "", WEB_SEARCH: "" };
-const SHARED_STATE = /(admin|batch|chat|notes|selection)\.spec\.ts/;
+const SHARED_STATE = /(admin|batch|chat|founders|notes|selection)\.spec\.ts/;
 
 export default defineConfig({
   testDir: "./e2e",
@@ -51,14 +51,14 @@ export default defineConfig({
       url: `http://localhost:${PORT}`,
       reuseExistingServer: !process.env.CI,
       timeout: 180_000,
-      env: { APP_PASSWORD: "", DATABASE_URL: E2E_DATABASE_URL, AI_FAKE: "1", ...AI_DEFAULTS, FOUNDERS_FETCH: "off", YC_SOURCE_URL: FEED_SOURCE_URL, CRON_SECRET: "e2e-cron" },
+      env: { APP_PASSWORD: "", DATABASE_URL: E2E_DATABASE_URL, AI_FAKE: "1", ...AI_DEFAULTS, FOUNDERS_FETCH: "off", YC_SOURCE_URL: FEED_SOURCE_URL, YC_PAGES_URL: FEED_URL, CRON_SECRET: "e2e-cron" },
     },
     {
       command: `npm run start -- -p ${GATED_PORT}`,
       url: `http://localhost:${GATED_PORT}/login`,
       reuseExistingServer: !process.env.CI,
       timeout: 60_000,
-      env: { APP_PASSWORD: E2E_PASSWORD, DATABASE_URL: E2E_DATABASE_URL, AI_FAKE: "1", ...AI_DEFAULTS, FOUNDERS_FETCH: "off", YC_SOURCE_URL: FEED_SOURCE_URL, CRON_SECRET: "e2e-cron" },
+      env: { APP_PASSWORD: E2E_PASSWORD, DATABASE_URL: E2E_DATABASE_URL, AI_FAKE: "1", ...AI_DEFAULTS, FOUNDERS_FETCH: "off", YC_SOURCE_URL: FEED_SOURCE_URL, YC_PAGES_URL: FEED_URL, CRON_SECRET: "e2e-cron" },
     },
   ],
 });
