@@ -33,3 +33,13 @@ old application code cannot run against the new schema. Deployment coordination
 is required at release. This PR does not migrate the production database.
 
 This AI-assisted review is not legal advice and does not replace review by qualified counsel for the product's jurisdictions and business model.
+
+Follow-up #74 rechecked during planning and PR handoff. This only groups existing home controls visually; the applicability table remains unchanged. Controls retain their native button/link semantics and wrap at narrow widths. No dependencies, data flows, permissions, assets, or policies change.
+
+Verification on 2026-11-26: the installed Next.js build reported a security advisory
+and stopped the first browser-suite build. A dependency security review and upgrade
+are required before public release. This layout fix does not change dependencies.
+
+Desktop and phone screenshots confirm the filter controls wrap and remain usable.
+The existing header navigation overflows by 16 px at 320 px, tracked separately
+in issue #75; the filter controls themselves fit at both 320 and 375 px.

@@ -11,6 +11,7 @@ All notable changes to Whatstir are recorded here. The format follows [Keep a Ch
 - **A how-it-works slide deck.** `docs/diagrams/` has an eight-slide Excalidraw deck covering the refresh, enrichment, exploring, the company card and asking a question, plus a GIF of the company card scrolling (#65).
 
 ### Fixed
+- Keep Combine sectors beside the batch filter on the left of the home page (#74).
 - **Pages no longer hang on Supabase's transaction pooler.** Loading several companies at once (Compare) could wait forever, because queries were pipelined on one connection. Each connection now runs one query at a time (#67).
 
 ## [2.2.0] - 2026-11-03
