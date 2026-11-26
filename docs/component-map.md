@@ -80,3 +80,5 @@ ThemesView now owns a desktop sidebar and one selected detail panel, server-back
 
 
 SectorComparisonView owns URL-based sector selection, add/remove/history loading and the local MetricPanel component for themes, groups and tags. SectorComparisonDetails exports SectorOverview (compact table), BatchYearChart (shared axes, range/count/share controls and accessible data table), SharedProblems (search, sort, count/percentage, expansion and heat cells), and the comparison palette. The existing comparison API and populations remain unchanged.
+
+BatchYearChart owns a ResizeObserver on its chart wrapper, disconnects on unmount and recalculates plot coordinates and x-axis tick density for the measured width. Its 280px-high SVG uses uniform aspect scaling. SectorComparisonView constrains only the comparison content to 1280px and uses the normal site header/typeface.

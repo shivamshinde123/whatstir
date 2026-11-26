@@ -103,3 +103,48 @@ test("uses the SVG overview, line chart, heatmap controls and editable sector ch
   await page.setViewportSize({ width: 320, height: 812 });
   expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(true);
 });
+
+test("keeps comparison text readable and chart labels undistorted from wide desktops to phones", async ({ page }) => {
+  await page.route("**/api/compare?*", (route) => route.fulfill({ json: {
+    sectors: ["b2b", "consumer", "healthcare", "fintech"].map((id) => ({ id, name: id, total: 10000, active: 8000, activeShare: 0.8, aiCount: 2000, aiShare: 0.2, undated: 9724,
+      years: Array.from({ length: 23 }, (_, i) => ({ year: 2005 + i, count: i + 1 })),
+      themes: [{ id: 1, name: "Making research easier", count: 3258, share: 0.3258 }], groups: [], tags: [{ name: "AI", count: 2000 }],
+    })), sharedThemes: [{ id: 1, name: "Making research easier", sectors: ["b2b", "consumer", "healthcare", "fintech"].map((id) => ({ id, count: 3258, share: 0.3258 })) }], gate: false,
+  } }));
+  await page.setViewportSize({ width: 1920, height: 1080 });
+  await page.goto("/compare?sectors=b2b,consumer,fintech,healthcare");
+  const graph = page.getByRole("img", { name: /company counts/ });
+  await expect(graph).toBeVisible();
+  for (const width of [1920, 1280, 375, 320]) {
+    await page.setViewportSize({ width, height: 1080 });
+    await expect.poll(() => graph.evaluate((element) => {
+      if (!(element instanceof SVGSVGElement)) throw new Error("Expected SVG chart");
+      return Math.abs(element.viewBox.baseVal.width - element.getBoundingClientRect().width);
+    })).toBeLessThan(1);
+    const geometry = await graph.evaluate((element) => {
+      if (!(element instanceof SVGSVGElement)) throw new Error("Expected SVG chart");
+      const matrix = element.getScreenCTM();
+      const labels = Array.from(element.querySelectorAll('text[data-axis="year"]')).map((label) => {
+        const box = label.getBoundingClientRect();
+        return { left: box.left, right: box.right, fontSize: parseFloat(getComputedStyle(label).fontSize) };
+      });
+      return { scaleX: matrix?.a ?? 0, scaleY: matrix?.d ?? 0, width: element.getBoundingClientRect().width, height: element.getBoundingClientRect().height, labels };
+    });
+    expect(Math.abs(geometry.scaleX - geometry.scaleY)).toBeLessThan(0.001);
+    expect(geometry.labels.every((label, i) => label.fontSize * geometry.scaleY >= 12.9 && (!i || label.left >= geometry.labels[i - 1].right + 8))).toBe(true);
+    expect(geometry.width).toBeLessThanOrEqual(1280);
+    expect(geometry.height).toBeGreaterThanOrEqual(260);
+    const main = await page.locator("main").boundingBox();
+    expect(main && main.width <= 1280).toBeTruthy();
+    const overviewCell = page.getByRole("table", { name: "Sector overview" }).getByRole("cell").first();
+    expect(await overviewCell.evaluate((element) => parseFloat(getComputedStyle(element).fontSize))).toBeGreaterThanOrEqual(14);
+    for (const name of ["Sector overview", "Shared theme shares by sector"]) {
+      const cells = page.getByRole("table", { name }).getByRole("cell");
+      expect(await cells.evaluateAll((elements) => elements.every((element) => element.scrollWidth <= element.clientWidth))).toBe(true);
+    }
+    const label = page.getByRole("region", { name: "Top problem themes", exact: true }).getByRole("link").first();
+    expect(await label.evaluate((element) => parseFloat(getComputedStyle(element).fontSize))).toBeGreaterThanOrEqual(14);
+    expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(true);
+    await page.screenshot({ path: `test-results/sector-comparison-readable-${width}.png`, fullPage: true });
+  }
+});

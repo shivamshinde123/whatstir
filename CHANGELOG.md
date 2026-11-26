@@ -14,6 +14,7 @@ All notable changes to Whatstir are recorded here. The format follows [Keep a Ch
 - Compare 2-4 sectors using editable sector chips, an overview table, a batch-year line chart, searchable shared-problem heatmap and aligned theme/group/tag panels based on the supplied SVG designs (#71).
 
 ### Fixed
+- Make sector comparison text readable on wide screens, cap content width and prevent stretched or overlapping batch-chart labels (#71).
 - Keep Combine sectors beside the batch filter on the left of the home page (#74).
 - Update Next.js and its ESLint configuration to 16.4.6, with compatible lint-tool dependency fixes for the release security audit.
 - **Pages no longer hang on Supabase's transaction pooler.** Loading several companies at once (Compare) could wait forever, because queries were pipelined on one connection. Each connection now runs one query at a time (#67).
