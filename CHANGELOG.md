@@ -13,6 +13,7 @@ All notable changes to Whatstir are recorded here. The format follows [Keep a Ch
 
 ### Fixed
 - Keep Combine sectors beside the batch filter on the left of the home page (#74).
+- Update Next.js and its ESLint configuration to 16.4.6, with compatible lint-tool dependency fixes for the release security audit.
 - **Pages no longer hang on Supabase's transaction pooler.** Loading several companies at once (Compare) could wait forever, because queries were pipelined on one connection. Each connection now runs one query at a time (#67).
 
 ## [2.2.0] - 2026-11-03

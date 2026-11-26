@@ -63,3 +63,13 @@ are required before public release. This layout fix does not change dependencies
 Desktop and phone screenshots confirm the filter controls wrap and remain usable.
 The existing header navigation overflows by 16 px at 320 px, tracked separately
 in issue #75; the filter controls themselves fit at both 320 and 375 px.
+
+## Authorized production release, 2026-11-26
+
+The owner authorized merging the alignment and themes changes and updating Vercel. The existing applicability classifications remain current. This release adds no processor, tracker, permission, payment flow or audience. Wider public-operation policy/contact/jurisdiction and historic asset questions remain documented above.
+
+The earlier dependency-security warning is resolved by Next.js and eslint-config-next 16.4.6 plus compatible lint-tool dependency updates. `npm audit` reports zero vulnerabilities. This supersedes the earlier unresolved dependency warning; it does not establish legal compliance or replace the remaining accessibility and policy reviews.
+
+Production migrations 008 and 009 were applied before the themes deployment. The reviewed local themes were promoted only after comparing ordered fingerprints of all live embedded company IDs, source and embedding hashes, vectors, sectors and customer/problem text against production. Both datasets matched exactly. Production now has 40 real-model themes and 6,408 company assignments. The import used the data-job lock and an atomic transaction. It copied no founders, notes, sessions, credentials or chat history and made no new external model request.
+
+Combined release verification passed type checking, ESLint, 713 unit/integration/component/API tests and all 90 end-to-end tests against isolated local databases with fake AI. This includes desktop batch/Combine sectors alignment, phone wrapping, theme membership and question-driven Results. The patched suite exited normally on Windows without manual server termination. Production verification uses deployment metadata and authenticated HTTP checks; no additional browser inspection is required for this release.
