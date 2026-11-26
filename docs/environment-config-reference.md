@@ -53,3 +53,5 @@ No new variables. Apply migration `007_sector_sets.sql` in a coordinated deploym
 ## Theme generation
 
 No new environment variable or secret. npm run themes reads the existing .env for DATABASE_URL and OpenRouter configuration. AI_MODEL_WRITE selects the naming model; AI_FAKE=1 avoids real model calls. Run npm run migrate against the intended database before deploying the new code. Generate themes manually after company enrichment; never point verification scripts at production. Real naming consumes existing OpenRouter credit.
+
+Theme workspace code also requires migration 009 before deployment. Applying it does not regenerate themes or call AI. Local review can use the existing isolated whatstir_themes_preview database; preserve the hosted database. Verification uses separate test/e2e databases and AI_FAKE, not the real-data preview.

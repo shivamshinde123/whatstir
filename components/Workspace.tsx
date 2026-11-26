@@ -24,7 +24,8 @@ export const BASKET_COLLAPSED_KEY = "whatstir-basket-collapsed";
 const fmt = new Intl.NumberFormat("en-US");
 
 /** The sector workspace: basket on the left, results grid in the middle, chat on the right. */
-export default function Workspace({ sectorId, sectorName }: { sectorId: string; sectorName: string }) {
+export default function Workspace({ sectorId, sectorName, themeId }: { sectorId: string; sectorName: string; themeId?: number }) {
+  const apiBase = themeId ? `/api/themes/${themeId}` : `/api/sectors/${sectorId}`;
   const [state, setState] = useState<State>({ kind: "loading" });
   const [subcategory, setSubcategory] = useState<number | null>(null);
   const [query, setQuery] = useState("");
@@ -48,7 +49,7 @@ export default function Workspace({ sectorId, sectorName }: { sectorId: string; 
   const load = useCallback(async () => {
     setState({ kind: "loading" });
     try {
-      const [res, sres] = await Promise.all([fetch(`/api/sectors/${sectorId}`), fetch(`/api/sectors/${sectorId}/session`)]);
+      const [res, sres] = await Promise.all([fetch(apiBase), fetch(`${apiBase}/session`)]);
       if (!res.ok || !sres.ok) throw new Error(`${res.status}/${sres.status}`);
       const [data, s] = await Promise.all([res.json() as Promise<Data>, sres.json() as Promise<SessionState>]);
       setSession(s);
@@ -58,14 +59,14 @@ export default function Workspace({ sectorId, sectorName }: { sectorId: string; 
       const wantedBatch = params.get("batch");
       if (wantedBatch && data.companies.some((c) => c.batch === wantedBatch)) setBatchState(wantedBatch);
       const linked = Number(params.get("company"));
-      if (Number.isSafeInteger(linked) && linked > 0) {
+      if (Number.isSafeInteger(linked) && linked > 0 && (!themeId || data.companies.some((c) => c.id === linked))) {
         setProfileId(linked);
         setProfileOpen(true);
       }
     } catch {
       setState({ kind: "error" });
     }
-  }, [sectorId]);
+  }, [apiBase, themeId]);
 
   useEffect(() => {
     // eslint-disable-next-line react-hooks/set-state-in-effect -- initial fetch on mount
@@ -118,7 +119,8 @@ export default function Workspace({ sectorId, sectorName }: { sectorId: string; 
   }, [inScope, query]);
   const groupName = subcategory === null ? sectorName : (data?.subcategories.find((s) => s.id === subcategory)?.name ?? sectorName);
   // Questions follow the batch too ("Fall 2026 B2B"); an explicit selection is just those companies.
-  const scopeName = selectionScope ? `${selected.length} selected` : batch ? `${batch} ${groupName}` : groupName;
+  const namedGroup = themeId && subcategory !== null ? `${sectorName} › ${groupName}` : groupName;
+  const scopeName = selectionScope ? `${selected.length} selected${themeId ? ` in ${sectorName}` : ""}` : batch ? `${batch} ${namedGroup}` : namedGroup;
 
   const ask = useCallback(
     async (
@@ -152,7 +154,7 @@ export default function Workspace({ sectorId, sectorName }: { sectorId: string; 
           setSession((s) => s && { ...s, messages: [...s.messages, body.userMessage, body.message] });
         } else if (res.status === 409) {
           // The session ended elsewhere (another tab started over): pick up the new one.
-          const s = await fetch(`/api/sectors/${sectorId}/session`);
+          const s = await fetch(`${apiBase}/session`);
           if (!s.ok) throw new Error(String(s.status));
           setSession(await s.json());
           setFresh(NONE);
@@ -166,7 +168,7 @@ export default function Workspace({ sectorId, sectorName }: { sectorId: string; 
         setPending(null);
       }
     },
-    [session, sectorId, subcategory, batch, selectionScope, selected],
+    [session, apiBase, subcategory, batch, selectionScope, selected],
   );
   const retry = useCallback((text: string, action: Action, scope: Message["scope"]) => ask(text, action, scope), [ask]);
 
@@ -188,7 +190,7 @@ export default function Workspace({ sectorId, sectorName }: { sectorId: string; 
     setSendError(null);
     setNotice(null);
     try {
-      const res = await fetch(`/api/sectors/${sectorId}/session/reset`, { method: "POST" });
+      const res = await fetch(`${apiBase}/session/reset`, { method: "POST" });
       if (!res.ok) throw new Error(String(res.status));
       setSession(await res.json());
       setFresh(NONE);
@@ -196,7 +198,7 @@ export default function Workspace({ sectorId, sectorName }: { sectorId: string; 
     } catch {
       setNotice("Couldn't start a new session. Try again.");
     }
-  }, [sectorId, clearSelection]);
+  }, [apiBase, clearSelection]);
 
   // The ring follows the latest successful answer only.
   const cited = useMemo<ReadonlySet<number>>(() => {
@@ -230,8 +232,8 @@ export default function Workspace({ sectorId, sectorName }: { sectorId: string; 
       <SiteHeader showSignOut={data?.gate} />
       <main className="flex min-h-0 w-full flex-1 flex-col px-4 pb-4 pt-3 sm:px-6 lg:px-8">
         <div className="flex flex-wrap items-center gap-x-3 gap-y-1">
-          <Link href={batch ? `/?batch=${encodeURIComponent(batch)}` : "/"} className="text-sm text-link hover:underline">
-            ‹ All sectors
+          <Link href={themeId ? `/themes?theme=${themeId}` : batch ? `/?batch=${encodeURIComponent(batch)}` : "/"} className="text-sm text-link hover:underline">
+            ‹ All {themeId ? "themes" : "sectors"}
           </Link>
           <h1 className="text-2xl font-semibold tracking-[-0.015em]">{sectorName}</h1>
           <p className="text-sm text-text-secondary" aria-live="polite">
@@ -257,13 +259,15 @@ export default function Workspace({ sectorId, sectorName }: { sectorId: string; 
           )}
         </div>
 
+        {themeId && <p className="mt-1 text-sm text-text-secondary">Browse all theme members in Companies. Ask a question to add relevant companies to Results. Questions stay within this theme.</p>}
+
         {state.kind === "loading" && (
           <div role="status" aria-label="Loading sector" className="mt-6 h-[60vh] rounded-[var(--radius-card)] bg-surface motion-safe:animate-pulse" />
         )}
 
         {state.kind === "error" && (
           <div className="mt-6 flex h-64 flex-col items-center justify-center gap-3 rounded-[var(--radius-card)] bg-surface text-center">
-            <p className="font-medium">Couldn&apos;t load this sector.</p>
+            <p className="font-medium">{themeId ? "Couldn't load this theme. It may have been regenerated; choose it again from All themes." : "Couldn't load this sector."}</p>
             <button type="button" onClick={load} className="pressable rounded-full bg-accent px-5 py-2 text-sm font-medium text-white">
               Try again
             </button>
@@ -310,6 +314,7 @@ export default function Workspace({ sectorId, sectorName }: { sectorId: string; 
                 {/* On phones the basket is always shown; the rail is desktop-only. */}
                 <div id="company-basket" className={`h-full ${basketCollapsed ? "lg:hidden" : ""}`}>
                   <Basket
+                    listLabel={themeId ? "Companies in this theme" : undefined}
                     companies={shown}
                     collected={collected}
                     inScope={inScope.length}

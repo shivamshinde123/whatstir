@@ -8,6 +8,7 @@ export const MAX_SELECTED = 20;
 
 export interface Scope {
   sectorId: string;
+  themeId?: number;
   subcategoryId?: number | null;
   /** A YC batch ("Fall 2026") to narrow to. Ignored for an explicit selection. */
   batch?: string | null;
@@ -51,11 +52,12 @@ const columns = (sql: Sql) => sql`c.id, c.name, c.sector_id, c.one_liner, c.batc
     p.customer, p.problem, p.workaround, p.solution, p.company_id is not null as has_card`;
 
 /** These companies, in the given order, if they're in the sector and still in the source. */
-export async function loadCompanies(sql: Sql, sectorId: string, ids: number[]): Promise<Candidate[]> {
+export async function loadCompanies(sql: Sql, sectorId: string, ids: number[], themeId?: number): Promise<Candidate[]> {
   if (!ids.length) return [];
   const rows = await sql<Row[]>`select ${columns(sql)} from companies c
     left join problem_cards p on p.company_id = c.id
-    where c.sector_id = any(${sectorId.split("+")}::text[]) and c.missing_since is null and c.id = any(${ids}::int[])`;
+    where c.sector_id = any(${sectorId.split("+")}::text[]) and c.missing_since is null and c.id = any(${ids}::int[])
+      ${themeId ? sql`and exists (select 1 from company_themes ct where ct.company_id = c.id and ct.theme_id = ${themeId})` : sql``}`;
   const byId = new Map(rows.map((r) => [r.id, r]));
   return ids.flatMap((id) => (byId.has(id) ? [toCandidate(byId.get(id)!)] : []));
 }
@@ -67,7 +69,7 @@ export async function retrieve(sql: Sql, scope: Scope, question: string): Promis
       ? sql`and exists (select 1 from company_subcategories cs
           where cs.company_id = c.id and cs.subcategory_id = ${scope.subcategoryId})`
       : sql``
-  }`;
+  } ${scope.themeId ? sql`and exists (select 1 from company_themes ct where ct.company_id = c.id and ct.theme_id = ${scope.themeId})` : sql``}`;
   if (scope.selectedIds?.length) {
     const rows = await sql<Row[]>`select ${columns(sql)} from companies c
       left join problem_cards p on p.company_id = c.id

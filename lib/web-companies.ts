@@ -46,9 +46,10 @@ const INSTRUCTIONS = `You check which of the listed companies a text talks about
  * prefilter, then one strict-JSON confirmation by the writing model. Only listed ids survive.
  * Fake mode skips the model and keeps every prefiltered match.
  */
-export async function webCompanies(sql: Sql, sectorId: string, text: string): Promise<number[]> {
+export async function webCompanies(sql: Sql, sectorId: string, text: string, themeId?: number): Promise<number[]> {
   const rows = await sql<{ id: number; name: string }[]>`
-    select id, name from companies where sector_id = any(${sectorId.split("+")}::text[]) and missing_since is null`;
+    select id, name from companies where sector_id = any(${sectorId.split("+")}::text[]) and missing_since is null
+      ${themeId ? sql`and exists (select 1 from company_themes ct where ct.company_id = companies.id and ct.theme_id = ${themeId})` : sql``}`;
   const hits = namesInText(text, rows);
   if (!hits.length) return [];
   // The grid gets them in the order the web text first mentions them.
@@ -56,7 +57,7 @@ export async function webCompanies(sql: Sql, sectorId: string, text: string): Pr
   const firstMention = new Map(hits.map((h) => [h.id, lower.indexOf(h.name.trim().toLowerCase())]));
   const byMention = (ids: number[]) => [...ids].sort((a, b) => firstMention.get(a)! - firstMention.get(b)!);
   if (isFake()) return byMention(hits.map((h) => h.id));
-  const candidates = await loadCompanies(sql, sectorId, hits.map((h) => h.id));
+  const candidates = await loadCompanies(sql, sectorId, hits.map((h) => h.id), themeId);
   const list = candidates.map((c) => `- [${c.id}] ${c.name}${c.oneLiner ? `: ${c.oneLiner}` : ""}`).join("\n");
   const res = await structured<{ companyIds: unknown }>(
     MODELS.write,

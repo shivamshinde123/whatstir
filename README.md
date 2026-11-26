@@ -190,6 +190,7 @@ npm run dev                      # http://localhost:3000
 - Founders aren't fetched by default, because that scrapes YC company pages (see [About the data](#about-the-data)). Turn on **Fetch founders from YC pages** on the Admin page (or set `FOUNDERS_FETCH=on`) and press **Extract founders** to opt in for your own private use. The Founders page then lists people who founded more than one company.
 - To regenerate one sector's groups, run `npm run subcategories -- --sector healthcare`, then `npm run backfill`.
 - Explore global problem themes at `/themes`. Regenerate them manually with `npm run themes` or **Generate themes** in Admin after enrichment. Naming uses the writing model and existing OpenRouter credit; clustering is local. Failed generation keeps the previous set. Apply migration 008 before deploying this feature.
+- Search themes by problem or company name, then use **View all companies** to open a theme-scoped workspace. All members appear in Companies; Results starts empty and fills from cited answers. Each theme has its own conversation. Apply migration 009 for these workspaces.
 
 ### 4. Deploy to your own Vercel
 

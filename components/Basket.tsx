@@ -19,6 +19,7 @@ export default function Basket({
   selectedId,
   onOpen,
   onCollapse,
+  listLabel = "Companies in this sector",
 }: {
   companies: BasketCompany[];
   /** Companies already in the results grid; their logos stay behind as faded ghosts. */
@@ -31,6 +32,7 @@ export default function Basket({
   onOpen: (id: number, opener: HTMLElement) => void;
   /** Desktop only: folds the basket into a slim rail (decision 80). */
   onCollapse?: () => void;
+  listLabel?: string;
 }) {
   return (
     <div className="flex h-full min-h-0 flex-col">
@@ -67,7 +69,7 @@ export default function Basket({
 
       {companies.length ? (
         <ul
-          aria-label="Companies in this sector"
+          aria-label={listLabel}
           className="grid min-h-0 flex-1 auto-rows-max grid-cols-[repeat(auto-fill,minmax(76px,1fr))] gap-1 overflow-y-auto px-2 pb-4"
         >
           {companies.map((c) => (

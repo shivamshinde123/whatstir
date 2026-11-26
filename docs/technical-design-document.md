@@ -105,3 +105,9 @@ Next.js 16.4 route params retain percent encoding for combined keys, so validati
 ## Theme implementation
 
 See lib/theme-clustering.ts for seeded spherical k-means and lib/themes.ts for the build-and-swap transaction. Raw pgvector text is parsed and validated before clustering. Assignment records are inserted in chunks of 1,000. The primary key on company_themes.company_id prevents multiple themes per company. Before publishing an Admin/CLI job, lock its running refresh row and reject a superseded job. Count queries use current live companies; example queries use row_number partitioned by theme and sector, capped at three. Both reads share a repeatable-read snapshot. Theme labels have max lengths 120/800 and the writer cannot return company ids. Manual regeneration can change theme ids and memberships.
+
+## Theme explorer and session isolation
+
+A theme workspace uses its live sector union for existing sector metadata and an additional immutable-per-session theme membership constraint. Each session stores theme_id/name independently of sector-session uniqueness. The browser selects a theme-specific API base and uses the common message API. All members are basket candidates, not initial Results tiles. Existing appendTiles handles answer citations. Theme resets create empty Results, as sector resets do. Current membership filters restored tiles and prior-company context; crafted selected ids are checked before saving a message. Regeneration ends active theme sessions before ON DELETE SET NULL retires their theme ids.
+
+Search uses case-insensitive strpos checks with an EXISTS query over full membership, preserving full counts. The client debounces requests and aborts stale searches. Sidebar selection updates the theme URL parameter; table display is a local accessible alternative to the coloured bar. Mobile uses a native select instead of compressing both panels.

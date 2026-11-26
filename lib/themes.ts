@@ -53,6 +53,7 @@ export async function generateThemes(opts: { sql: Sql; runId?: number; clusters?
       const [run] = await tx`select id from refresh_runs where id = ${opts.runId} and status = 'running' and trigger = 'themes' for update`;
       if (!run) throw new Error("Theme run no longer owns the refresh slot.");
     }
+    await tx`update sessions set ended_at = now() where theme_id is not null and ended_at is null`;
     await tx`delete from themes`;
     for (let i = 0; i < groups.length; i++) {
       const [theme] = await tx`insert into themes (name, description, model)
@@ -78,7 +79,7 @@ export async function runThemes(sql: Sql, runId: number) {
   }
 }
 
-export async function getThemes(sql: Sql): Promise<Theme[]> {
+export async function getThemes(sql: Sql, query = ""): Promise<Theme[]> {
   // One snapshot keeps counts and examples consistent if generation commits during this request.
   return sql.begin("isolation level repeatable read read only", async (tx) => {
     const rows = await tx<{ id: string; name: string; description: string; generated_at: Date; sector_id: string; sector_name: string; count: number }[]>`
@@ -86,6 +87,11 @@ export async function getThemes(sql: Sql): Promise<Theme[]> {
       from themes t join company_themes ct on ct.theme_id = t.id
       join companies c on c.id = ct.company_id and c.missing_since is null
       join sectors s on s.id = c.sector_id
+      where ${!query ? sql`true` : sql`(
+        strpos(lower(t.name), lower(${query})) > 0 or strpos(lower(t.description), lower(${query})) > 0 or
+        exists (select 1 from company_themes membership join companies member on member.id = membership.company_id
+          where membership.theme_id = t.id and member.missing_since is null and strpos(lower(member.name), lower(${query})) > 0)
+      )`}
       group by t.id, s.id order by t.id, count(*) desc, s.id`;
     const examples = await tx<{ theme_id: string; id: number; name: string; logo_url: string | null; sector_id: string }[]>`
       select * from (
@@ -109,4 +115,20 @@ export async function getThemes(sql: Sql): Promise<Theme[]> {
       return { ...t, ...spread, sectors: t.sectors.map((s, i) => ({ ...s, share: spread.sectors[i].share })) };
     });
   });
+}
+
+/** Current theme and its live sector set; missing/empty themes cannot open a workspace. */
+export async function getThemeHeader(sql: Sql, id: number) {
+  const [theme] = await sql<{ id: string; name: string; sector_ids: string[] }[]>`
+    select t.id, t.name, array_agg(distinct c.sector_id order by c.sector_id) as sector_ids
+    from themes t join company_themes ct on ct.theme_id = t.id
+    join companies c on c.id = ct.company_id and c.missing_since is null
+    where t.id = ${id} group by t.id`;
+  return theme ? { id: Number(theme.id), name: theme.name, sectorIds: theme.sector_ids } : null;
+}
+
+export function parseThemeId(value: string): number | null {
+  if (!/^[1-9]\d*$/.test(value)) return null;
+  const id = Number(value);
+  return Number.isSafeInteger(id) ? id : null;
 }

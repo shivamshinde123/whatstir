@@ -69,3 +69,7 @@ HomeView owns Combine sectors selection. Treemap renders pressed buttons during 
 ## Theme components
 
 ThemesView owns loading, retry, empty/no-match states, spread and size sorting, sector bars and example expansion. It reuses SiteHeader, SiteFooter, Logo and sectorColor. SiteHeader links to /themes and wraps navigation on phones. AdminView starts generation and polls existing job status. lib/theme-clustering.ts is pure deterministic clustering; lib/theme-names.ts owns bounded AI naming; lib/themes.ts owns generation, job outcomes and database queries.
+
+## Theme explorer update
+
+ThemesView now owns a desktop sidebar and one selected detail panel, server-backed search, plain-language sorting, a mobile theme picker, sector statistics and chart/table views. Example cards and View all companies open the theme workspace, preserving context. Workspace reuses Basket, ResultsGrid, Chat and ProfilePanel with a theme-specific API base. Basket lists full membership; ResultsGrid remains answer-driven. lib/session.ts owns separate theme conversations and resets; lib/chat.ts and lib/retrieval.ts enforce the pinned theme on the server.

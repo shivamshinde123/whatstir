@@ -49,3 +49,7 @@ Research boundaries now use canonical sector sets rather than exactly one sector
 ## Global themes
 
 The server clusters existing Postgres embeddings locally and sends bounded customer-problem statements to the existing OpenRouter writing model for naming. No new data source, SDK or processor is added. Themes and assignments live in RLS-protected Postgres tables. Generation uses the shared refresh slot, a response-after callback or the CLI, then an atomic replacement. A separate read API exposes aggregate splits and a capped set of examples to the themes screen. This adds no daily background schedule or production migration invocation.
+
+## Theme research boundary
+
+Theme workspace membership is enforced by company_themes joins in server queries. Client URLs select a theme; the persisted session is authoritative for message scope. The existing bounded vector retrieval and OpenRouter answering pipeline are reused, with membership constraints on candidates, prior citations, selected ids and web matching. No new processor, source or dependency is added. Theme regeneration ends active theme sessions before deleting old theme records, preserving name snapshots and conversation history.

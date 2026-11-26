@@ -1,5 +1,6 @@
 import type { Sql } from "postgres";
 import { parseSectorSet, sectorSetName } from "./sector-set";
+import { getThemeHeader } from "./themes";
 
 export interface SubcategoryInfo {
   id: number;
@@ -29,7 +30,7 @@ export interface SectorWorkspace {
 const KIND_ORDER = { ai: 0, problem: 1, unclassified: 2 } as const;
 
 /** Everything the workspace needs for one sector, or null if the sector doesn't exist. */
-export async function getSectorWorkspace(sql: Sql, sectorId: string): Promise<SectorWorkspace | null> {
+export async function getSectorWorkspace(sql: Sql, sectorId: string, themeId?: number): Promise<SectorWorkspace | null> {
   const ids = parseSectorSet(sectorId);
   if (!ids) return null;
   const counts = await sql<{ total: number }[]>`
@@ -53,12 +54,13 @@ export async function getSectorWorkspace(sql: Sql, sectorId: string): Promise<Se
     from companies c
     left join company_subcategories cs on cs.company_id = c.id
     where c.sector_id = any(${ids}::text[]) and c.missing_since is null
+      ${themeId ? sql`and exists (select 1 from company_themes ct where ct.company_id = c.id and ct.theme_id = ${themeId})` : sql``}
     group by c.id
     order by lower(c.name), c.id`;
 
   return {
-    sector,
-    subcategories,
+    sector: themeId ? { ...sector, total: rows.length } : sector,
+    subcategories: themeId ? subcategories.map((s) => ({ ...s, count: rows.filter((r) => r.subs.map(Number).includes(s.id)).length })).filter((s) => s.count > 0) : subcategories,
     companies: rows.map((r) => ({
       id: r.id,
       name: r.name,
@@ -68,6 +70,13 @@ export async function getSectorWorkspace(sql: Sql, sectorId: string): Promise<Se
       subcategoryIds: r.subs.map(Number),
     })),
   };
+}
+
+export async function getThemeWorkspace(sql: Sql, themeId: number): Promise<SectorWorkspace | null> {
+  const theme = await getThemeHeader(sql, themeId);
+  if (!theme) return null;
+  const workspace = await getSectorWorkspace(sql, theme.sectorIds.join("+"), themeId);
+  return workspace ? { ...workspace, sector: { ...workspace.sector, name: theme.name } } : null;
 }
 
 export interface CompanyProfile {

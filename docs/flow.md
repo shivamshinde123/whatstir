@@ -113,3 +113,9 @@ Home selection -> sorted `/sector/b2b+fintech` -> validated sector set -> union 
 Admin Generate themes -> POST /api/admin/themes -> claimRun("themes") -> after(runThemes) -> generateThemes -> ordered embedding snapshot -> clusterEmbeddings -> nameThemes -> transaction replaces themes and assignments -> job status recorded. The CLI npm run themes takes the same slot and calls the same runner. The runner verifies it still owns the slot before publishing. A 240-second budget check prevents late publication; the writing request has a 90-second timeout and no retries. Hosting maxDuration is 300 seconds; killed jobs are reclaimed by the existing 15-minute stale-run rule.
 
 /themes -> ThemesView -> GET /api/themes -> getThemes uses a repeatable-read transaction for counts and examples -> local spread/size sort and 3+ sector filter -> native details expansion -> /sector/:id?company=:companyId opens the existing profile.
+
+## Theme exploration and scoped research
+
+/themes fetches its searchable list, sorts by Most companies or Most sectors, filters by 3+ main sectors and selects one detail panel. Desktop uses a scrolling sidebar/detail split; phones use a native theme picker. The URL theme parameter restores selection on return. Search checks full membership on the server; chart/table toggling is local.
+
+View all N companies -> /themes/:id -> Workspace with theme API base -> getThemeWorkspace and getThemeSession. All live members appear in Companies. Results starts empty and only answer citations add tiles. Restoring a conversation restores its cited Results; New session clears Results. Retrieval, previous cited-company context, explicit selections and web-company matching retain the session's theme restriction. Clearing a batch, group or explicit selection never escapes that theme. Regeneration retires the old theme conversation; the themes page supplies new current links.
