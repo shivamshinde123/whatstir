@@ -17,9 +17,12 @@ test.describe("design", () => {
     for (const path of ["/", "/sector/b2b", "/notes", "/admin"]) {
       await page.goto(path);
       await expect(page.getByRole("heading", { level: 1 })).toBeVisible();
+      if (path === "/admin") {
+        await expect(page.getByRole("switch", { name: "Fetch founders from YC pages" })).toBeVisible();
+      }
       expect(await bodyBg(page), path).toBe("rgb(248, 249, 245)"); // Linen
       expect(await page.evaluate(() => document.documentElement.dataset.theme), path).toBeUndefined();
-      await expect(page.getByRole("switch")).toHaveCount(0);
+      await expect(page.getByRole("switch", { name: /theme|dark|light/i })).toHaveCount(0);
     }
   });
 
