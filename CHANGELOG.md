@@ -5,6 +5,7 @@ All notable changes to Whatstir are recorded here. The format follows [Keep a Ch
 ## [Unreleased]
 
 ### Added
+- Make all six sector-comparison panels independently collapsible and closed by default (#71).
 - Cross-sector problem themes, with a searchable sidebar explorer, sector charts and tables, and theme-scoped company research. View all companies opens the full Companies basket; Results grows from answer citations. Generate themes manually from Admin or `npm run themes` (#69).
 - Research multiple sectors together, with combined company baskets, sector-labelled groups and persistent sessions per sector set (#68).
 - **A demo video in the README.** A three-and-a-half-minute tour of Whatstir plays at the top of the README (#63).

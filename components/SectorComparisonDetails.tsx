@@ -1,6 +1,6 @@
 "use client";
 import Link from "next/link";
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState, type ReactNode } from "react";
 import type { ComparisonData } from "@/lib/sector-comparison";
 import { sectorColor } from "@/lib/sector-style";
 
@@ -11,6 +11,18 @@ const pct = new Intl.NumberFormat("en-US", { style: "percent", maximumFractionDi
 const number = (value: number) => value.toLocaleString("en-US");
 const control = "rounded border border-transparent bg-[#edf1e8] px-3 py-2 text-sm";
 
+export function ComparisonSection({ title, children }: { title: string; children: ReactNode }) {
+  return <section aria-label={title} className={comparisonPanel}>
+    <details className="group">
+      <summary className="flex min-h-8 cursor-pointer list-none items-center justify-between gap-4 rounded-sm [&::-webkit-details-marker]:hidden">
+        <h2 className="text-lg font-semibold">{title}</h2>
+        <svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="size-4 shrink-0 text-text-secondary transition-transform group-open:rotate-180 motion-reduce:transition-none"><path d="m6 9 6 6 6-6" /></svg>
+      </summary>
+      <div className="pt-4">{children}</div>
+    </details>
+  </section>;
+}
+
 export function SectorOverview({ sectors }: Pick<ComparisonData, "sectors">) {
   const rows = [
     { label: "Companies", value: (s: ComparisonData["sectors"][number]) => number(s.total) },
@@ -18,15 +30,15 @@ export function SectorOverview({ sectors }: Pick<ComparisonData, "sectors">) {
     { label: "Active share", value: (s: ComparisonData["sectors"][number]) => pct.format(s.activeShare) },
     { label: "Tagged AI", value: (s: ComparisonData["sectors"][number]) => `${pct.format(s.aiShare)} (${number(s.aiCount)})` },
   ];
-  return <section aria-label="Sector overview" className={comparisonPanel}>
+  return <ComparisonSection title="Sector overview">
     <div className="overflow-x-auto">
       <table style={{ minWidth: Math.max(560, sectors.length * 200) }} className="w-full table-fixed text-left text-sm">
         <caption className="sr-only">Sector overview</caption>
-        <thead><tr><th scope="col" className="w-[36%] pb-3 text-lg">Sector overview</th>{sectors.map((s) => <th key={s.id} scope="col" className="pb-3"><Link href={`/sector/${s.id}`} className="inline-flex items-center gap-2 hover:underline"><span aria-hidden="true" className="size-2 rounded-full" style={{ backgroundColor: comparisonColor(s.id) }} />{s.name}</Link></th>)}</tr></thead>
+        <thead><tr><th scope="col" className="w-[36%] pb-3">Metric</th>{sectors.map((s) => <th key={s.id} scope="col" className="pb-3"><Link href={`/sector/${s.id}`} className="inline-flex items-center gap-2 hover:underline"><span aria-hidden="true" className="size-2 rounded-full" style={{ backgroundColor: comparisonColor(s.id) }} />{s.name}</Link></th>)}</tr></thead>
         <tbody>{rows.map((row) => <tr key={row.label} className="border-t border-[#e9ede5]"><th scope="row" className="py-2.5 font-normal">{row.label}</th>{sectors.map((s) => <td key={s.id} className="py-2.5 font-semibold tabular-nums">{row.value(s)}</td>)}</tr>)}</tbody>
       </table>
     </div>
-  </section>;
+  </ComparisonSection>;
 }
 
 export function BatchYearChart({ sectors }: Pick<ComparisonData, "sectors">) {
@@ -66,8 +78,8 @@ export function BatchYearChart({ sectors }: Pick<ComparisonData, "sectors">) {
     }
     if (!ticks.length || year === last || x(year - start) - x(ticks[ticks.length - 1] - start) >= 72) ticks.push(year);
   }
-  return <section aria-label="Companies by batch year" className={comparisonPanel}>
-    <div className="flex flex-wrap items-center justify-between gap-2"><h2 className="text-lg font-semibold">Companies by batch year</h2><div className="flex flex-wrap gap-2">
+  return <ComparisonSection title="Companies by batch year">
+    <div className="flex flex-wrap items-center justify-end gap-2"><div className="flex flex-wrap gap-2">
       <select aria-label="Batch year range" className={`${control} min-w-[140px]`} value={range} onChange={(e) => setRange(e.target.value)}><option value="all">All years</option><option value="10">Last 10 years</option><option value="5">Last 5 years</option></select>
       <button className={`${control} whitespace-nowrap`} aria-label="Show batch-year shares" aria-pressed={share} onClick={() => setShare(!share)}><span className={!share ? "font-semibold" : ""}>Count</span> / <span className={share ? "font-semibold" : ""}>Share</span></button>
     </div></div>
@@ -83,7 +95,7 @@ export function BatchYearChart({ sectors }: Pick<ComparisonData, "sectors">) {
       <div className="sr-only"><p className="my-2">Shares use all listed companies in each sector, across all batches. Unknown batch years: {sectors.map((s) => `${s.name}: ${s.undated}`).join("; ")}.</p><div className="overflow-x-auto"><table className="w-full text-left"><caption className="sr-only">Batch-year data</caption><thead><tr><th scope="col">Year</th>{sectors.map((s) => <th key={s.id} scope="col">{s.name}</th>)}</tr></thead><tbody>{years.map((year, index) => <tr key={year}><th scope="row">{year}</th>{series.map(({ sector, values }) => <td key={sector.id}>{share ? pct.format(values[index].value) : number(values[index].count)}</td>)}</tr>)}</tbody></table></div></div>
     </>}
     </div>
-  </section>;
+  </ComparisonSection>;
 }
 
 export function SharedProblems({ sectors, sharedThemes }: ComparisonData) {
@@ -94,8 +106,7 @@ export function SharedProblems({ sectors, sharedThemes }: ComparisonData) {
   const filtered = sharedThemes.filter((t) => t.name.toLowerCase().includes(query.trim().toLowerCase())).sort((a, b) => sort === "size" ? b.sectors.reduce((sum, s) => sum + s.count, 0) - a.sectors.reduce((sum, s) => sum + s.count, 0) || a.name.localeCompare(b.name) : a.name.localeCompare(b.name));
   const maximum = Math.max(0.01, ...sharedThemes.flatMap((t) => t.sectors.map((s) => counts ? s.count : s.share)));
   const visible = expanded ? filtered : filtered.slice(0, 8);
-  return <section aria-label="Shared problems" className={comparisonPanel}>
-    <h2 className="text-lg font-semibold">Shared problems</h2>
+  return <ComparisonSection title="Shared problems">
     <p className="mt-1 text-sm text-text-secondary">Problem themes represented in every selected sector.</p>
     <div className="my-4 flex flex-wrap items-center gap-2">
       <input aria-label="Search problem themes" placeholder="Search problem themes..." value={query} onChange={(e) => { setQuery(e.target.value); setExpanded(false); }} type="search" className="mr-auto w-full max-w-[320px] rounded-[5px] border border-[#dce1d7] bg-bg px-3 py-2 text-sm" />
@@ -112,5 +123,5 @@ export function SharedProblems({ sectors, sharedThemes }: ComparisonData) {
       })}</tr>)}</tbody>
     </table></div>}
     {filtered.length > 8 && <button className="mt-4 text-sm text-link hover:underline" onClick={() => setExpanded(!expanded)}>{expanded ? "Show fewer shared problems" : "View all shared problems"} <span aria-hidden="true">›</span></button>}
-  </section>;
+  </ComparisonSection>;
 }

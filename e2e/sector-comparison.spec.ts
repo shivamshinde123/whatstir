@@ -1,4 +1,9 @@
-import { expect, test } from "@playwright/test";
+import { expect, test, type Page } from "@playwright/test";
+
+const sectionTitles = ["Sector overview", "Companies by batch year", "Shared problems", "Top problem themes", "Top sector problem groups", "Top tags"];
+async function openSections(page: Page) {
+  for (const title of sectionTitles) await page.getByRole("region", { name: title, exact: true }).locator("summary").click();
+}
 
 test("selects sectors, compares them, stacks columns on phones and opens their combined workspace", async ({ page }) => {
   await page.route("**/bookface-images.s3.amazonaws.com/**", (r) => r.fulfill({ status: 204 }));
@@ -8,6 +13,7 @@ test("selects sectors, compares them, stacks columns on phones and opens their c
   await page.getByRole("button", { name: /^Fintech,/ }).click();
   await page.getByRole("link", { name: "Compare sectors", exact: true }).click();
   await expect(page.getByRole("heading", { level: 1 })).toHaveText("Compare sectors");
+  await openSections(page);
   const a = page.getByRole("region", { name: "B2B top problem themes" });
   const b = page.getByRole("region", { name: "Fintech top problem themes" });
   await expect(a).toBeVisible(); await expect(b).toBeVisible();
@@ -37,6 +43,7 @@ for (const count of [3, 4]) {
     await page.route("**/api/compare?*", (route) => route.fulfill({ json: { sectors, sharedThemes: [], gate: false } }));
     await page.setViewportSize({ width: 1440, height: 1000 });
     await page.goto(`/compare?sectors=${sectors.map((s) => s.id).join(",")}`);
+    await openSections(page);
     const panel = page.getByRole("region", { name: "Top problem themes", exact: true });
     const first = panel.getByRole("region", { name: "b2b top problem themes" });
     const last = panel.getByRole("region", { name: `${sectors[count - 1].id} top problem themes` });
@@ -74,6 +81,7 @@ test("uses the SVG overview, line chart, heatmap controls and editable sector ch
     return route.fulfill({ json: { sectors, sharedThemes, gate: false } });
   });
   await page.goto("/compare?sectors=b2b,consumer,healthcare");
+  await openSections(page);
   await expect(page.getByRole("table", { name: "Sector overview" })).toBeVisible();
   const graph = page.getByRole("img", { name: /company counts/ });
   await expect(graph.locator("polyline")).toHaveCount(3);
@@ -113,6 +121,7 @@ test("keeps comparison text readable and chart labels undistorted from wide desk
   } }));
   await page.setViewportSize({ width: 1920, height: 1080 });
   await page.goto("/compare?sectors=b2b,consumer,fintech,healthcare");
+  await openSections(page);
   const graph = page.getByRole("img", { name: /company counts/ });
   await expect(graph).toBeVisible();
   for (const width of [1920, 1280, 375, 320]) {
@@ -147,4 +156,42 @@ test("keeps comparison text readable and chart labels undistorted from wide desk
     expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(true);
     await page.screenshot({ path: `test-results/sector-comparison-readable-${width}.png`, fullPage: true });
   }
+});
+
+test("starts every section closed and supports independent keyboard toggles and chart reopening", async ({ page }) => {
+  await page.goto("/compare?sectors=b2b,fintech");
+  for (const title of sectionTitles) {
+    const region = page.getByRole("region", { name: title, exact: true });
+    await expect(region.locator("summary")).toBeVisible();
+    await expect(region.locator("details")).toHaveJSProperty("open", false);
+  }
+  await page.screenshot({ path: "test-results/sector-comparison-collapsed.png", fullPage: true });
+  const chart = page.getByRole("region", { name: "Companies by batch year", exact: true });
+  const summary = chart.locator("summary");
+  await summary.focus();
+  await summary.press("Enter");
+  await expect(chart.locator("details")).toHaveJSProperty("open", true);
+  const shares = chart.getByRole("button", { name: "Show batch-year shares" });
+  await shares.click();
+  await summary.focus();
+  await summary.press("Space");
+  await expect(chart.locator("details")).toHaveJSProperty("open", false);
+  await expect(shares).not.toBeVisible();
+  const overview = page.getByRole("region", { name: "Sector overview", exact: true });
+  await overview.locator("summary").click();
+  await expect(overview.getByRole("table")).toBeVisible();
+  await summary.click();
+  await expect(shares).toHaveAttribute("aria-pressed", "true");
+  await expect(overview.locator("details")).toHaveJSProperty("open", true);
+  await summary.click();
+  await page.setViewportSize({ width: 320, height: 812 });
+  await summary.click();
+  const graph = chart.getByRole("img");
+  await expect.poll(() => graph.evaluate((element) => {
+    if (!(element instanceof SVGSVGElement)) throw new Error("Expected SVG chart");
+    return Math.abs(element.viewBox.baseVal.width - element.getBoundingClientRect().width);
+  })).toBeLessThan(1);
+  expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(true);
+  await page.reload();
+  for (const title of sectionTitles) await expect(page.getByRole("region", { name: title, exact: true }).locator("details")).toHaveJSProperty("open", false);
 });

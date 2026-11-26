@@ -3,7 +3,7 @@ import Link from "next/link";
 import { useCallback, useEffect, useState } from "react";
 import type { ComparisonData } from "@/lib/sector-comparison";
 import { SECTOR_NAMES } from "@/lib/sector";
-import { BatchYearChart, SharedProblems, SectorOverview, comparisonColor } from "./SectorComparisonDetails";
+import { BatchYearChart, SharedProblems, SectorOverview, ComparisonSection, comparisonColor } from "./SectorComparisonDetails";
 import SiteHeader from "./SiteHeader";
 import SiteFooter from "./SiteFooter";
 
@@ -23,10 +23,9 @@ function MetricPanel({ sectors, kind, title, description }: {
   }));
   const largest = Math.max(0, ...columns.flatMap(({ items }) => items.map((item) => kind === "tags" ? item.count : item.share)));
   const maximum = kind === "tags" ? Math.max(1, largest) : Math.max(0.1, Math.ceil(largest * 10) / 10);
-  return <section aria-label={title} className="mt-4 rounded-[var(--radius-card)] border border-separator bg-white p-4 sm:p-6">
-    <h2 className="text-lg font-semibold">{title}</h2>
+  return <ComparisonSection title={title}>
     <p className="sr-only">{description} {kind === "tags" ? `Same count scale: 0–${maximum.toLocaleString("en-US")}.` : `Same share scale: 0–${pct.format(maximum)}.`}</p>
-    <div className={`${sectorGrid(sectors.length)} mt-4`}>
+    <div className={sectorGrid(sectors.length)}>
       {columns.map(({ sector, items }) => <section key={sector.id} aria-label={`${sector.name} ${title.toLowerCase()}`} className="min-w-0">
         <h3 className="mb-3 text-sm font-semibold" style={{ color: sector.id === "consumer" ? "#856334" : sector.id === "healthcare" ? "#536f80" : comparisonColor(sector.id) }}>{sector.name}</h3>
         <ul className="space-y-3">
@@ -39,7 +38,7 @@ function MetricPanel({ sectors, kind, title, description }: {
         {!items.length && <p className="text-sm text-text-secondary">{kind === "themes" ? "No theme assignments yet." : kind === "groups" ? "No problem groups assigned." : "No source tags available."}</p>}
       </section>)}
     </div>
-  </section>;
+  </ComparisonSection>;
 }
 
 export default function SectorComparisonView() {

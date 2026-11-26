@@ -1,4 +1,4 @@
-import { render, screen, within } from "@testing-library/react";
+import { fireEvent, render, screen, within } from "@testing-library/react";
 import { afterEach, expect, it, vi } from "vitest";
 import type { ComparisonData } from "@/lib/sector-comparison";
 import SectorComparisonView from "./SectorComparisonView";
@@ -9,7 +9,13 @@ it("renders sector columns, shared theme shares and research links", async () =>
     years: [{ year: 2020, count: 10 }], themes: [{ id: 1, name: "Claims", count: index ? 2 : 5, share: index ? 0.2 : 0.5 }], groups: [], tags: [{ name: "AI", count: index ? 1 : 2 }] })), sharedThemes: [{ id: 1, name: "Claims", sectors: [{ id: "b2b", count: 5, share: 0.5 }, { id: "fintech", count: 5, share: 0.5 }] }] };
   vi.stubGlobal("fetch", vi.fn(async () => new Response(JSON.stringify({ ...data, gate: false }))));
   render(<SectorComparisonView />);
-  const b2b = await screen.findByRole("table", { name: "Sector overview" });
+  await screen.findByRole("region", { name: "Sector overview" });
+  for (const title of ["Sector overview", "Companies by batch year", "Shared problems", "Top problem themes", "Top sector problem groups", "Top tags"]) {
+    const heading = screen.getByText(title, { selector: "summary h2" });
+    expect(heading.closest("details")).not.toHaveAttribute("open");
+    fireEvent.click(heading);
+  }
+  const b2b = screen.getByRole("table", { name: "Sector overview" });
   expect(within(b2b).getAllByText("80%")).toHaveLength(2);
   expect(screen.getByRole("table", { name: "Shared theme shares by sector" })).toHaveTextContent("Claims");
   expect(screen.getByRole("link", { name: "Research these sectors together" })).toHaveAttribute("href", "/sector/b2b+fintech");
