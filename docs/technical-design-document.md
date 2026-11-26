@@ -95,3 +95,9 @@ With `cacheComponents` on, Next.js starts running GET handlers at build time. So
 - If the chat call fails, the user's message is saved, the reply is marked `status=error`, and a Retry button reposts the same text.
 - If a refresh fails, the run is marked `failed` with the error and the old data stays live. The admin page shows the failure.
 - If enrichment fails for one company, that company stays pending and the rest of the run continues.
+
+## Combined sector research, issue #68
+
+`lib/sector-set.ts` validates known ids, removes duplicates and sorts keys. `sessions.sector_ids` owns the session boundary; API string keys preserve existing callers. Retrieval supplies each candidate sector name to the answer model. Search still takes the best 40 matches across the union, without per-sector quotas.
+
+Next.js 16.4 route params retain percent encoding for combined keys, so validation decodes URI components once before splitting. Page URL-data access is inside Suspense for partial prefetching. Canonical comparisons use the decoded key to avoid redirect loops.

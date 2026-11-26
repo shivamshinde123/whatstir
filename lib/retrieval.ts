@@ -1,4 +1,5 @@
 import type { Sql } from "postgres";
+import { SECTOR_NAMES } from "./sector";
 import { embed } from "./ai";
 import type { Candidate } from "./answer";
 
@@ -23,6 +24,7 @@ export interface Retrieved {
 type Row = {
   id: number;
   name: string;
+  sector_id: string;
   one_liner: string | null;
   batch: string | null;
   status: string | null;
@@ -37,6 +39,7 @@ type Row = {
 const toCandidate = (r: Row): Candidate => ({
   id: r.id,
   name: r.name,
+  sectorName: SECTOR_NAMES[r.sector_id],
   oneLiner: r.one_liner,
   batch: r.batch,
   status: r.status,
@@ -44,7 +47,7 @@ const toCandidate = (r: Row): Candidate => ({
   card: r.has_card ? { customer: r.customer, problem: r.problem, workaround: r.workaround, solution: r.solution } : null,
 });
 
-const columns = (sql: Sql) => sql`c.id, c.name, c.one_liner, c.batch, c.status, c.launched_at,
+const columns = (sql: Sql) => sql`c.id, c.name, c.sector_id, c.one_liner, c.batch, c.status, c.launched_at,
     p.customer, p.problem, p.workaround, p.solution, p.company_id is not null as has_card`;
 
 /** These companies, in the given order, if they're in the sector and still in the source. */
@@ -52,14 +55,14 @@ export async function loadCompanies(sql: Sql, sectorId: string, ids: number[]): 
   if (!ids.length) return [];
   const rows = await sql<Row[]>`select ${columns(sql)} from companies c
     left join problem_cards p on p.company_id = c.id
-    where c.sector_id = ${sectorId} and c.missing_since is null and c.id = any(${ids}::int[])`;
+    where c.sector_id = any(${sectorId.split("+")}::text[]) and c.missing_since is null and c.id = any(${ids}::int[])`;
   const byId = new Map(rows.map((r) => [r.id, r]));
   return ids.flatMap((id) => (byId.has(id) ? [toCandidate(byId.get(id)!)] : []));
 }
 
 /** Companies the model may cite for this question: the scope, ranked by similarity. */
 export async function retrieve(sql: Sql, scope: Scope, question: string): Promise<Retrieved> {
-  const inScope = sql`c.sector_id = ${scope.sectorId} and c.missing_since is null ${
+  const inScope = sql`c.sector_id = any(${scope.sectorId.split("+")}::text[]) and c.missing_since is null ${
     scope.subcategoryId
       ? sql`and exists (select 1 from company_subcategories cs
           where cs.company_id = c.id and cs.subcategory_id = ${scope.subcategoryId})`

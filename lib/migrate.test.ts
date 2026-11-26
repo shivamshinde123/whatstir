@@ -164,3 +164,21 @@ describe("004_lock_down_data_api", () => {
     expect(await sql`select body from notes`).toEqual([{ body: "still works" }]);
   });
 });
+
+it("widens existing sessions without losing history or tiles", async () => {
+  const { sql } = await emptySchema();
+  const files = (await readdir(MIGRATIONS_DIR)).filter((f) => f.endsWith(".sql") && f < "007").sort();
+  const oldFiles: Record<string, string> = {};
+  for (const file of files) oldFiles[file] = await readFile(path.join(MIGRATIONS_DIR, file), "utf8");
+  await migrate(sql, await tempMigrations(oldFiles));
+  const [old] = await sql`insert into sessions (sector_id) values ('b2b') returning id`;
+  await sql`insert into companies (id, slug, name, sector_id, source_hash) values (1, 'example', 'Example', 'b2b', 'h')`;
+  await sql`insert into messages (session_id, role, content) values (${old.id}, 'user', 'Keep me')`;
+  await sql`insert into session_tiles (session_id, company_id, position) values (${old.id}, 1, 0)`;
+  await migrate(sql);
+  expect((await sql`select id, sector_ids from sessions`)[0]).toMatchObject({ id: old.id, sector_ids: ['b2b'] });
+  expect((await sql`select content from messages`)[0].content).toBe('Keep me');
+  expect((await sql`select company_id from session_tiles`)[0].company_id).toBe(1);
+  await expect(sql`insert into sessions (sector_ids) values (array['fintech','b2b'])`).rejects.toThrow();
+  await expect(sql`insert into sessions (sector_ids) values (array['b2b'])`).rejects.toThrow();
+});

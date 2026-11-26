@@ -58,7 +58,7 @@ describe("proxy with the gate on", () => {
 });
 
 describe("unknown sectors", () => {
-  it.each(["/sector/space", "/sector/constructor", "/sector/toString", "/sector/%E0%A4", "/sector/B2B", "/sector/b2b%20"])(
+  it.each(["/sector/space", "/sector/constructor", "/sector/toString", "/sector/%E0%A4", "/sector/B2B", "/sector/b2b%20", "/sector/b2b+space", "/sector/b2b+constructor"])(
     "%s gets a 404 rewrite, gate or no gate",
     (path) => {
       for (const pw of ["", "s3cret"]) {
@@ -70,7 +70,7 @@ describe("unknown sectors", () => {
     },
   );
 
-  it.each(["/sector/b2b", "/sector/other", "/sector/real-estate-and-construction/"])("%s passes through", (path) => {
+  it.each(["/sector/b2b", "/sector/other", "/sector/real-estate-and-construction/", "/sector/b2b+fintech", "/sector/fintech+b2b", "/sector/b2b%2Bfintech"])("%s passes through", (path) => {
     vi.stubEnv("APP_PASSWORD", "");
     expect(passes(proxy(req(path)))).toBe(true);
   });
@@ -78,6 +78,7 @@ describe("unknown sectors", () => {
   it("still gates a known sector page", () => {
     vi.stubEnv("APP_PASSWORD", "s3cret");
     expect(proxy(req("/sector/b2b")).status).toBe(307);
+    expect(proxy(req("/sector/b2b+fintech")).status).toBe(307);
   });
 });
 

@@ -1,4 +1,5 @@
 import type { Sql } from "postgres";
+import { parseSectorSet } from "./sector-set";
 import type { WebResult } from "./ai";
 import type { Action } from "./answer";
 
@@ -67,30 +68,30 @@ export async function listTiles(sql: Sql, sessionId: string): Promise<Tile[]> {
   }));
 }
 
-async function load(sql: Sql, s: { id: string; sector_id: string; created_at: Date }): Promise<SessionState> {
+async function load(sql: Sql, s: { id: string; sector_ids: string[]; created_at: Date }): Promise<SessionState> {
   const [tiles, messages] = await Promise.all([
     listTiles(sql, s.id),
     sql<MessageRow[]>`select id, role, action, content, scope, company_ids, web, status, created_at
       from messages where session_id = ${s.id} order by id`,
   ]);
   return {
-    session: { id: s.id, sectorId: s.sector_id, createdAt: s.created_at.toISOString() },
+    session: { id: s.id, sectorId: s.sector_ids.join("+"), createdAt: s.created_at.toISOString() },
     tiles,
     messages: messages.map(toMessage),
   };
 }
 
 /** The sector's active session, created if there isn't one. Null if the sector doesn't exist. */
-export async function getOrCreateSession(sql: Sql, sectorId: string): Promise<SessionState | null> {
-  const [sector] = await sql`select 1 from sectors where id = ${sectorId}`;
-  if (!sector) return null;
+export async function getOrCreateSession(sql: Sql, sectorId: string | string[]): Promise<SessionState | null> {
+  const ids = parseSectorSet(sectorId);
+  if (!ids) return null;
   for (let attempt = 0; attempt < 2; attempt++) {
-    const [active] = await sql<{ id: string; sector_id: string; created_at: Date }[]>`
-      select id, sector_id, created_at from sessions where sector_id = ${sectorId} and ended_at is null`;
+    const [active] = await sql<{ id: string; sector_ids: string[]; created_at: Date }[]>`
+      select id, sector_ids, created_at from sessions where sector_ids = ${ids}::text[] and ended_at is null`;
     if (active) return load(sql, active);
     try {
-      const [created] = await sql<{ id: string; sector_id: string; created_at: Date }[]>`
-        insert into sessions (sector_id) values (${sectorId}) returning id, sector_id, created_at`;
+      const [created] = await sql<{ id: string; sector_ids: string[]; created_at: Date }[]>`
+        insert into sessions (sector_ids) values (${ids}::text[]) returning id, sector_ids, created_at`;
       return load(sql, created);
     } catch (e) {
       // Another request created it first (one active session per sector): read that one.
@@ -101,13 +102,13 @@ export async function getOrCreateSession(sql: Sql, sectorId: string): Promise<Se
 }
 
 /** Ends the sector's active session (keeping its history) and starts an empty one. */
-export async function resetSession(sql: Sql, sectorId: string): Promise<SessionState | null> {
-  const [sector] = await sql`select 1 from sectors where id = ${sectorId}`;
-  if (!sector) return null;
+export async function resetSession(sql: Sql, sectorId: string | string[]): Promise<SessionState | null> {
+  const ids = parseSectorSet(sectorId);
+  if (!ids) return null;
   const created = await sql.begin(async (tx) => {
-    await tx`update sessions set ended_at = now() where sector_id = ${sectorId} and ended_at is null`;
-    const [s] = await tx<{ id: string; sector_id: string; created_at: Date }[]>`
-      insert into sessions (sector_id) values (${sectorId}) returning id, sector_id, created_at`;
+    await tx`update sessions set ended_at = now() where sector_ids = ${ids}::text[] and ended_at is null`;
+    const [s] = await tx<{ id: string; sector_ids: string[]; created_at: Date }[]>`
+      insert into sessions (sector_ids) values (${ids}::text[]) returning id, sector_ids, created_at`;
     return s;
   });
   return load(sql, created);

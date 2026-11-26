@@ -58,7 +58,7 @@ Indexes: an HNSW index on `embedding` (`vector_cosine_ops`), plus indexes on `se
 ## Research
 
 ### `sessions`
-`id` uuid PK, `sector_id` FK, `created_at`, `ended_at`. A partial unique index on `(sector_id) WHERE ended_at IS NULL` guarantees one active session per sector.
+`id` uuid PK, `sector_ids` text[] with canonical known-id CHECK constraints, `created_at`, `ended_at`. A partial unique index on `(sector_ids) WHERE ended_at IS NULL` guarantees one active session per sorted sector set. Migration 007 preserves existing sessions as singleton arrays.
 
 ### `session_tiles`
 `session_id` FK, `company_id` FK, `position` int, `added_by` FK → messages, `added_at`. **Primary key `(session_id, company_id)`.** This key is what keeps duplicate tiles impossible. Inserts use `ON CONFLICT DO NOTHING RETURNING company_id`, so the rows returned are exactly the new tiles to animate. A unique constraint on `(session_id, position)` also stops two tiles from sharing a slot. Deleting a session deletes its tiles and messages too.
@@ -96,3 +96,7 @@ Indexes: an HNSW index on `embedding` (`vector_cosine_ops`), plus indexes on `se
 - Migration `004_lock_down_data_api.sql` enables row-level security on every table, with no policies, and revokes all privileges from Supabase's `anon` and `authenticated` roles (tables, views, sequences, functions and default privileges). The REST Data API therefore sees nothing.
 - The app connects as the owning role through the transaction pooler, so RLS doesn't apply to it.
 - **A new table must enable RLS in its own migration** (`alter table … enable row level security`). The default privileges are already revoked.
+
+## Combined sector research, issue #68
+
+Migration `007_sector_sets.sql` replaces `sessions.sector_id` with a nonempty, canonical sorted `sector_ids text[]`. A CHECK restricts it to the nine known ids, rejects duplicates and nulls, and a partial unique index allows one active session per set. Session UUIDs, messages and tiles survive migration. Existing RLS remains enabled.

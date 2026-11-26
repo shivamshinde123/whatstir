@@ -61,3 +61,7 @@
 - `refresh.mts [--load-only]` runs one refresh (`trigger=script`) against `DATABASE_URL`.
 - `generate-subcategories.mts` names the problem groups for each sector, once.
 - `backfill.mts` runs the full pipeline locally with no time limit.
+
+## Combined sector research, issue #68
+
+HomeView owns Combine sectors selection. Treemap renders pressed buttons during selection and links otherwise. Workspace reuses the existing basket, group filter, profile, compare and chat components over the union.

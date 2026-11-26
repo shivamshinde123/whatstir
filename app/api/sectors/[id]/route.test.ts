@@ -89,3 +89,21 @@ describe("GET /api/companies/:id", () => {
     expect(await res.json()).toEqual({ error: "Couldn't load this company." });
   });
 });
+
+it("returns a combined basket, labelled groups, and sessions for a set", async () => {
+  await insertCompany(sql, { id: 3, sector_id: "b2b" });
+  await sql`insert into subcategories (sector_id, slug, name, kind) values ('b2b', 'ai', 'AI', 'ai'), ('fintech', 'ai', 'AI', 'ai')`;
+  const res = await getSector("fintech+b2b");
+  expect(res.status).toBe(200);
+  const body = await res.json();
+  expect(body.sector).toEqual({ id: "b2b+fintech", name: "B2B + Fintech", total: 3 });
+  expect(body.companies.map((c: { id: number }) => c.id)).toEqual([1, 2, 3]);
+  expect(body.subcategories.map((s: { name: string }) => s.name).sort()).toEqual(["B2B · AI", "Fintech · AI"]);
+  const sessionRoute = await import("./session/route");
+  const resetRoute = await import("./session/reset/route");
+  const state = await (await sessionRoute.GET(new Request("http://x"), ctx("b2b+fintech") as never)).json();
+  const reset = await resetRoute.POST(new Request("http://x", { method: "POST" }), ctx("fintech+b2b") as never);
+  expect(reset.status).toBe(200);
+  expect((await reset.json()).session.id).not.toBe(state.session.id);
+  expect((await getSector("b2b+unknown")).status).toBe(404);
+});

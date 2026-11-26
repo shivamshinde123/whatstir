@@ -218,3 +218,20 @@ describe("batch filter", () => {
     expect(rows[0]).toHaveAttribute("href", "/sector/b2b?batch=Fall%202026");
   });
 });
+
+it("selects sectors in map and list mode, opens their canonical union and clears on exit", async () => {
+  window.history.replaceState(null, "", "/");
+  render(<HomeView />);
+  await tile(/^B2B,/);
+  fireEvent.click(screen.getByRole("button", { name: "Combine sectors" }));
+  expect(screen.getByText("Select at least two sectors.")).toBeInTheDocument();
+  fireEvent.click(screen.getByRole("button", { name: /^Fintech,/ }));
+  fireEvent.click(screen.getByRole("button", { name: /^B2B,/ }));
+  expect(screen.getByRole("button", { name: /^B2B,/ })).toHaveAttribute("aria-pressed", "true");
+  expect(screen.getByRole("link", { name: "Open 2 sectors" })).toHaveAttribute("href", "/sector/b2b+fintech");
+  fireEvent.click(screen.getByRole("button", { name: "Show as list" }));
+  fireEvent.click(screen.getByRole("button", { name: /Consumer/ }));
+  expect(screen.getByRole("link", { name: "Open 3 sectors" })).toHaveAttribute("href", "/sector/b2b+consumer+fintech");
+  fireEvent.click(screen.getByRole("button", { name: "Combine sectors" }));
+  expect(screen.queryByRole("link", { name: /Open .* sectors/ })).not.toBeInTheDocument();
+});

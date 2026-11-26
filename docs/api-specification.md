@@ -50,7 +50,7 @@ The full profile. Missing fields come back as `null`, never left out.
 ## Sessions and chat
 
 ### `GET /api/sectors/:id/session`
-Returns the sector's active session, creating one if none exists. If several requests arrive at once, they all get the same session.
+Returns the sector set's active session, creating one if none exists. If several requests arrive at once, they all get the same session.
 ```json
 { "session": { "id": "uuid", "sectorId": "healthcare", "createdAt": "…" },
   "tiles": [{ "companyId": 5, "position": 0, "addedBy": 41, "name": "CircuitHub", "logoUrl": "https://…" }],
@@ -71,7 +71,7 @@ Ends the active session and starts a new one. Returns the same shape as the GET 
 - **Validation (400):**
   - `text` must be 1–2,000 characters after trimming.
   - `action` is `ask` (the default), `explore` or `challenge`. Anything else is a 400. Each uses its own prompt rules (`instructionsFor`), and the action is saved on both messages.
-  - `subcategoryId` must be a positive integer belonging to this session's sector.
+  - `subcategoryId` must be a positive integer belonging to one of this session's sectors.
   - `selectedCompanyIds` can hold at most 20 positive integers; duplicates are removed.
   - `batch` (optional) is a YC batch name such as `"Fall 2026"` (1–40 characters, trimmed). It narrows the sector or group to that batch, and the scope label becomes "Healthcare › Scheduling · Fall 2026". It's ignored when `selectedCompanyIds` is non-empty, and it's saved in the message's `scope`.
 - **Other errors:** an id that isn't a UUID, or an unknown session, returns 404. An ended session returns 409, telling the client to reload into the new one.
@@ -91,7 +91,7 @@ Response:
 - **`web`** is `null` unless the model asked for a web search and `WEB_SEARCH` isn't `off` (decision 77).
   - It holds the search `query`, the web answer `text` and up to 8 `sources` (http(s) only).
   - On a failed search it's `{ query, text: null, sources: [], failed: true }`, and the database answer still stands.
-  - Web *sources* (links) never appear in `companyIds` or the grid. But companies from this sector that the web text discusses are confirmed and added (decision 78): they're appended to `companyIds` and `newTileIds`, and listed in `web.companyIds` (only those the database answer didn't already cite). Messages loaded with the session carry `web` too.
+  - Web *sources* (links) never appear in `companyIds` or the grid. But companies from the selected sector set that the web text discusses are confirmed and added (decision 78): they're appended to `companyIds` and `newTileIds`, and listed in `web.companyIds` (only those the database answer didn't already cite). Messages loaded with the session carry `web` too.
 - `skipped` is the number of companies in scope that couldn't be searched because they have no embedding yet.
 - If nothing at all is in scope and the session has no earlier companies, the model isn't called, and the reply is "No companies in <scope> match yet."
 - `companyIds` are the companies the latest answer cites. The grid highlights them.
@@ -170,3 +170,7 @@ Requires exactly `Authorization: Bearer $CRON_SECRET` (compared in constant time
   - **400** when the body isn't JSON.
   - **200** with no cookie when the gate is off (`APP_PASSWORD` unset).
 - `POST /api/logout` clears the cookie (`Max-Age=0`). It returns **204** for `fetch`, or **303** to `/login` when the request accepts `text/html` (a plain form post).
+
+## Combined sector research, issue #68
+
+Sector workspace, session and reset endpoints accept a plus-separated set of known sector ids, such as `b2b+fintech`. Responses retain `sector.id` and `session.sectorId` as canonical sorted keys. Unknown sets return 404. Group names include their sector when more than one sector is requested.

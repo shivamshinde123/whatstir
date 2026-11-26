@@ -35,6 +35,9 @@ export default function HomeView() {
   const [activeOnly, setActiveOnly] = useState(false);
   /** The chosen YC batch ("Fall 2026"), or null for all. Kept in the URL so "‹ All sectors" returns to it. */
   const [batch, setBatchState] = useState<string | null>(null);
+  const [combining, setCombining] = useState(false);
+  const [selected, setSelected] = useState<string[]>([]);
+  const toggleSector = (id: string) => setSelected((ids) => ids.includes(id) ? ids.filter((v) => v !== id) : [...ids, id].sort());
   const [asList, setAsList] = useState(false);
   const [mapRef, size] = useSize<HTMLDivElement>();
 
@@ -148,6 +151,15 @@ export default function HomeView() {
             </button>
           )}
           </div>
+          <button type="button" aria-pressed={combining} onClick={() => { setCombining((v) => !v); setSelected([]); }}
+            className="pressable rounded-full bg-surface px-4 py-1.5 text-sm aria-pressed:ring-2 aria-pressed:ring-accent">
+            Combine sectors
+          </button>
+          {combining && (selected.length >= 2 ? (
+            <Link href={`/sector/${selected.join("+")}${query}`} className="pressable rounded-full bg-accent px-4 py-1.5 text-sm text-white">
+              Open {selected.length} sectors
+            </Link>
+          ) : <p role="status" className="text-sm text-text-secondary">Select at least two sectors.</p>)}
           <button
             type="button"
             aria-pressed={asList}
@@ -195,7 +207,7 @@ export default function HomeView() {
             </div>
           )}
 
-          {data && !empty && !noMatch && <Treemap tiles={tiles} query={query} />}
+          {data && !empty && !noMatch && <Treemap tiles={tiles} query={query} selected={selected} onToggle={combining ? toggleSector : undefined} />}
         </div>
 
         {asList && data && !empty && (
@@ -205,14 +217,18 @@ export default function HomeView() {
               .sort((a, b) => b.count - a.count)
               .map((s) => (
                 <li key={s.id}>
-                  <Link
+                  {combining ? <button type="button" aria-pressed={selected.includes(s.id)} onClick={() => toggleSector(s.id)}
+                    className="pressable flex w-full items-center justify-between px-4 py-3 text-left aria-pressed:bg-accent/10 aria-pressed:ring-2 aria-pressed:ring-inset aria-pressed:ring-accent">
+                    <span>{s.name} {selected.includes(s.id) ? "\u2713" : "+"}</span>
+                    <span className="tabular-nums text-text-secondary">{fmt.format(s.count)}</span>
+                  </button> : <Link
                     href={`/sector/${s.id}${query}`}
                     aria-label={tileLabel(s)}
                     className="flex items-center justify-between px-4 py-3 hover:bg-bg/60"
                   >
                     <span>{s.name}</span>
                     <span className="tabular-nums text-text-secondary">{fmt.format(s.count)}</span>
-                  </Link>
+                  </Link>}
                 </li>
               ))}
           </ul>

@@ -52,3 +52,7 @@ Whatstir/
 - Each test sits next to the code it checks, as `*.test.ts(x)`. End-to-end tests live in `e2e/`, and shared fixtures live in `test/`.
 - Database schema changes go in a new numbered migration. Never edit a migration that has already been applied.
 - There is no `utils/` grab-bag folder. A helper lives in the module that uses it until a second module needs it too.
+
+## Combined sector research, issue #68
+
+`lib/sector-set.ts` validates workspace keys. `db/migrations/007_sector_sets.sql` migrates session ownership. `e2e/cross-sector.spec.ts` covers combined navigation, answers, reload and canonical redirects.

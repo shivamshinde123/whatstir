@@ -183,6 +183,8 @@ Listed in the order they were made. Decisions 1–14 are recorded in §16 of [in
     - *Search and compare (added to #67 by the owner):* the page filters by founder or company name in the browser, since the whole list (about 250 people) is already loaded. Compare companies reuses the workspace's Compare modal for all of a person's companies (at most 4 in the data), which gained a Sector row so a sector change is visible side by side.
     - *Tests:* `YC_PAGES_URL` swaps the ycombinator.com origin, so e2e extraction reads stand-in pages from the local feed server.
 
+82. **A research workspace may cover a canonical sector set** (#68, 2026-11-25). This supersedes the single-sector restriction in decisions 22 and 24. Home offers explicit sector selection; single-sector navigation stays available. Combined workspaces use the union for baskets, counts, search, explicit selections and web-company matching. Groups carry their sector name. Sessions are unique per sorted set, with a preserving migration from single-sector sessions. The batch remains a narrowing filter. Top-40 retrieval ranks the union rather than reserving equal slots per sector, so an answer need not cite every selected sector.
+
 ## Open items
 
 - **A. Founder data.** Founders come from YC company pages. YC's terms of use forbid scraping, so the fetch is now off by default (decision 73). The Admin switch or `FOUNDERS_FETCH=on` opts in for private use (decision 81).

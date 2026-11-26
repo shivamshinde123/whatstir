@@ -45,3 +45,7 @@ These live in the `app_settings` table so they can change without a redeploy:
 
 - Never prefix a key with `NEXT_PUBLIC_`. Every AI and database call runs on the server.
 - Use a different `CRON_SECRET` for each environment.
+
+## Combined sector migration
+
+No new variables. Apply migration `007_sector_sets.sql` in a coordinated deployment before starting the updated application. It replaces the session sector column; the old application requires the old schema. Do not run `npm run migrate` against production merely to preview the feature.

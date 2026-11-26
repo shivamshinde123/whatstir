@@ -350,7 +350,7 @@ describe("run (integration)", () => {
     await load();
     const id = FIXTURE[2].id;
     const [note] = await sql`insert into notes (company_id, body) values (${id}, 'keep me') returning id, updated_at`;
-    const [s] = await sql`insert into sessions (sector_id) values ('b2b') returning id`;
+    const [s] = await sql`insert into sessions (sector_ids) values (array['b2b']) returning id`;
     await sql`insert into session_tiles (session_id, company_id, position) values (${s.id}, ${id}, 0)`;
 
     const data = clone().filter((c) => c.id !== id); // the noted company vanishes
