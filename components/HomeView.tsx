@@ -160,6 +160,7 @@ export default function HomeView() {
             </Link>
           ) : <p role="status" className="text-sm text-text-secondary">Select at least two sectors.</p>)}
           </div>
+          <Link href={`/themes/trends?${new URLSearchParams({ ...(chosen ? { batch: chosen.name } : {}), ...(combining && selected.length ? { sectors: selected.join(",") } : {}) })}`} className="pressable text-sm text-link hover:underline">Over time</Link>
           <button
             type="button"
             aria-pressed={asList}

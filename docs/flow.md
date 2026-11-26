@@ -119,3 +119,7 @@ Admin Generate themes -> POST /api/admin/themes -> claimRun("themes") -> after(r
 /themes fetches its searchable list, sorts by Most companies or Most sectors, filters by 3+ main sectors and selects one detail panel. Desktop uses a scrolling sidebar/detail split; phones use a native theme picker. The URL theme parameter restores selection on return. Search checks full membership on the server; chart/table toggling is local.
 
 View all N companies -> /themes/:id -> Workspace with theme API base -> getThemeWorkspace and getThemeSession. All live members appear in Companies. Results starts empty and only answer citations add tiles. Restoring a conversation restores its cited Results; New session clears Results. Retrieval, previous cited-company context, explicit selections and web-company matching retain the session's theme restriction. Clearing a batch, group or explicit selection never escapes that theme. Regeneration retires the old theme conversation; the themes page supplies new current links.
+
+## Batch trends, issue #70
+
+Home or Themes -> /themes/trends -> GET /api/themes/trends -> live company/theme rows -> cohort aggregation -> heatmap. Selecting a cell stores theme and period in the URL and loads only that cell's companies into the response detail list. Links open the existing theme workspace/company profile.

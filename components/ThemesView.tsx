@@ -66,7 +66,7 @@ export default function ThemesView() {
   return <div className="flex min-h-dvh flex-col lg:h-dvh lg:min-h-[760px]">
     <SiteHeader showSignOut={state.kind === "ready" && state.gate} />
     <main className="flex min-h-0 w-full flex-1 flex-col px-4 pb-5 pt-6 sm:px-6 lg:px-8">
-      <h1 className="text-headline">Problems across sectors</h1>
+      <div className="flex flex-wrap items-center justify-between gap-3"><h1 className="text-headline">Problems across sectors</h1><Link href="/themes/trends" className="pressable rounded-full bg-surface px-4 py-2 text-sm text-link">Over time</Link></div>
       <p className="mt-2 max-w-4xl text-text-secondary">Find companies tackling similar customer problems across industries. Choose a theme, then open its companies to explore and ask questions.</p>
       <p className="mt-1 text-sm text-text-secondary">AI-generated groups and descriptions. Companies without embeddings are excluded.</p>
 

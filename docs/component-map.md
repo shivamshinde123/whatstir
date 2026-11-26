@@ -73,3 +73,7 @@ ThemesView owns loading, retry, empty/no-match states, spread and size sorting, 
 ## Theme explorer update
 
 ThemesView now owns a desktop sidebar and one selected detail panel, server-backed search, plain-language sorting, a mobile theme picker, sector statistics and chart/table views. Example cards and View all companies open the theme workspace, preserving context. Workspace reuses Basket, ResultsGrid, Chat and ProfilePanel with a theme-specific API base. Basket lists full membership; ResultsGrid remains answer-driven. lib/session.ts owns separate theme conversations and resets; lib/chat.ts and lib/retrieval.ts enforce the pinned theme on the server.
+
+## Batch trends, issue #70
+
+ThemeTrendsView owns cohort filters, Rising/Fading sorting, the accessible heatmap table and selected-cell company links. ThemesView and HomeView link into it; home carries its chosen batch and sector selection.

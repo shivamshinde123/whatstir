@@ -109,3 +109,7 @@ Read all live companies with nonnull embeddings, ordered by company id. Normalis
 Name each cluster from at most eight company problem-card customer/problem statements, each truncated to 500 characters. Fall back to the company one-liner when no card statement exists. One strict writing-model request names the ordered set; validate the number of labels and bounded nonempty names/descriptions. AI_FAKE uses deterministic placeholder labels without network calls. Labels are approximate AI output, not a new source of company facts.
 
 Build before replacing; failures preserve the old set. Regeneration is manual after enrichment, not part of daily refresh. Removed companies are excluded from current counts and examples even before regeneration. Shares divide sector membership by that theme's live membership. Spread counts sectors with at least 5% inclusive. Examples use the first three company ids per sector, not an AI ranking.
+
+## Batch trends, issue #70
+
+Trend years come only from recognised YC Season YYYY batch names, from 2005 through the current UTC year. Missing/unrecognised/future years are reported as excluded. Missing-source companies are excluded. Current theme memberships and descriptions are used; no historical descriptions are inferred.
