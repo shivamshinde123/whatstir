@@ -12,7 +12,7 @@ const RECENT_RUNS = 20;
 
 export interface Run {
   id: number;
-  trigger: "cron" | "manual" | "script" | "founders";
+  trigger: "cron" | "manual" | "script" | "founders" | "themes";
   status: "running" | "ok" | "failed" | "skipped";
   startedAt: string;
   finishedAt: string | null;
@@ -123,8 +123,8 @@ export async function getRefreshStatus(sql: Sql, now = new Date()): Promise<Refr
   const [settings, rows, [success], pending, foundersPending] = await Promise.all([
     getSettings(sql),
     sql<RunRow[]>`select * from refresh_runs order by id desc limit ${RECENT_RUNS}`,
-    // A founders pass doesn't re-read yc-oss, so it isn't the last successful refresh.
-    sql<RunRow[]>`select * from refresh_runs where status = 'ok' and trigger <> 'founders' order by id desc limit 1`,
+    // Derived-data jobs don't re-read yc-oss, so they aren't successful source refreshes.
+    sql<RunRow[]>`select * from refresh_runs where status = 'ok' and trigger not in ('founders', 'themes') order by id desc limit 1`,
     countPending(sql),
     countFoundersPending(sql),
   ]);

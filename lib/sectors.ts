@@ -31,7 +31,7 @@ export async function getSectorOverview(sql: Sql): Promise<SectorOverview> {
   const sectors = await sql<SectorCount[]>`
     select sector_id as id, name, total, active from sector_counts order by sort`;
   const [run] = await sql<{ finished_at: Date }[]>`
-    select finished_at from refresh_runs where status = 'ok' order by finished_at desc limit 1`;
+    select finished_at from refresh_runs where status = 'ok' and trigger not in ('founders', 'themes') order by finished_at desc limit 1`;
   const rows = await sql<{ batch: string; sector_id: string; total: number; active: number }[]>`
     select batch, sector_id, count(*)::int as total, count(*) filter (where status = 'Active')::int as active
     from companies where missing_since is null and batch is not null

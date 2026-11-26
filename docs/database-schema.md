@@ -100,3 +100,13 @@ Indexes: an HNSW index on `embedding` (`vector_cosine_ops`), plus indexes on `se
 ## Combined sector research, issue #68
 
 Migration `007_sector_sets.sql` replaces `sessions.sector_id` with a nonempty, canonical sorted `sector_ids text[]`. A CHECK restricts it to the nine known ids, rejects duplicates and nulls, and a partial unique index allows one active session per set. Session UUIDs, messages and tiles survive migration. Existing RLS remains enabled.
+
+## Problem themes, migration 008
+
+`themes`: bigint identity `id` primary key; nonempty `name`; nonnull `description`, `model`; `generated_at` timestamptz default now. `company_themes`: `company_id` primary key references companies with cascade deletion, and `theme_id` references themes with cascade deletion, indexed for theme queries. A company can belong to at most one theme. Both tables enable RLS with no public policies and revoke API-role access. Generation replaces the set in one transaction. Theme ids are generation-specific, not stable external identifiers.
+
+`refresh_runs.trigger` also accepts `themes`. Theme generation shares the existing unique running slot with refresh and founders jobs. A successful themes run does not become the last successful source refresh.
+
+## Theme workspace sessions, migration 009
+
+sessions gains nullable theme_id, referencing themes with ON DELETE SET NULL, and theme_name, a retained name snapshot. Sector sessions have neither field. Active theme sessions require both; retired theme sessions can retain the name after the theme id is cleared. A check constraint enforces this distinction. One active sector session remains unique per sector_ids where theme_name is null. A separate partial index allows one active session per theme_id, independently of the sector union. Before theme replacement, generation ends active theme sessions inside its transaction; messages and tiles remain stored as history. Ordinary sector sessions are unaffected.

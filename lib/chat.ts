@@ -80,16 +80,21 @@ export async function postMessage(
   const searchWeb = deps.searchWeb ?? defaultSearchWeb;
   const webCompanies = deps.webCompanies ?? defaultWebCompanies;
 
-  const [session] = await sql<{ id: string; sector_ids: string[]; ended_at: Date | null }[]>`
-    select id, sector_ids, ended_at from sessions where id = ${sessionId}`;
+  const [session] = await sql<{ id: string; sector_ids: string[]; ended_at: Date | null; theme_id: string | null; theme_name: string | null }[]>`
+    select id, sector_ids, ended_at, theme_id, theme_name from sessions where id = ${sessionId}`;
   if (!session) return { status: 404, body: { error: "No such session." } };
   if (session.ended_at) return { status: 409, body: { error: "This session has ended. Reload to continue in the new one." } };
 
   const sectorId = session.sector_ids.join("+");
-  const sectorName = sectorSetName(session.sector_ids);
+  const themeId = session.theme_id ? Number(session.theme_id) : undefined;
+  const sectorName = session.theme_name ?? sectorSetName(session.sector_ids);
+  if (themeId && input.selectedCompanyIds.length) {
+    const members = await loadCompanies(sql, sectorId, input.selectedCompanyIds, themeId);
+    if (members.length !== input.selectedCompanyIds.length) return { status: 400, body: { error: "Select companies from this theme only." } };
+  }
   let scopeLabel = sectorName;
   if (input.selectedCompanyIds.length) {
-    scopeLabel = `${input.selectedCompanyIds.length} selected ${input.selectedCompanyIds.length === 1 ? "company" : "companies"}`;
+    scopeLabel = `${input.selectedCompanyIds.length} selected ${input.selectedCompanyIds.length === 1 ? "company" : "companies"}${themeId ? ` in ${sectorName}` : ""}`;
   } else if (input.subcategoryId) {
     const [sub] = await sql<{ name: string }[]>`
       select case when ${session.sector_ids.length} > 1 then
@@ -102,14 +107,13 @@ export async function postMessage(
   const batch = input.selectedCompanyIds.length ? null : input.batch;
   if (batch) scopeLabel += ` · ${batch}`;
 
-  const scope = { subcategoryId: input.subcategoryId, batch, selectedCompanyIds: input.selectedCompanyIds };
+  const scope = { subcategoryId: input.subcategoryId, batch, selectedCompanyIds: input.selectedCompanyIds, ...(themeId ? { themeId } : {}) };
   // The whole session's conversation (bounded), with what web searches added, so follow-ups keep context.
   const history: HistoryTurn[] = (
     await sql<{ role: HistoryTurn["role"]; content: string; web: WebResult | null }[]>`
       select role, content, web from messages where session_id = ${sessionId} and status = 'ok'
       order by id desc limit ${HISTORY_TURNS}`
-  )
-    .reverse()
+  ).reverse()
     .map((m) => ({ role: m.role, content: m.web?.text ? `${m.content}\n\nFrom the web (${m.web.query}): ${m.web.text}` : m.content }));
   // Every company already in the grid stays citable until the session ends, unless the user picked
   // an explicit selection, which is exactly those companies.
@@ -131,12 +135,17 @@ export async function postMessage(
   try {
     const found = await retrieve(
       sql,
-      { sectorId: sectorId, subcategoryId: input.subcategoryId, batch, selectedIds: input.selectedCompanyIds },
+      { sectorId: sectorId, subcategoryId: input.subcategoryId, batch, selectedIds: input.selectedCompanyIds, ...(themeId ? { themeId } : {}) },
       input.text,
     );
     skipped = found.skipped;
     const matched = new Set(found.candidates.map((c) => c.id));
-    const earlier = await loadCompanies(sql, sectorId, earlierIds.filter((id) => !matched.has(id)));
+    // Recheck injected/model dependencies too: a theme session never cites outside its membership.
+    if (themeId) {
+      const allowed = new Set((await loadCompanies(sql, sectorId, found.candidates.map((c) => c.id), themeId)).map((c) => c.id));
+      found.candidates = found.candidates.filter((c) => allowed.has(c.id));
+    }
+    const earlier = await loadCompanies(sql, sectorId, earlierIds.filter((id) => !matched.has(id)), themeId);
     if (!found.candidates.length && !earlier.length) {
       text = `No companies in ${scopeLabel} match yet.`;
       companyIds = [];
@@ -166,7 +175,8 @@ export async function postMessage(
         // Dataset companies the web answer discusses join the grid too (decision 78).
         if (web.text) {
           try {
-            const found = await webCompanies(sql, sectorId, web.text);
+            const matched = themeId ? await webCompanies(sql, sectorId, web.text, themeId) : await webCompanies(sql, sectorId, web.text);
+            const found = themeId ? (await loadCompanies(sql, sectorId, matched, themeId)).map((c) => c.id) : matched;
             // Only the ones the database answer didn't already cite: what the web added.
             web.companyIds = found.filter((id) => !companyIds.includes(id));
             companyIds = [...companyIds, ...web.companyIds];

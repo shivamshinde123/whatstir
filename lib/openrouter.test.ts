@@ -79,7 +79,7 @@ describe("structured", () => {
       ],
       response_format: { type: "json_schema", json_schema: { name: "check", schema: SCHEMA, strict: true } },
       provider: { require_parameters: true },
-    });
+    }, undefined);
   });
 
   it("carries the answer's conversation history as chat turns", async () => {

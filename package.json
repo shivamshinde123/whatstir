@@ -26,12 +26,13 @@
     "db:test:up": "docker start whatstir-test-db || docker run -d --name whatstir-test-db -e POSTGRES_PASSWORD=postgres -e POSTGRES_DB=whatstir_test -p 54329:5432 pgvector/pgvector:pg16",
     "refresh": "tsx --env-file=.env scripts/refresh.mts",
     "subcategories": "tsx --env-file=.env scripts/generate-subcategories.mts",
+    "themes": "tsx --env-file=.env scripts/generate-themes.mts",
     "backfill": "tsx --env-file=.env scripts/backfill.mts"
   },
   "dependencies": {
     "@typesafe-ai/sdk": "^0.7.0",
     "d3-hierarchy": "^3.1.2",
-    "next": "16.4.4",
+    "next": "16.4.6",
     "openai": "^7.47.0",
     "postgres": "^4.0.0",
     "react": "19.3.0",
@@ -51,7 +52,7 @@
     "@types/react-dom": "^19",
     "@vitejs/plugin-react": "^6",
     "eslint": "^9",
-    "eslint-config-next": "16.4.4",
+    "eslint-config-next": "16.4.6",
     "jsdom": "^30",
     "tailwindcss": "^4",
     "tsx": "^4.23.15",

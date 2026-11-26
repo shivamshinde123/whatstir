@@ -49,3 +49,13 @@ These live in the `app_settings` table so they can change without a redeploy:
 ## Combined sector migration
 
 No new variables. Apply migration `007_sector_sets.sql` in a coordinated deployment before starting the updated application. It replaces the session sector column; the old application requires the old schema. Do not run `npm run migrate` against production merely to preview the feature.
+
+## Theme generation
+
+No new environment variable or secret. npm run themes reads the existing .env for DATABASE_URL and OpenRouter configuration. AI_MODEL_WRITE selects the naming model; AI_FAKE=1 avoids real model calls. Run npm run migrate against the intended database before deploying the new code. Generate themes manually after company enrichment; never point verification scripts at production. Real naming consumes existing OpenRouter credit.
+
+Theme workspace code also requires migration 009 before deployment. Applying it does not regenerate themes or call AI. Local review can use the existing isolated whatstir_themes_preview database; preserve the hosted database. Verification uses separate test/e2e databases and AI_FAKE, not the real-data preview.
+
+## Detached local preview
+
+Redirect dev-server stdout/stderr outside the project tree, for example to the OS temp directory's `whatstir-preview` folder. Logs under `node_modules/.cache` triggered repeated Turbopack recompiles and browser reloads during local review. Moving the logs outside the watched tree stopped that loop. Verify stable browser interactions as well as HTTP responses after startup.

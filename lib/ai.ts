@@ -127,6 +127,7 @@ export async function structured<T>(
   input: string | ChatTurn[],
   name: string,
   schema: Record<string, unknown>,
+  requestOptions?: { timeout?: number; maxRetries?: number },
 ): Promise<T> {
   const turns: ChatTurn[] = typeof input === "string" ? [{ role: "user", content: input }] : input;
   const res = await openai().chat.completions.create({
@@ -135,7 +136,7 @@ export async function structured<T>(
     response_format: { type: "json_schema", json_schema: { name, schema, strict: true } },
     // OpenRouter: route only to providers that honour response_format, never to one that ignores it.
     provider: { require_parameters: true },
-  } as OpenAI.Chat.ChatCompletionCreateParamsNonStreaming);
+  } as OpenAI.Chat.ChatCompletionCreateParamsNonStreaming, requestOptions);
   return parseJson<T>(model, res.choices[0]?.message?.content);
 }
 

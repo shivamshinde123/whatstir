@@ -174,3 +174,14 @@ Requires exactly `Authorization: Bearer $CRON_SECRET` (compared in constant time
 ## Combined sector research, issue #68
 
 Sector workspace, session and reset endpoints accept a plus-separated set of known sector ids, such as `b2b+fintech`. Responses retain `sector.id` and `session.sectorId` as canonical sorted keys. Unknown sets return 404. Group names include their sector when more than one sector is requested.
+
+## Problem themes, issue #69
+
+- `GET /api/themes` returns `{ themes: Theme[], gate: boolean }`. Each theme has numeric `id`, `name`, `description`, ISO `generatedAt`, company `count`, `spread`, and `sectors`. A sector has `id`, `name`, `count`, fractional `share` and up to three `examples`, each with `id`, `name`, `logoUrl`, and `sectorId`. An empty database returns an empty array; storage failures return 500 with an error message.
+- `POST /api/admin/themes` starts a manual generation job. Returns 202 `{ runId }`, 409 `{ error }` while another data job owns the slot, or 500 on startup failure. The optional existing password gate protects both APIs. Background errors appear in `refresh_runs` and Admin.
+
+### Theme explorer and workspaces, superseding the initial list view
+
+GET /api/themes accepts optional q, up to 200 trimmed characters. It searches theme names/descriptions and every live member company name, including members absent from examples. Matching returns each entire theme with unchanged counts and shares. Percent/underscore characters are literal text.
+
+GET /api/themes/:id returns the existing workspace shape with only live theme members and theme-specific group counts. GET /api/themes/:id/session restores or creates a separate theme conversation. POST /api/themes/:id/session/reset ends that conversation and creates one with empty messages and Results. Invalid, removed or empty themes return 404. These endpoints use the existing password gate. Message POST continues through /api/sessions/:uuid/messages; the server derives theme scope from the session, never a client-provided theme id. Outside-theme selections return 400; ended sessions return 409.

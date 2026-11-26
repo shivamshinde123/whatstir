@@ -3,7 +3,7 @@
 | Layer | Choice | Why |
 |---|---|---|
 | Runtime | Node.js 22 or newer | The Jev SDK requires Node 22 or newer. |
-| Framework | Next.js 16.4 (App Router, Turbopack, `cacheComponents`) with TypeScript 5 | Pages and API route handlers in one codebase, and it deploys to Vercel. TypeScript 7 (the Go rewrite) is skipped until Next.js supports it. |
+| Framework | Next.js 16.4.6 (App Router, Turbopack, `cacheComponents`) with TypeScript 5 | Pages and API route handlers in one codebase, and it deploys to Vercel. TypeScript 7 (the Go rewrite) is skipped until Next.js supports it. |
 | Database | Supabase Postgres with the `pgvector` extension | Hosted Postgres that does vector search and full-text search itself. |
 | Database client | [`postgres`](https://github.com/porsager/postgres) | Plain SQL with transactions. supabase-js isn't needed because there is no auth and no database access from the browser. |
 | AI gateway | [OpenRouter](https://openrouter.ai) only, through the `openai` SDK (models) and the TypeSafe SDK (Jev) | One key and one bill for every AI call, and hundreds of models from many vendors (decisions 74–75). |

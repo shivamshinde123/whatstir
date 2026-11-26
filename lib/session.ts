@@ -2,6 +2,7 @@ import type { Sql } from "postgres";
 import { parseSectorSet } from "./sector-set";
 import type { WebResult } from "./ai";
 import type { Action } from "./answer";
+import { getThemeHeader } from "./themes";
 
 export interface Tile {
   companyId: number;
@@ -16,7 +17,7 @@ export interface Message {
   role: "user" | "assistant";
   action: Action;
   content: string;
-  scope: { subcategoryId?: number | null; batch?: string | null; selectedCompanyIds?: number[] };
+  scope: { subcategoryId?: number | null; batch?: string | null; selectedCompanyIds?: number[]; themeId?: number };
   companyIds: number[];
   /** What a web search added (assistant messages only), or null. */
   web: WebResult | null;
@@ -25,7 +26,7 @@ export interface Message {
 }
 
 export interface SessionState {
-  session: { id: string; sectorId: string; createdAt: string };
+  session: { id: string; sectorId: string; createdAt: string; themeId?: number; themeName?: string };
   tiles: Tile[];
   messages: Message[];
 }
@@ -57,8 +58,10 @@ export const toMessage = (r: MessageRow): Message => ({
 export async function listTiles(sql: Sql, sessionId: string): Promise<Tile[]> {
   const rows = await sql<{ company_id: number; position: number; added_by: string | null; name: string; logo_url: string | null }[]>`
     select t.company_id, t.position, t.added_by, c.name, c.logo_url
-    from session_tiles t join companies c on c.id = t.company_id
-    where t.session_id = ${sessionId} order by t.position`;
+    from session_tiles t join companies c on c.id = t.company_id join sessions s on s.id = t.session_id
+    where t.session_id = ${sessionId} and (s.theme_name is null or
+      (c.missing_since is null and exists (select 1 from company_themes ct where ct.company_id = c.id and ct.theme_id = s.theme_id)))
+    order by t.position`;
   return rows.map((r) => ({
     companyId: r.company_id,
     position: r.position,
@@ -68,14 +71,15 @@ export async function listTiles(sql: Sql, sessionId: string): Promise<Tile[]> {
   }));
 }
 
-async function load(sql: Sql, s: { id: string; sector_ids: string[]; created_at: Date }): Promise<SessionState> {
+async function load(sql: Sql, s: { id: string; sector_ids: string[]; created_at: Date; theme_id?: string | null; theme_name?: string | null }): Promise<SessionState> {
   const [tiles, messages] = await Promise.all([
     listTiles(sql, s.id),
     sql<MessageRow[]>`select id, role, action, content, scope, company_ids, web, status, created_at
       from messages where session_id = ${s.id} order by id`,
   ]);
   return {
-    session: { id: s.id, sectorId: s.sector_ids.join("+"), createdAt: s.created_at.toISOString() },
+    session: { id: s.id, sectorId: s.sector_ids.join("+"), createdAt: s.created_at.toISOString(),
+      ...(s.theme_id && s.theme_name ? { themeId: Number(s.theme_id), themeName: s.theme_name } : {}) },
     tiles,
     messages: messages.map(toMessage),
   };
@@ -87,7 +91,7 @@ export async function getOrCreateSession(sql: Sql, sectorId: string | string[]):
   if (!ids) return null;
   for (let attempt = 0; attempt < 2; attempt++) {
     const [active] = await sql<{ id: string; sector_ids: string[]; created_at: Date }[]>`
-      select id, sector_ids, created_at from sessions where sector_ids = ${ids}::text[] and ended_at is null`;
+      select id, sector_ids, created_at from sessions where sector_ids = ${ids}::text[] and ended_at is null and theme_name is null`;
     if (active) return load(sql, active);
     try {
       const [created] = await sql<{ id: string; sector_ids: string[]; created_at: Date }[]>`
@@ -106,12 +110,38 @@ export async function resetSession(sql: Sql, sectorId: string | string[]): Promi
   const ids = parseSectorSet(sectorId);
   if (!ids) return null;
   const created = await sql.begin(async (tx) => {
-    await tx`update sessions set ended_at = now() where sector_ids = ${ids}::text[] and ended_at is null`;
+    await tx`update sessions set ended_at = now() where sector_ids = ${ids}::text[] and ended_at is null and theme_name is null`;
     const [s] = await tx<{ id: string; sector_ids: string[]; created_at: Date }[]>`
       insert into sessions (sector_ids) values (${ids}::text[]) returning id, sector_ids, created_at`;
     return s;
   });
   return load(sql, created);
+}
+
+/** Theme sessions retain their own conversation; only answer citations populate Results. */
+export async function getThemeSession(sql: Sql, themeId: number): Promise<SessionState | null> {
+  const theme = await getThemeHeader(sql, themeId);
+  if (!theme) return null;
+  for (let attempt = 0; attempt < 2; attempt++) {
+    try {
+      const [session] = await sql<{ id: string; sector_ids: string[]; created_at: Date; theme_id: string; theme_name: string }[]>`
+        insert into sessions (sector_ids, theme_id, theme_name) values (${theme.sectorIds}::text[], ${theme.id}, ${theme.name})
+        on conflict (theme_id) where ended_at is null and theme_id is not null
+        do update set sector_ids = excluded.sector_ids, theme_name = excluded.theme_name
+        returning id, sector_ids, created_at, theme_id, theme_name`;
+      return load(sql, session);
+    } catch (e) {
+      if (e && typeof e === "object" && "code" in e && e.code === "23503") return null;
+      if (!(e && typeof e === "object" && "code" in e && e.code === "23505")) throw e;
+    }
+  }
+  throw new Error("Could not open the theme session.");
+}
+
+export async function resetThemeSession(sql: Sql, themeId: number): Promise<SessionState | null> {
+  if (!(await getThemeHeader(sql, themeId))) return null;
+  await sql`update sessions set ended_at = now() where theme_id = ${themeId} and ended_at is null`;
+  return getThemeSession(sql, themeId);
 }
 
 /**

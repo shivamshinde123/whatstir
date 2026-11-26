@@ -35,7 +35,7 @@ export async function createTestDb(): Promise<{ sql: Sql; schema: string; drop: 
 /** Empties every table that holds data, keeping the seeded sectors and settings. */
 export async function resetData(sql: Sql): Promise<void> {
   await sql`truncate session_tiles, messages, sessions, notes, company_subcategories,
-    subcategories, problem_cards, founders, companies, refresh_runs restart identity cascade`;
+    subcategories, problem_cards, founders, themes, companies, refresh_runs restart identity cascade`;
 }
 
 /** Inserts a minimal company row. */

@@ -56,6 +56,7 @@ describe("migrate", () => {
       "app_settings",
       "companies",
       "company_subcategories",
+      "company_themes",
       "founders",
       "messages",
       "notes",
@@ -66,6 +67,7 @@ describe("migrate", () => {
       "session_tiles",
       "sessions",
       "subcategories",
+      "themes",
     ]);
   });
 

@@ -34,6 +34,26 @@ is required at release. This PR does not migrate the production database.
 
 This AI-assisted review is not legal advice and does not replace review by qualified counsel for the product's jurisdictions and business model.
 
+## Theme generation review, issue #69, 2026-11-26
+
+Planning review: this remains the existing owner-operated research web app, with optional password access. New derived themes/assignments use existing company data. The existing OpenRouter writing model receives at most eight 500-character problem statements per cluster. No new processor, dependency, asset, payment, cookie, permission, marketing channel or target audience is introduced. The applicability classifications in controls 1-14 above remain current, with the following evidence changes:
+
+- Controls 4-5: embedding clustering stays on the server; naming input is bounded, output validated, and there is no new SDK. New tables use RLS and revoke API-role access.
+- Controls 6-7: Generate themes is explicit and discloses existing model-credit use. AI labels and embedding coverage are explained; counts are actual database membership, not invented model facts.
+- Controls 8-9: native buttons, checkbox, select, links and details/summary; labelled sector bars plus a text legend. Keyboard and narrow-phone checks are included in the browser tests. Complete screen-reader/contrast audit remains TBD.
+- Control 14: derived themes are replaced on regeneration, assignments cascade when their companies are deleted, and removed companies disappear from current results. Existing broader retention/export questions remain TBD.
+
+Policy/contact/jurisdiction and historic asset questions are still required before wider public operation. The previously observed Next.js build security warning also requires dependency review before public release. Migration 008 must be applied before deployment; this work does not run migrations or real AI generation in production.
+
+PR handoff verification: `npm run ci` passed type checking, ESLint, 704 unit/integration/component/API tests and 88 browser tests. Browser coverage includes Admin generation, theme filters and profile links, empty states, keyboard expansion, and no overflow at 320/375 px. Desktop and phone screenshots were reviewed with fake AI labels. The Windows runner required manual termination of its two verified test-server processes after all tests completed before reporting exit 0. No full assistive-technology audit or legal conclusion is implied.
+
+## Theme explorer and workspace review, 2026-11-26
+
+Planning: the existing controls 1-14 and their applicability classifications remain current. This update reuses existing company data, user questions, Postgres and OpenRouter recipients. It adds no SDK, tracker, cookie, payment, marketing channel, asset, audience or jurisdiction. Theme membership narrows what can enter the existing AI pipeline. Search parameters go only to this app's read API. Session name snapshots remain stored with retained research history, under the existing retention/export TBDs.
+
+Controls 4/6/7: server-enforced scope, no invented reference-image counts, no nonfunctional menus, explicit bounded-retrieval wording, and Results populated by cited answers only. Controls 8/9: native sidebar buttons, mobile select, labelled search, pressed states, chart/table equivalents and a theme return link; automated keyboard/phone checks supplement screenshot review. Full assistive-technology and contrast review remains TBD. Migration 009 is required before deployment; no hosted migration or new model generation is part of this update. Previously recorded public-release policy/contact/license and dependency-security questions remain open.
+
+Handoff verification: type checking, ESLint and 713 unit/integration/component/API tests passed. The final full browser run passed 89 tests, including empty Results on theme entry, citation-only additions, reload/reset behavior, full-member search, session isolation, regeneration and 320/375 px keyboard layouts. Reviewed the real-data desktop explorer and phone screenshots. The local preview retains its 40 real themes; a 309-company theme returns zero Results before questions. Windows test-server teardown again required terminating only the two verified Playwright test servers before the runner reported exit 0. The real-data preview remains isolated from the hosted database.
 Follow-up #74 rechecked during planning and PR handoff. This only groups existing home controls visually; the applicability table remains unchanged. Controls retain their native button/link semantics and wrap at narrow widths. No dependencies, data flows, permissions, assets, or policies change.
 
 Verification on 2026-11-26: the installed Next.js build reported a security advisory
@@ -43,3 +63,13 @@ are required before public release. This layout fix does not change dependencies
 Desktop and phone screenshots confirm the filter controls wrap and remain usable.
 The existing header navigation overflows by 16 px at 320 px, tracked separately
 in issue #75; the filter controls themselves fit at both 320 and 375 px.
+
+## Authorized production release, 2026-11-26
+
+The owner authorized merging the alignment and themes changes and updating Vercel. The existing applicability classifications remain current. This release adds no processor, tracker, permission, payment flow or audience. Wider public-operation policy/contact/jurisdiction and historic asset questions remain documented above.
+
+The earlier dependency-security warning is resolved by Next.js and eslint-config-next 16.4.6 plus compatible lint-tool dependency updates. `npm audit` reports zero vulnerabilities. This supersedes the earlier unresolved dependency warning; it does not establish legal compliance or replace the remaining accessibility and policy reviews.
+
+Production migrations 008 and 009 were applied before the themes deployment. The reviewed local themes were promoted only after comparing ordered fingerprints of all live embedded company IDs, source and embedding hashes, vectors, sectors and customer/problem text against production. Both datasets matched exactly. Production now has 40 real-model themes and 6,408 company assignments. The import used the data-job lock and an atomic transaction. It copied no founders, notes, sessions, credentials or chat history and made no new external model request.
+
+Combined release verification passed type checking, ESLint, 713 unit/integration/component/API tests and all 90 end-to-end tests against isolated local databases with fake AI. This includes desktop batch/Combine sectors alignment, phone wrapping, theme membership and question-driven Results. The patched suite exited normally on Windows without manual server termination. Production verification uses deployment metadata and authenticated HTTP checks; no additional browser inspection is required for this release.
