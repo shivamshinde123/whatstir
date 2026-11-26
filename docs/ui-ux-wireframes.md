@@ -223,3 +223,13 @@ Keep the Whatstir header. A compact introduction and search/sort/filter toolbar 
 
 The theme workspace keeps the familiar three columns. Companies holds all theme members. Results is initially empty, fills from questions and citations, and clears on New session. This supersedes the interim interpretation that opening a theme should preload all members into Results. The pinned theme name stays in the page heading and chat scope, with an All themes return link restoring selection.
 Home filter alignment (#74): Combine sectors and its selection action sit in the left filter group beside All batches. Show as list remains on the right. The controls wrap on narrow screens.
+
+## Sector comparison, both owner-supplied SVG references, issue #71
+
+Match compare_companies2.svg first: compact header/introduction, removable sector chips, Add sector, combined research action, sector overview table, overlaid batch-year line chart, shared-problems heatmap. Follow it with the three panels from compare_companies.svg: top problem themes, sector problem groups and tags. Use the references' white bordered cards, compact Arial typography, spacing, sage B2B, amber Consumer and slate Healthcare. Other sectors retain their existing colors. No large summary cards or per-sector batch bar charts remain.
+
+Overview shows company count, active count/share and source AI-tag share. Its sector headings link to research. Chips preserve 2-4 sectors; add/remove updates the canonical URL and live data, including browser Back/Forward. The chart shares one year axis and y-scale across all selected sectors, fills missing years with zero, supports All/last 10/last 5 years and Count/Share. Share means the fraction of all current sector companies in that batch year. Exact values and unknown-year counts have a screen-reader table equivalent.
+
+Shared problems uses a search field, theme-name/company-count sort and Percentage/Count control. Show eight themes initially with View all/Show fewer. Heat cells use a common green scale, retaining text values and adequate foreground contrast. The data stays live and can contain more/different themes and years than the illustrative SVG. Overview/heat tables scroll internally on phones. Three-sector chart panels use three columns from 768px, with wrapped labels and stacked phone columns. Four sectors use two columns on tablets and four from 1024px.
+
+Theme/group bars share one percentage scale per panel; tags share a count scale. Scale descriptions are accessible text. Tags show counts as in the SVG. Theme names remain links. Empty columns remain visible. Notes explain source populations, overlapping groups and independently generated sector group labels. No data-layer, dependency or model-generation change is involved.

@@ -2,11 +2,45 @@
 import Link from "next/link";
 import { useCallback, useEffect, useState } from "react";
 import type { ComparisonData } from "@/lib/sector-comparison";
+import { SECTOR_NAMES } from "@/lib/sector";
+import { BatchYearChart, SharedProblems, SectorOverview, comparisonColor } from "./SectorComparisonDetails";
 import SiteHeader from "./SiteHeader";
 import SiteFooter from "./SiteFooter";
 
 type State = { kind: "loading" } | { kind: "error"; message: string } | { kind: "ready"; data: ComparisonData & { gate: boolean } };
 const pct = new Intl.NumberFormat("en-US", { style: "percent", maximumFractionDigits: 1 });
+
+const sectorGrid = (count: number) => `grid min-w-0 gap-4 ${count === 4 ? "md:grid-cols-2 lg:grid-cols-4" : count === 3 ? "md:grid-cols-3" : "md:grid-cols-2"}`;
+
+function MetricPanel({ sectors, kind, title, description }: {
+  sectors: ComparisonData["sectors"]; kind: "themes" | "groups" | "tags"; title: string; description: string;
+}) {
+  const columns = sectors.map((sector) => ({
+    sector,
+    items: kind === "tags"
+      ? sector.tags.map((tag) => ({ ...tag, id: tag.name, share: sector.total ? tag.count / sector.total : 0, href: null }))
+      : sector[kind].map((item) => ({ ...item, href: kind === "themes" ? `/themes?theme=${item.id}` : null })),
+  }));
+  const largest = Math.max(0, ...columns.flatMap(({ items }) => items.map((item) => kind === "tags" ? item.count : item.share)));
+  const maximum = kind === "tags" ? Math.max(1, largest) : Math.max(0.1, Math.ceil(largest * 10) / 10);
+  return <section aria-label={title} className="mt-4 rounded-[var(--radius-card)] border border-separator bg-white p-4">
+    <h2 className="text-[13px] font-semibold">{title}</h2>
+    <p className="sr-only">{description} {kind === "tags" ? `Same count scale: 0–${maximum.toLocaleString("en-US")}.` : `Same share scale: 0–${pct.format(maximum)}.`}</p>
+    <div className={`${sectorGrid(sectors.length)} mt-2`}>
+      {columns.map(({ sector, items }) => <section key={sector.id} aria-label={`${sector.name} ${title.toLowerCase()}`} className="min-w-0">
+        <h3 className="mb-1 text-[11px] font-semibold" style={{ color: sector.id === "consumer" ? "#856334" : sector.id === "healthcare" ? "#536f80" : comparisonColor(sector.id) }}>{sector.name}</h3>
+        <ul className="space-y-0.5">
+          {items.map((item) => <li key={item.id} className={kind === "tags" ? "grid grid-cols-[minmax(0,1fr)_minmax(0,1.3fr)_3rem] items-center gap-x-2 text-[10px] leading-[12px]" : "grid grid-cols-[minmax(0,1fr)_4rem] items-center gap-x-2 text-[10px] leading-[12px]"}>
+            <span className={`min-w-0 break-words ${kind === "tags" ? "" : "col-span-2"}`}>{item.href ? <Link className="hover:underline focus-visible:underline" href={item.href}>{item.name}</Link> : item.name}</span>
+            <span aria-hidden="true" className={`block rounded-full bg-surface ${kind === "tags" ? "h-2" : "h-1"}`}><span className="block h-full rounded-full" style={{ backgroundColor: comparisonColor(sector.id), width: `${(kind === "tags" ? item.count : item.share) / maximum * 100}%` }} /></span>
+            <span className="whitespace-nowrap text-right text-[9px] leading-[10px] tabular-nums">{kind === "tags" ? item.count.toLocaleString("en-US") : `${pct.format(item.share)} (${item.count.toLocaleString("en-US")})`}</span>
+          </li>)}
+        </ul>
+        {!items.length && <p className="text-sm text-text-secondary">{kind === "themes" ? "No theme assignments yet." : kind === "groups" ? "No problem groups assigned." : "No source tags available."}</p>}
+      </section>)}
+    </div>
+  </section>;
+}
 
 export default function SectorComparisonView() {
   const [state, setState] = useState<State>({ kind: "loading" });
@@ -28,51 +62,36 @@ export default function SectorComparisonView() {
     const controller = new AbortController();
     // eslint-disable-next-line react-hooks/set-state-in-effect -- restore the chosen URL and fetch on mount
     void load(controller.signal);
-    return () => controller.abort();
+    const restore = () => { void load(controller.signal); };
+    window.addEventListener("popstate", restore);
+    return () => { controller.abort(); window.removeEventListener("popstate", restore); };
   }, [load]);
   const data = state.kind === "ready" ? state.data : null;
-  const maxYearCount = Math.max(1, ...(data?.sectors.flatMap((s) => s.years.map((y) => y.count)) ?? []));
-  return <div className="flex min-h-dvh flex-col">
+  const changeSectors = (ids: string[]) => {
+    window.history.pushState(null, "", `/compare?sectors=${ids.sort().join(",")}`);
+    void load();
+  };
+  return <div className="flex min-h-dvh flex-col bg-[#f6f7f2] text-[#223426] font-[Arial,sans-serif] [&_header_nav]:min-h-11 [&_header_nav]:py-1 [&_header_nav>a]:text-[15px] [&_header_nav>div_a]:text-[11px]">
     <SiteHeader showSignOut={data?.gate} />
-    <main className="w-full min-w-0 flex-1 px-4 py-8 sm:px-6 lg:px-8">
-      <Link href="/" className="text-sm text-link underline">All sectors</Link>
-      <h1 className="mt-3 text-headline">Compare sectors</h1>
-      <p className="mt-2 max-w-4xl text-text-secondary">Compare current company data across all batches. Percentages use every listed company in each sector, including companies without a theme. Companies removed from the directory are excluded.</p>
-      {state.kind === "loading" && <p role="status" className="mt-6">Loading comparison…</p>}
+    <main className="w-full min-w-0 flex-1 px-4 py-3 sm:px-6">
+      <Link href="/" className="block text-[10px] leading-3 text-text-secondary hover:underline">‹ All sectors</Link>
+      <h1 className="mt-1 text-[26px] leading-[30px] font-semibold">Compare sectors</h1>
+      <p className="mt-1 text-[11px] leading-4 text-text-secondary">Explore company distributions, trends and shared problems across sectors.</p>
+      {state.kind === "loading" && <p role="status" className="mt-6">Loading comparison...</p>}
       {state.kind === "error" && <div role="alert" className="mt-6"><p>{state.message}</p><button onClick={() => void load()} className="pressable mt-3 text-link underline">Try again</button></div>}
       {data && <>
-        <Link href={`/sector/${data.sectors.map((s) => s.id).join("+")}`} className="pressable my-5 inline-block rounded-full bg-accent px-4 py-2 text-sm text-white">Research these sectors together</Link>
-        <div className={`grid min-w-0 gap-4 md:grid-cols-2 ${data.sectors.length === 4 ? "xl:grid-cols-4" : data.sectors.length === 3 ? "xl:grid-cols-3" : "xl:grid-cols-2"}`}>
-          {data.sectors.map((s) => <section key={s.id} aria-label={`${s.name} comparison`} className="min-w-0 rounded-[var(--radius-card)] border border-separator bg-surface p-4 break-words">
-            <h2 className="text-xl font-semibold">{s.name}</h2>
-            <dl className="my-4 grid grid-cols-2 gap-4 text-sm">
-              <div><dt>Companies</dt><dd className="text-2xl font-semibold">{s.total.toLocaleString("en-US")}</dd></div>
-              <div><dt>Active</dt><dd className="text-2xl font-semibold">{s.active.toLocaleString("en-US")}</dd></div>
-              <div><dt>Active share</dt><dd>{pct.format(s.activeShare)}</dd></div>
-              <div><dt>Tagged AI</dt><dd>{pct.format(s.aiShare)} ({s.aiCount})</dd></div>
-            </dl>
-            {!s.total && <p className="mb-4 text-sm text-text-secondary">No companies in this sector.</p>}
-            <h3 className="mt-5 font-semibold">Companies by batch year</h3>
-            <ul aria-label={`${s.name} companies by batch year`} className="mt-2 space-y-2">{s.years.map((y) => <li key={y.year} className="flex items-center gap-2 text-xs"><span className="w-9 shrink-0">{y.year}</span><span className="h-3 flex-1 rounded-full bg-bg"><span aria-hidden="true" className="block h-3 rounded-full bg-accent/50" style={{ width: `${y.count / maxYearCount * 100}%` }} /></span><span className="min-w-6 text-right tabular-nums">{y.count}</span></li>)}</ul>
-            <p className="mt-2 text-xs text-text-secondary">Same bar scale across sectors. Unknown batch year: {s.undated}.</p>
-            <h3 className="mt-5 font-semibold">Top problem themes</h3>
-            <ul className="mt-2 space-y-2 text-sm">{s.themes.map((t) => <li key={t.id}><Link className="text-link underline" href={`/themes?theme=${t.id}`}>{t.name}</Link> · {pct.format(t.share)} ({t.count})</li>)}</ul>
-            {!s.themes.length && <p className="text-sm text-text-secondary">No theme assignments yet.</p>}
-            <h3 className="mt-5 font-semibold">Top sector problem groups</h3>
-            <ul className="mt-2 space-y-2 text-sm">{s.groups.map((g) => <li key={g.id}>{g.name} · {pct.format(g.share)} ({g.count})</li>)}</ul>
-            {!s.groups.length && <p className="text-sm text-text-secondary">No problem groups assigned.</p>}
-            <h3 className="mt-5 font-semibold">Top tags</h3>
-            <ul className="mt-2 space-y-1 text-sm">{s.tags.map((t) => <li key={t.name}>{t.name} · {t.count}</li>)}</ul>
-            {!s.tags.length && <p className="text-sm text-text-secondary">No source tags available.</p>}
-            <Link href={`/sector/${s.id}`} className="pressable mt-5 inline-block text-sm text-link underline">Research {s.name}</Link>
-          </section>)}
+        <div className="mt-2.5 flex flex-wrap items-center gap-2">
+          {data.sectors.map((s) => <button key={s.id} className="min-w-[104px] rounded-[5px] border border-[#d9e0d4] bg-[#e8ede2] px-3 py-1.5 text-[11px] disabled:opacity-60" aria-label={`Remove ${s.name}`} disabled={data.sectors.length <= 2} title={data.sectors.length <= 2 ? "At least two sectors are required" : `Remove ${s.name}`} onClick={() => changeSectors(data.sectors.filter((sector) => sector.id !== s.id).map((sector) => sector.id))}>{s.name} <span aria-hidden="true">×</span></button>)}
+          <select aria-label="Add sector" value="" disabled={data.sectors.length >= 4} onChange={(e) => { if (e.target.value) changeSectors([...data.sectors.map((s) => s.id), e.target.value]); }} className="w-[104px] rounded-[5px] border border-[#d9e0d4] bg-[#e8ede2] px-3 py-1.5 text-[11px] disabled:opacity-60"><option value="">+ Add sector</option>{Object.entries(SECTOR_NAMES).filter(([id]) => !data.sectors.some((s) => s.id === id)).map(([id, name]) => <option key={id} value={id}>{name}</option>)}</select>
+          <Link href={`/sector/${data.sectors.map((s) => s.id).join("+")}`} className="ml-auto rounded-[6px] bg-[#213b27] px-4 py-1.5 text-[11px] text-white">Research these sectors together</Link>
         </div>
-        <section aria-labelledby="shared-problems" className="mt-6 min-w-0 rounded-[var(--radius-card)] bg-surface p-4">
-          <h2 id="shared-problems" className="font-semibold">Shared problems</h2>
-          <p className="mt-2 text-sm text-text-secondary">Themes represented in every selected sector, including themes outside a sector&apos;s top five.</p>
-          {!data.sharedThemes.length ? <p className="mt-3">No themes currently appear in every selected sector.</p> : <div className="mt-3 max-w-full overflow-x-auto"><table className="w-full text-left text-sm"><caption className="sr-only">Shared theme shares by sector</caption><thead><tr><th scope="col" className="p-2">Theme</th>{data.sectors.map((s) => <th key={s.id} scope="col" className="p-2">{s.name}</th>)}</tr></thead><tbody>{data.sharedThemes.map((t) => <tr key={t.id} className="border-t border-separator"><th scope="row" className="p-2 font-normal"><Link href={`/themes?theme=${t.id}`} className="text-link underline">{t.name}</Link></th>{t.sectors.map((s) => <td key={s.id} className="whitespace-nowrap p-2">{pct.format(s.share)} ({s.count})</td>)}</tr>)}</tbody></table></div>}
-        </section>
-        <p className="mt-4 text-xs text-text-secondary">Themes and problem groups are AI-generated and reflect current descriptions. Problem groups may overlap. Tagged AI counts the source tags AI or Artificial Intelligence; it is separate from the AI problem group.</p>
+        <SectorOverview sectors={data.sectors} />
+        <BatchYearChart sectors={data.sectors} />
+        <SharedProblems sectors={data.sectors} sharedThemes={data.sharedThemes} />
+        <MetricPanel sectors={data.sectors} kind="themes" title="Top problem themes" description="Shared theme classification; shares use all companies in each sector." />
+        <MetricPanel sectors={data.sectors} kind="groups" title="Top sector problem groups" description="Groups are generated separately within each sector; labels are not equivalent across sectors and memberships may overlap." />
+        <MetricPanel sectors={data.sectors} kind="tags" title="Top tags" description="Source tags describe technologies and categories. Percentages show each tag's share of the sector." />
+        <p className="mt-4 text-xs text-text-secondary">Counts include every company still listed in each sector, including companies without a theme, across all batches and statuses. Themes and problem groups are AI-generated and reflect current descriptions. Problem groups may overlap. Tagged AI counts the source tags AI or Artificial Intelligence; it is separate from the AI problem group.</p>
       </>}
     </main>
     <SiteFooter />
