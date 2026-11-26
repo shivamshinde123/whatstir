@@ -6,6 +6,7 @@ export type Action = "ask" | "explore" | "challenge";
 export interface Candidate {
   id: number;
   name: string;
+  sectorName?: string;
   oneLiner: string | null;
   batch: string | null;
   status: string | null;
@@ -68,6 +69,7 @@ export function instructionsFor(action: Action): string {
 
 function describe(c: Candidate): string {
   const facts = [
+    c.sectorName && `sector: ${c.sectorName}`,
     c.oneLiner && `one-liner: ${c.oneLiner}`,
     c.batch && `batch: ${c.batch}`,
     c.launchedAt && `launched: ${c.launchedAt.slice(0, 10)}`,

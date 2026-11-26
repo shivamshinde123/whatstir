@@ -204,3 +204,7 @@ A calm, botanical look, adapted from a style on styles.refero.design (decision 7
 - **Content.**
   - Every logo sits next to its company name.
   - Status badges are small pills: Active (green), Acquired (blue), Public (purple), Inactive (grey).
+
+## Combined sector research, issue #68
+
+Home adds a Combine sectors pressed toggle. Selected map tiles and list rows show a tick and ring. Before two selections, the UI says Select at least two sectors. Open N sectors carries the selected batch. Combined workspace titles join names with +, and groups are qualified as Fintech · AI.

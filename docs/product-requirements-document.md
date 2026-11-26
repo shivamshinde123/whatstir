@@ -39,3 +39,7 @@ The acceptance journey in §13 of the source document applies unchanged. It also
 - **Compare:** selecting 2–3 tiles shows their cards side by side, and unknown fields are marked as unknown.
 - **Chat actions:** Explore and Challenge label hypothetical content as hypothetical.
 - **Notes:** a note can be created, read back, edited and deleted. Notes survive a data refresh.
+
+## Combined sector research, issue #68
+
+Issue #68 adds research over two or more sectors. Select Combine sectors on home, select tiles or list rows, then Open N sectors. Single-sector navigation continues normally when selection is off. Cross-sector problem themes, batch trends and sector comparison remain separate issues.

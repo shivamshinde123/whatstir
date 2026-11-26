@@ -41,3 +41,7 @@
 
 ## Why there's no separate backend or queue
 This is a single user making about 6k records' worth of changes a day. One Vercel function with a time budget handles the daily delta. Companies left unfinished stay marked pending and are picked up by the next run. The big initial backfill runs locally. A queue becomes worth adding only if the daily delta stops fitting in one 300 s run.
+
+## Combined sector research, issue #68
+
+Research boundaries now use canonical sector sets rather than exactly one sector. Ingestion and company classification remain per sector. Search, web matching and session history use the selected union.

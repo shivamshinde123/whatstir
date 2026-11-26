@@ -87,6 +87,7 @@ describe("retrieve", () => {
     expect(c[0]).toEqual({
       id: 1,
       name: "Company 1",
+      sectorName: "Healthcare",
       oneLiner: "Healthcare thing 1",
       batch: "Summer 2021",
       status: "Acquired",

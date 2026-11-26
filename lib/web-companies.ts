@@ -48,7 +48,7 @@ const INSTRUCTIONS = `You check which of the listed companies a text talks about
  */
 export async function webCompanies(sql: Sql, sectorId: string, text: string): Promise<number[]> {
   const rows = await sql<{ id: number; name: string }[]>`
-    select id, name from companies where sector_id = ${sectorId} and missing_since is null`;
+    select id, name from companies where sector_id = any(${sectorId.split("+")}::text[]) and missing_since is null`;
   const hits = namesInText(text, rows);
   if (!hits.length) return [];
   // The grid gets them in the order the web text first mentions them.

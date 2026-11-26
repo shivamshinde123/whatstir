@@ -1,4 +1,5 @@
 import type { Sql } from "postgres";
+import { sectorSetName } from "./sector-set";
 import { searchWeb as defaultSearchWeb, webSearchEnabled, type WebResult } from "./ai";
 import { answer as defaultAnswer, filterIds, HISTORY_TURNS, type Action, type HistoryTurn } from "./answer";
 import { loadCompanies, MAX_SELECTED, retrieve as defaultRetrieve } from "./retrieval";
@@ -79,20 +80,23 @@ export async function postMessage(
   const searchWeb = deps.searchWeb ?? defaultSearchWeb;
   const webCompanies = deps.webCompanies ?? defaultWebCompanies;
 
-  const [session] = await sql<{ id: string; sector_id: string; sector_name: string; ended_at: Date | null }[]>`
-    select s.id, s.sector_id, x.name as sector_name, s.ended_at
-    from sessions s join sectors x on x.id = s.sector_id where s.id = ${sessionId}`;
+  const [session] = await sql<{ id: string; sector_ids: string[]; ended_at: Date | null }[]>`
+    select id, sector_ids, ended_at from sessions where id = ${sessionId}`;
   if (!session) return { status: 404, body: { error: "No such session." } };
   if (session.ended_at) return { status: 409, body: { error: "This session has ended. Reload to continue in the new one." } };
 
-  let scopeLabel = session.sector_name;
+  const sectorId = session.sector_ids.join("+");
+  const sectorName = sectorSetName(session.sector_ids);
+  let scopeLabel = sectorName;
   if (input.selectedCompanyIds.length) {
     scopeLabel = `${input.selectedCompanyIds.length} selected ${input.selectedCompanyIds.length === 1 ? "company" : "companies"}`;
   } else if (input.subcategoryId) {
     const [sub] = await sql<{ name: string }[]>`
-      select name from subcategories where id = ${input.subcategoryId} and sector_id = ${session.sector_id}`;
+      select case when ${session.sector_ids.length} > 1 then
+        (select name from sectors where id = subcategories.sector_id) || ' · ' || name else name end as name
+      from subcategories where id = ${input.subcategoryId} and sector_id = any(${session.sector_ids}::text[])`;
     if (!sub) return { status: 400, body: { error: "That subcategory isn't in this sector." } };
-    scopeLabel = `${session.sector_name} › ${sub.name}`;
+    scopeLabel = `${sectorName} › ${sub.name}`;
   }
   // An explicit selection is exactly those companies; otherwise a batch narrows the sector or group.
   const batch = input.selectedCompanyIds.length ? null : input.batch;
@@ -127,18 +131,18 @@ export async function postMessage(
   try {
     const found = await retrieve(
       sql,
-      { sectorId: session.sector_id, subcategoryId: input.subcategoryId, batch, selectedIds: input.selectedCompanyIds },
+      { sectorId: sectorId, subcategoryId: input.subcategoryId, batch, selectedIds: input.selectedCompanyIds },
       input.text,
     );
     skipped = found.skipped;
     const matched = new Set(found.candidates.map((c) => c.id));
-    const earlier = await loadCompanies(sql, session.sector_id, earlierIds.filter((id) => !matched.has(id)));
+    const earlier = await loadCompanies(sql, sectorId, earlierIds.filter((id) => !matched.has(id)));
     if (!found.candidates.length && !earlier.length) {
       text = `No companies in ${scopeLabel} match yet.`;
       companyIds = [];
     } else {
       const a = await answer({
-        sectorName: session.sector_name,
+        sectorName: sectorName,
         scopeLabel,
         action: input.action,
         question: input.text,
@@ -162,7 +166,7 @@ export async function postMessage(
         // Dataset companies the web answer discusses join the grid too (decision 78).
         if (web.text) {
           try {
-            const found = await webCompanies(sql, session.sector_id, web.text);
+            const found = await webCompanies(sql, sectorId, web.text);
             // Only the ones the database answer didn't already cite: what the web added.
             web.companyIds = found.filter((id) => !companyIds.includes(id));
             companyIds = [...companyIds, ...web.companyIds];

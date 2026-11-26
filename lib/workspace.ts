@@ -1,4 +1,5 @@
 import type { Sql } from "postgres";
+import { parseSectorSet, sectorSetName } from "./sector-set";
 
 export interface SubcategoryInfo {
   id: number;
@@ -29,14 +30,17 @@ const KIND_ORDER = { ai: 0, problem: 1, unclassified: 2 } as const;
 
 /** Everything the workspace needs for one sector, or null if the sector doesn't exist. */
 export async function getSectorWorkspace(sql: Sql, sectorId: string): Promise<SectorWorkspace | null> {
-  const [sector] = await sql<{ id: string; name: string; total: number }[]>`
-    select sector_id as id, name, total from sector_counts where sector_id = ${sectorId}`;
-  if (!sector) return null;
+  const ids = parseSectorSet(sectorId);
+  if (!ids) return null;
+  const counts = await sql<{ total: number }[]>`
+    select total from sector_counts where sector_id = any(${ids}::text[])`;
+  const sector = { id: ids.join("+"), name: sectorSetName(ids), total: counts.reduce((n, c) => n + c.total, 0) };
 
   const subs = await sql<(Omit<SubcategoryInfo, "id"> & { id: string })[]>`
-    select s.id, s.slug, s.name, s.description, s.kind, sc.total as count
+    select s.id, s.slug, case when ${ids.length} > 1 then
+      (select name from sectors where id = s.sector_id) || ' · ' || s.name else s.name end as name, s.description, s.kind, sc.total as count
     from subcategories s join subcategory_counts sc on sc.subcategory_id = s.id
-    where s.sector_id = ${sectorId}`;
+    where s.sector_id = any(${ids}::text[])`;
   const subcategories = subs
     .map((s) => ({ ...s, id: Number(s.id) }))
     // AI first, then problem groups largest first, Unclassified last.
@@ -48,7 +52,7 @@ export async function getSectorWorkspace(sql: Sql, sectorId: string): Promise<Se
         filter (where cs.subcategory_id is not null), '{}') as subs
     from companies c
     left join company_subcategories cs on cs.company_id = c.id
-    where c.sector_id = ${sectorId} and c.missing_since is null
+    where c.sector_id = any(${ids}::text[]) and c.missing_since is null
     group by c.id
     order by lower(c.name), c.id`;
 

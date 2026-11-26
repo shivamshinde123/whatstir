@@ -103,3 +103,7 @@ refresh.run(trigger, runId?)
 
 ## Suggested questions
 `Chat` → `suggestionsFor(action, scopeName, selection)` (`lib/suggestions.ts`, pure) → 3 buttons → click → the same path as a typed question: `onAsk(text, action)` → `Workspace.ask` → `POST /api/sessions/:id/messages` with the current scope.
+
+## Combined sector research, issue #68
+
+Home selection -> sorted `/sector/b2b+fintech` -> validated sector set -> union basket and session keyed by `sector_ids` -> retrieval and web matching restricted to that union -> cumulative tiles. Reversed page URLs redirect while preserving query parameters. Batch filtering and subcategory narrowing remain available.

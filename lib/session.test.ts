@@ -38,7 +38,7 @@ describe("getOrCreateSession", () => {
   it("creates only one session when several requests race on the first visit", async () => {
     const results = await Promise.all(Array.from({ length: 6 }, () => getOrCreateSession(sql, "healthcare")));
     expect(new Set(results.map((r) => r!.session.id)).size).toBe(1);
-    const [{ n }] = await sql`select count(*)::int as n from sessions where sector_id = 'healthcare'`;
+    const [{ n }] = await sql`select count(*)::int as n from sessions where sector_ids = array['healthcare']`;
     expect(n).toBe(1);
   });
 

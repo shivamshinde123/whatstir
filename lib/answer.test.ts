@@ -189,3 +189,9 @@ describe("answer (real path, stubbed client)", () => {
     }
   });
 });
+
+it("includes sector attribution for combined research candidates", () => {
+  const turns = buildAnswerInput({ ...REQ, sectorName: "B2B + Fintech", candidates: [cand(1, { sectorName: "B2B" }), cand(2, { sectorName: "Fintech" })] });
+  expect(turns.at(-1)?.content).toContain("sector: B2B");
+  expect(turns.at(-1)?.content).toContain("sector: Fintech");
+});

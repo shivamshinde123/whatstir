@@ -17,7 +17,7 @@ const PG_FK = "23503";
 const PG_CHECK = "23514";
 
 async function newSession(sector = "b2b"): Promise<string> {
-  const [s] = await sql`insert into sessions (sector_id) values (${sector}) returning id`;
+  const [s] = await sql`insert into sessions (sector_ids) values (array[${sector}]) returning id`;
   return s.id;
 }
 
@@ -289,5 +289,11 @@ describe("refresh_runs", () => {
     await expect(sql`insert into refresh_runs (trigger) values ('webhook')`).rejects.toMatchObject({
       code: PG_CHECK,
     });
+  });
+});
+
+describe("canonical session sector sets", () => {
+  it.each([[[]], [["b2b", "b2b"]], [["fintech", "b2b"]], [["unknown"]], [["b2b", null]]])("rejects a noncanonical or unknown set %j", async (ids) => {
+    await expect(sql`insert into sessions (sector_ids) values (${ids}::text[])`).rejects.toMatchObject({ code: PG_CHECK });
   });
 });

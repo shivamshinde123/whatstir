@@ -1,6 +1,6 @@
 import { NextResponse, type NextRequest } from "next/server";
 import { AUTH_COOKIE, gatePassword, isPublicPath, isValidToken } from "@/lib/auth";
-import { SECTOR_NAMES } from "@/lib/sector";
+import { parseSectorSet } from "@/lib/sector-set";
 
 /**
  * 1. Unknown sector pages get a real 404 status (the prerendered shell would stream a 200
@@ -9,7 +9,7 @@ import { SECTOR_NAMES } from "@/lib/sector";
 export function proxy(request: NextRequest) {
   const { pathname, search } = request.nextUrl;
   const sector = pathname.match(/^\/sector\/([^/]+)\/?$/);
-  if (sector && !Object.hasOwn(SECTOR_NAMES, sector[1])) {
+  if (sector && !parseSectorSet(sector[1])) {
     return NextResponse.rewrite(new URL("/_not-found", request.url), { status: 404 });
   }
 
