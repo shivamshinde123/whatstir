@@ -174,3 +174,8 @@ Requires exactly `Authorization: Bearer $CRON_SECRET` (compared in constant time
 ## Combined sector research, issue #68
 
 Sector workspace, session and reset endpoints accept a plus-separated set of known sector ids, such as `b2b+fintech`. Responses retain `sector.id` and `session.sectorId` as canonical sorted keys. Unknown sets return 404. Group names include their sector when more than one sector is requested.
+
+## Problem themes, issue #69
+
+- `GET /api/themes` returns `{ themes: Theme[], gate: boolean }`. Each theme has numeric `id`, `name`, `description`, ISO `generatedAt`, company `count`, `spread`, and `sectors`. A sector has `id`, `name`, `count`, fractional `share` and up to three `examples`, each with `id`, `name`, `logoUrl`, and `sectorId`. An empty database returns an empty array; storage failures return 500 with an error message.
+- `POST /api/admin/themes` starts a manual generation job. Returns 202 `{ runId }`, 409 `{ error }` while another data job owns the slot, or 500 on startup failure. The optional existing password gate protects both APIs. Background errors appear in `refresh_runs` and Admin.

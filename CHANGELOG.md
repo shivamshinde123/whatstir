@@ -5,6 +5,7 @@ All notable changes to Whatstir are recorded here. The format follows [Keep a Ch
 ## [Unreleased]
 
 ### Added
+- Cross-sector problem themes, with sector-share bars, spread and size sorting, example companies, and manual generation from Admin or `npm run themes` (#69).
 - Research multiple sectors together, with combined company baskets, sector-labelled groups and persistent sessions per sector set (#68).
 - **A demo video in the README.** A three-and-a-half-minute tour of Whatstir plays at the top of the README (#63).
 - **Repeat founders.** A new Founders page lists people who founded more than one YC company, matched by LinkedIn, with their companies in order and whether they stayed in one sector. Search by founder or company name, and compare a founder's companies side by side. Admin has a switch to turn founder fetching on and an Extract founders button to fill it in (#67).

@@ -65,3 +65,7 @@
 ## Combined sector research, issue #68
 
 HomeView owns Combine sectors selection. Treemap renders pressed buttons during selection and links otherwise. Workspace reuses the existing basket, group filter, profile, compare and chat components over the union.
+
+## Theme components
+
+ThemesView owns loading, retry, empty/no-match states, spread and size sorting, sector bars and example expansion. It reuses SiteHeader, SiteFooter, Logo and sectorColor. SiteHeader links to /themes and wraps navigation on phones. AdminView starts generation and polls existing job status. lib/theme-clustering.ts is pure deterministic clustering; lib/theme-names.ts owns bounded AI naming; lib/themes.ts owns generation, job outcomes and database queries.

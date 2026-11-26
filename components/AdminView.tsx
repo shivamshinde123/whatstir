@@ -1,6 +1,7 @@
 "use client";
 
 import { useCallback, useEffect, useState } from "react";
+import Link from "next/link";
 import type { RefreshStatus, Run } from "@/lib/admin";
 import SiteFooter from "./SiteFooter";
 import SiteHeader from "./SiteHeader";
@@ -114,6 +115,7 @@ export default function AdminView() {
       () => (foundersFetch ? "Founder fetching is on." : "Founder fetching is off."),
     );
   const extractFounders = () => act(() => fetch("/api/admin/founders", { method: "POST" }), () => "Extracting founders.");
+  const generateThemes = () => act(() => fetch("/api/admin/themes", { method: "POST" }), () => "Generating problem themes. Existing themes stay available until the new set is ready.");
 
   const s = state.kind === "ready" ? state.status : null;
 
@@ -282,6 +284,15 @@ export default function AdminView() {
                   {!s.founders.enabled && s.founders.pending > 0 && " Turn fetching on to extract them."}
                 </p>
               </div>
+            </section>
+
+            <section aria-labelledby="themes-heading" className="mt-10 rounded-[var(--radius-card)] bg-surface p-4">
+              <h2 id="themes-heading" className="font-semibold">Problem themes</h2>
+              <p className="mt-2 max-w-2xl text-sm text-text-secondary">Group embedded companies across sectors, then name their shared problems with the writing model. Generating a new set replaces the previous themes. This is manual and uses OpenRouter credit.</p>
+              <button type="button" disabled={busy || s.running} onClick={() => void generateThemes()} className="pressable mt-4 rounded-full bg-accent px-4 py-2 text-sm text-white disabled:opacity-40">
+                {s.runs.some((r) => r.status === "running" && r.trigger === "themes") ? "Generating themes…" : "Generate themes"}
+              </button>
+              <p className="mt-2 text-sm text-text-secondary">Progress and errors appear in Recent runs. <Link href="/themes" className="text-link underline">Explore themes</Link></p>
             </section>
 
             <section aria-labelledby="runs-heading" className="mt-10">

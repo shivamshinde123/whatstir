@@ -49,3 +49,7 @@ These live in the `app_settings` table so they can change without a redeploy:
 ## Combined sector migration
 
 No new variables. Apply migration `007_sector_sets.sql` in a coordinated deployment before starting the updated application. It replaces the session sector column; the old application requires the old schema. Do not run `npm run migrate` against production merely to preview the feature.
+
+## Theme generation
+
+No new environment variable or secret. npm run themes reads the existing .env for DATABASE_URL and OpenRouter configuration. AI_MODEL_WRITE selects the naming model; AI_FAKE=1 avoids real model calls. Run npm run migrate against the intended database before deploying the new code. Generate themes manually after company enrichment; never point verification scripts at production. Real naming consumes existing OpenRouter credit.

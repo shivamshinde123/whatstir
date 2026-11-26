@@ -13,7 +13,7 @@ export const MIN_SOURCE_RATIO = 0.9;
 export const STALE_RUN_MINUTES = 15;
 const BATCH = 500; // keeps one upsert under Postgres's 65,535-parameter limit
 
-export type Trigger = "cron" | "manual" | "script" | "founders";
+export type Trigger = "cron" | "manual" | "script" | "founders" | "themes";
 
 export interface CompanyRow {
   id: number;

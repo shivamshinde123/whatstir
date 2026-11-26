@@ -6,6 +6,7 @@ import { migrate } from "../lib/migrate";
 import { enrich } from "../lib/enrich";
 import { run } from "../lib/refresh";
 import { generateSubcategories } from "../lib/subcategories";
+import { generateThemes } from "../lib/themes";
 import { E2E_DATABASE_URL, TEST_SERVER_URL } from "./db-urls";
 import { E2E_FOUNDERS, startFeedServer } from "./feed-server";
 
@@ -42,6 +43,7 @@ export default async function globalSetup() {
     if (failed) throw new Error(`e2e subcategories failed: ${failed.error}`);
     const e = await enrich({ sql, timeBudgetMs: 120_000, concurrency: 8 });
     if (e.pending) throw new Error(`e2e enrichment left ${e.pending} pending: ${JSON.stringify(e.errors[0])}`);
+    await generateThemes({ sql });
 
     for (const f of E2E_FOUNDERS) {
       await sql`insert into founders (company_id, name, title, linkedin_url) values (5, ${f.name}, ${f.title}, ${f.linkedin})`;

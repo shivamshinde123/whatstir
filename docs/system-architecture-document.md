@@ -45,3 +45,7 @@ This is a single user making about 6k records' worth of changes a day. One Verce
 ## Combined sector research, issue #68
 
 Research boundaries now use canonical sector sets rather than exactly one sector. Ingestion and company classification remain per sector. Search, web matching and session history use the selected union.
+
+## Global themes
+
+The server clusters existing Postgres embeddings locally and sends bounded customer-problem statements to the existing OpenRouter writing model for naming. No new data source, SDK or processor is added. Themes and assignments live in RLS-protected Postgres tables. Generation uses the shared refresh slot, a response-after callback or the CLI, then an atomic replacement. A separate read API exposes aggregate splits and a capped set of examples to the themes screen. This adds no daily background schedule or production migration invocation.

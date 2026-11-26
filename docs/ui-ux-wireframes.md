@@ -208,3 +208,7 @@ A calm, botanical look, adapted from a style on styles.refero.design (decision 7
 ## Combined sector research, issue #68
 
 Home adds a Combine sectors pressed toggle. Selected map tiles and list rows show a tick and ring. Before two selections, the UI says Select at least two sectors. Open N sectors carries the selected batch. Combined workspace titles join names with +, and groups are qualified as Fintech · AI.
+
+## Problem themes, issue #69
+
+/themes uses the existing sage palette, type, rings and radius. A plain heading and AI-label/coverage note precede In 3+ sectors and Sort by Spread/Size. Every theme card always shows its name, description, company count, spread, sector-coloured stacked bar and a text legend with percentages. Native details/summary reveals example companies grouped by sector. Each logo accompanies a linked company name. Counts include all live assigned companies, not only examples. The bar has an accessible summary and the text legend provides a colour-independent equivalent. Controls wrap and navigation uses flexible height on narrow phones, including 320 px. Admin adds a Generate themes action, explains the replacement and model cost, and reports job status/errors in Recent runs.

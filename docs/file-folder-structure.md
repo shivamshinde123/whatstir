@@ -56,3 +56,12 @@ Whatstir/
 ## Combined sector research, issue #68
 
 `lib/sector-set.ts` validates workspace keys. `db/migrations/007_sector_sets.sql` migrates session ownership. `e2e/cross-sector.spec.ts` covers combined navigation, answers, reload and canonical redirects.
+
+## Theme additions
+
+- app/themes/page.tsx and components/ThemesView.tsx: themes screen.
+- app/api/themes/route.ts and app/api/admin/themes/route.ts: read and generate APIs.
+- lib/theme-clustering.ts, lib/theme-names.ts, lib/themes.ts: clustering, naming and storage/job services.
+- scripts/generate-themes.mts: manual CLI entry point.
+- db/migrations/008_problem_themes.sql: tables, RLS and job trigger.
+- Adjacent unit/integration/component/API tests and e2e/themes.spec.ts verify the feature. Browser fixtures seed themes after enrichment.

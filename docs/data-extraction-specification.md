@@ -101,3 +101,11 @@ The card is written with one Chat Completions call through OpenRouter (`openai` 
 - Each card stores its model and source hash.
 - Each assignment stores who made it (Jev or manual) and its confidence.
 - The UI marks cards and subcategories as "AI-generated".
+
+## Cross-sector themes
+
+Read all live companies with nonnull embeddings, ordered by company id. Normalise vectors and use spherical k-means with cosine similarity, k-means++ initialisation, seed 69 and at most 20 iterations. Default cluster count is min(40, max(1, round(sqrt(N)))); small fixtures therefore retain meaningful cross-company groups. Identical vectors or empty clusters can yield fewer themes. Reject invalid or zero vectors. All eligible companies receive one assignment.
+
+Name each cluster from at most eight company problem-card customer/problem statements, each truncated to 500 characters. Fall back to the company one-liner when no card statement exists. One strict writing-model request names the ordered set; validate the number of labels and bounded nonempty names/descriptions. AI_FAKE uses deterministic placeholder labels without network calls. Labels are approximate AI output, not a new source of company facts.
+
+Build before replacing; failures preserve the old set. Regeneration is manual after enrichment, not part of daily refresh. Removed companies are excluded from current counts and examples even before regeneration. Shares divide sector membership by that theme's live membership. Spread counts sectors with at least 5% inclusive. Examples use the first three company ids per sector, not an AI ranking.

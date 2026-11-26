@@ -107,3 +107,9 @@ refresh.run(trigger, runId?)
 ## Combined sector research, issue #68
 
 Home selection -> sorted `/sector/b2b+fintech` -> validated sector set -> union basket and session keyed by `sector_ids` -> retrieval and web matching restricted to that union -> cumulative tiles. Reversed page URLs redirect while preserving query parameters. Batch filtering and subcategory narrowing remain available.
+
+## Theme flow
+
+Admin Generate themes -> POST /api/admin/themes -> claimRun("themes") -> after(runThemes) -> generateThemes -> ordered embedding snapshot -> clusterEmbeddings -> nameThemes -> transaction replaces themes and assignments -> job status recorded. The CLI npm run themes takes the same slot and calls the same runner. The runner verifies it still owns the slot before publishing. A 240-second budget check prevents late publication; the writing request has a 90-second timeout and no retries. Hosting maxDuration is 300 seconds; killed jobs are reclaimed by the existing 15-minute stale-run rule.
+
+/themes -> ThemesView -> GET /api/themes -> getThemes uses a repeatable-read transaction for counts and examples -> local spread/size sort and 3+ sector filter -> native details expansion -> /sector/:id?company=:companyId opens the existing profile.

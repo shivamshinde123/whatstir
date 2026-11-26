@@ -33,3 +33,16 @@ old application code cannot run against the new schema. Deployment coordination
 is required at release. This PR does not migrate the production database.
 
 This AI-assisted review is not legal advice and does not replace review by qualified counsel for the product's jurisdictions and business model.
+
+## Theme generation review, issue #69, 2026-11-26
+
+Planning review: this remains the existing owner-operated research web app, with optional password access. New derived themes/assignments use existing company data. The existing OpenRouter writing model receives at most eight 500-character problem statements per cluster. No new processor, dependency, asset, payment, cookie, permission, marketing channel or target audience is introduced. The applicability classifications in controls 1-14 above remain current, with the following evidence changes:
+
+- Controls 4-5: embedding clustering stays on the server; naming input is bounded, output validated, and there is no new SDK. New tables use RLS and revoke API-role access.
+- Controls 6-7: Generate themes is explicit and discloses existing model-credit use. AI labels and embedding coverage are explained; counts are actual database membership, not invented model facts.
+- Controls 8-9: native buttons, checkbox, select, links and details/summary; labelled sector bars plus a text legend. Keyboard and narrow-phone checks are included in the browser tests. Complete screen-reader/contrast audit remains TBD.
+- Control 14: derived themes are replaced on regeneration, assignments cascade when their companies are deleted, and removed companies disappear from current results. Existing broader retention/export questions remain TBD.
+
+Policy/contact/jurisdiction and historic asset questions are still required before wider public operation. The previously observed Next.js build security warning also requires dependency review before public release. Migration 008 must be applied before deployment; this work does not run migrations or real AI generation in production.
+
+PR handoff verification: `npm run ci` passed type checking, ESLint, 704 unit/integration/component/API tests and 88 browser tests. Browser coverage includes Admin generation, theme filters and profile links, empty states, keyboard expansion, and no overflow at 320/375 px. Desktop and phone screenshots were reviewed with fake AI labels. The Windows runner required manual termination of its two verified test-server processes after all tests completed before reporting exit 0. No full assistive-technology audit or legal conclusion is implied.

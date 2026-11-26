@@ -182,12 +182,14 @@ npm run migrate                  # create the schema (and enable pgvector)
 npm run refresh -- --load-only   # load ~6.4k companies from yc-oss (seconds, no AI)
 npm run subcategories            # name each sector's problem groups (one model call per sector)
 npm run backfill                 # embeddings, groups, problem cards and founders for everything
+npm run themes                   # optional: cluster and name cross-sector problem themes
 npm run dev                      # http://localhost:3000
 ```
 
 - `backfill` shows its progress. It's safe to stop and run again, because finished work is kept. If any company fails (a timeout, say), it exits with code 1; run it again to retry only those.
 - Founders aren't fetched by default, because that scrapes YC company pages (see [About the data](#about-the-data)). Turn on **Fetch founders from YC pages** on the Admin page (or set `FOUNDERS_FETCH=on`) and press **Extract founders** to opt in for your own private use. The Founders page then lists people who founded more than one company.
 - To regenerate one sector's groups, run `npm run subcategories -- --sector healthcare`, then `npm run backfill`.
+- Explore global problem themes at `/themes`. Regenerate them manually with `npm run themes` or **Generate themes** in Admin after enrichment. Naming uses the writing model and existing OpenRouter credit; clustering is local. Failed generation keeps the previous set. Apply migration 008 before deploying this feature.
 
 ### 4. Deploy to your own Vercel
 

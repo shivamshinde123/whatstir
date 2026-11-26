@@ -43,3 +43,7 @@ The acceptance journey in §13 of the source document applies unchanged. It also
 ## Combined sector research, issue #68
 
 Issue #68 adds research over two or more sectors. Select Combine sectors on home, select tiles or list rows, then Open N sectors. Single-sector navigation continues normally when selection is off. Cross-sector problem themes, batch trends and sector comparison remain separate issues.
+
+## Cross-sector problem themes, issue #69
+
+Researchers can browse global problem themes, see company counts and sector shares, sort by size or spread, filter to themes reaching at least three sectors, and open example companies in their original sector. Sector reach uses a 5% inclusive threshold. The page labels AI-generated names and explains incomplete embedding coverage. No generated labels become company facts. Owners regenerate manually through Admin or npm run themes. Failed generation preserves current data. Generation and data refresh cannot overlap. Empty, failed-load and no-match states are required. Trend analysis and side-by-side sector comparisons remain future issues #70 and #71.

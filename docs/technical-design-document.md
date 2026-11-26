@@ -101,3 +101,7 @@ With `cacheComponents` on, Next.js starts running GET handlers at build time. So
 `lib/sector-set.ts` validates known ids, removes duplicates and sorts keys. `sessions.sector_ids` owns the session boundary; API string keys preserve existing callers. Retrieval supplies each candidate sector name to the answer model. Search still takes the best 40 matches across the union, without per-sector quotas.
 
 Next.js 16.4 route params retain percent encoding for combined keys, so validation decodes URI components once before splitting. Page URL-data access is inside Suspense for partial prefetching. Canonical comparisons use the decoded key to avoid redirect loops.
+
+## Theme implementation
+
+See lib/theme-clustering.ts for seeded spherical k-means and lib/themes.ts for the build-and-swap transaction. Raw pgvector text is parsed and validated before clustering. Assignment records are inserted in chunks of 1,000. The primary key on company_themes.company_id prevents multiple themes per company. Before publishing an Admin/CLI job, lock its running refresh row and reject a superseded job. Count queries use current live companies; example queries use row_number partitioned by theme and sector, capped at three. Both reads share a repeatable-read snapshot. Theme labels have max lengths 120/800 and the writer cannot return company ids. Manual regeneration can change theme ids and memberships.
