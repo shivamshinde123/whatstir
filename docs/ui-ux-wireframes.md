@@ -208,3 +208,5 @@ A calm, botanical look, adapted from a style on styles.refero.design (decision 7
 ## Combined sector research, issue #68
 
 Home adds a Combine sectors pressed toggle. Selected map tiles and list rows show a tick and ring. Before two selections, the UI says Select at least two sectors. Open N sectors carries the selected batch. Combined workspace titles join names with +, and groups are qualified as Fintech · AI.
+
+Home filter alignment (#74): Combine sectors and its selection action sit in the left filter group beside All batches. Show as list remains on the right. The controls wrap on narrow screens.
