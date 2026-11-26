@@ -26,6 +26,42 @@ test.describe("home page", () => {
     expect(overflow).toBe(0);
   });
 
+  test("keeps sector selection beside the batch filter and wraps on phones", async ({ page }) => {
+    await page.setViewportSize({ width: 1440, height: 900 });
+    await page.goto("/");
+    const batch = page.getByRole("combobox", { name: "Batch" });
+    const combine = page.getByRole("button", { name: "Combine sectors" });
+    const list = page.getByRole("button", { name: "Show as list" });
+    await expect(batch).toBeVisible();
+    const batchBox = await batch.boundingBox();
+    const combineBox = await combine.boundingBox();
+    const listBox = await list.boundingBox();
+    if (!batchBox || !combineBox || !listBox) throw new Error("Home controls must have layout boxes");
+    expect(combineBox.x).toBeGreaterThan(batchBox.x + batchBox.width);
+    expect(Math.abs(combineBox.y - batchBox.y)).toBeLessThan(8);
+    expect(listBox.x).toBeGreaterThan(combineBox.x + combineBox.width);
+    await page.screenshot({ path: "test-results/home-controls-desktop.png" });
+
+    await combine.click();
+    await expect(page.getByText("Select at least two sectors.")).toBeVisible();
+    await page.getByRole("button", { name: /^B2B,/ }).click();
+    await page.getByRole("button", { name: /^Consumer,/ }).click();
+    const open = page.getByRole("link", { name: "Open 2 sectors" });
+    await expect(open).toBeVisible();
+    for (const width of [320, 375]) {
+      await page.setViewportSize({ width, height: 800 });
+      await page.evaluate(() => window.scrollTo(0, 0));
+      for (const control of [batch, combine, list, open]) {
+        await expect(control).toBeInViewport();
+        const box = await control.boundingBox();
+        if (!box) throw new Error("Home controls must remain visible");
+        expect(box.x).toBeGreaterThanOrEqual(0);
+        expect(box.x + box.width).toBeLessThanOrEqual(width);
+      }
+      await page.screenshot({ path: `test-results/home-controls-${width}.png` });
+    }
+  });
+
   test("stays light when the system prefers dark (the design is light only)", async ({ page }) => {
     await page.emulateMedia({ colorScheme: "dark" });
     await page.goto("/");

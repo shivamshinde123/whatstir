@@ -54,3 +54,12 @@ Planning: the existing controls 1-14 and their applicability classifications rem
 Controls 4/6/7: server-enforced scope, no invented reference-image counts, no nonfunctional menus, explicit bounded-retrieval wording, and Results populated by cited answers only. Controls 8/9: native sidebar buttons, mobile select, labelled search, pressed states, chart/table equivalents and a theme return link; automated keyboard/phone checks supplement screenshot review. Full assistive-technology and contrast review remains TBD. Migration 009 is required before deployment; no hosted migration or new model generation is part of this update. Previously recorded public-release policy/contact/license and dependency-security questions remain open.
 
 Handoff verification: type checking, ESLint and 713 unit/integration/component/API tests passed. The final full browser run passed 89 tests, including empty Results on theme entry, citation-only additions, reload/reset behavior, full-member search, session isolation, regeneration and 320/375 px keyboard layouts. Reviewed the real-data desktop explorer and phone screenshots. The local preview retains its 40 real themes; a 309-company theme returns zero Results before questions. Windows test-server teardown again required terminating only the two verified Playwright test servers before the runner reported exit 0. The real-data preview remains isolated from the hosted database.
+Follow-up #74 rechecked during planning and PR handoff. This only groups existing home controls visually; the applicability table remains unchanged. Controls retain their native button/link semantics and wrap at narrow widths. No dependencies, data flows, permissions, assets, or policies change.
+
+Verification on 2026-11-26: the installed Next.js build reported a security advisory
+and stopped the first browser-suite build. A dependency security review and upgrade
+are required before public release. This layout fix does not change dependencies.
+
+Desktop and phone screenshots confirm the filter controls wrap and remain usable.
+The existing header navigation overflows by 16 px at 320 px, tracked separately
+in issue #75; the filter controls themselves fit at both 320 and 375 px.

@@ -150,7 +150,6 @@ export default function HomeView() {
               Clear batch
             </button>
           )}
-          </div>
           <button type="button" aria-pressed={combining} onClick={() => { setCombining((v) => !v); setSelected([]); }}
             className="pressable rounded-full bg-surface px-4 py-1.5 text-sm aria-pressed:ring-2 aria-pressed:ring-accent">
             Combine sectors
@@ -160,6 +159,7 @@ export default function HomeView() {
               Open {selected.length} sectors
             </Link>
           ) : <p role="status" className="text-sm text-text-secondary">Select at least two sectors.</p>)}
+          </div>
           <button
             type="button"
             aria-pressed={asList}
