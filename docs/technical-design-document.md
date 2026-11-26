@@ -1,5 +1,9 @@
 # Technical design
 
+## Sector comparison (#71)
+
+Query present companies and their optional theme memberships, plus sector-local problem-group counts. Aggregate totals, status shares, unique tags and batch years in TypeScript; intersect complete theme lists before taking the top five per sector. Zero-company sectors use zero shares and empty charts. API validation constrains requests to 2-4 canonical known ids. Native bars carry actual text counts, and the shared table uses row/column headers.
+
 ## Retrieval and answer
 - **Scope.** The query is always limited to `sector_id = :sector` and `missing_since IS NULL`.
   - If a subcategory is selected, an `EXISTS` subquery on `company_subcategories` narrows it further.

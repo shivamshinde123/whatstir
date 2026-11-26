@@ -1,5 +1,9 @@
 # File and folder structure
 
+## Sector comparison, issue #71
+
+lib/sector-comparison.ts validates the selected sector set and queries/computes comparison data. app/api/compare/route.ts serves it; app/compare/page.tsx renders components/SectorComparisonView.tsx. e2e/sector-comparison.spec.ts runs serially with theme-state tests.
+
 ```
 Whatstir/
 ├─ app/

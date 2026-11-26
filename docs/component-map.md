@@ -1,5 +1,9 @@
 # Component map
 
+## Sector comparison, issue #71
+
+SectorComparisonView presents responsive per-sector columns, batch-year bars on one shared count scale, and a shared-problems table. HomeView exposes Compare sectors for 2-4 selected sectors alongside Open; larger research selections remain supported but are not comparable.
+
 ## Pages (`app/`)
 | Route | Component | Responsibility |
 |---|---|---|

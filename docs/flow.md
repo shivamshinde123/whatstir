@@ -1,5 +1,9 @@
 # Code flow
 
+## Sector comparison, issue #71
+
+Home Combine sectors -> select 2-4 -> /compare?sectors=... -> GET /api/compare -> live company and group queries -> per-sector metrics and complete theme intersection -> single-sector or combined research workspace links.
+
 *This describes the planned design and gets updated as the code lands.*
 
 ## Entry points

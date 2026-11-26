@@ -1,5 +1,9 @@
 # UI/UX wireframes
 
+## Sector comparison, issue #71
+
+Home offers Compare sectors beside Open for 2-4 selected sectors. /compare uses one card per sector on desktop, stacked on phones. Year bars share the same count scale across cards. Each card links to its workspace; the set links to combined research. The shared-themes table scrolls within its own container. Missing themes/groups and empty sectors have explicit empty states. All comparison counts cover every batch, as stated on the page.
+
 ## 1. Landing page: treemap
 ```
 ┌ Whatstir (translucent bar) ──────────────────────────── [Sign out]┐

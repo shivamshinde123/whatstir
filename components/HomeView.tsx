@@ -159,6 +159,8 @@ export default function HomeView() {
               Open {selected.length} sectors
             </Link>
           ) : <p role="status" className="text-sm text-text-secondary">Select at least two sectors.</p>)}
+          {combining && selected.length >= 2 && selected.length <= 4 && <Link href={`/compare?${new URLSearchParams({ sectors: selected.join(",") })}`} className="pressable rounded-full bg-surface px-4 py-1.5 text-sm text-link ring-1 ring-separator">Compare sectors</Link>}
+          {combining && selected.length > 4 && <p className="text-sm text-text-secondary">Choose up to four sectors to compare.</p>}
           </div>
           <button
             type="button"

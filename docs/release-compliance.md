@@ -1,5 +1,9 @@
 # Release review for combined sector research
 
+## Sector comparison review, issue #71
+
+Planning and pre-PR review: the existing controls 1-14 retain their applicability. This uses only existing records and introduces no collection, SDK, processor, asset, cookie, permission, payment or target-audience change. Controls 4-5 keep aggregates server-side and add no AI request. Control 7 defines all denominators and distinguishes source AI tags from model groups; no success/market claims are made. Controls 8-9 use native links, headings and tables with visible count labels for bars; browser verification includes phones and research navigation. The existing broader policy/contact/retention and full accessibility TBDs remain unchanged.
+
 Reviewed during planning and before PR handoff on 2026-11-25 for issue #68.
 This is a private, owner-operated web research tool behind an optional shared password.
 Regions, formal publisher identity and privacy contact are TBD. No new sources,
