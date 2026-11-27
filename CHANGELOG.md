@@ -5,6 +5,7 @@ All notable changes to Whatstir are recorded here. The format follows [Keep a Ch
 ## [Unreleased]
 
 ### Changed
+- Expand or collapse a problem-theme history by clicking anywhere in its Explorer row; comparison checkboxes remain independent.
 - Simplify sector selection: Select sectors, a count, primary Research companies, and Compare sectors plus View theme trends inside More analyses. Name the grouped analysis Problem themes, Shared problem themes and Problem themes over time (#82).
 
 ### Added

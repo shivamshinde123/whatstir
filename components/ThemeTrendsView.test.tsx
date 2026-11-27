@@ -73,3 +73,24 @@ it("preserves search, direction, sorting and history filters in heatmap mode wit
   fireEvent.change(screen.getByRole("searchbox"), { target: { value: "missing" } });
   expect(screen.getByText("No problem themes match your search and filters.")).toBeVisible();
 });
+
+
+it("toggles details from row cells without coupling checkbox selection or double-toggling buttons", async () => {
+  render(<ThemeTrendsView />);
+  const name = await screen.findByRole("button", { name: "Claims" });
+  const row = name.closest("tr");
+  if (!row) throw new Error("Expected the theme table row");
+  const cells = within(row).getAllByRole("cell");
+  fireEvent.click(cells[1]);
+  expect(screen.getByRole("region", { name: "Claims historical detail" })).toBeVisible();
+  fireEvent.click(cells[2]);
+  expect(screen.queryByRole("region", { name: "Claims historical detail" })).toBeNull();
+  const checkbox = within(row).getByRole("checkbox", { name: "Select Claims" });
+  fireEvent.click(checkbox);
+  expect(checkbox).toBeChecked();
+  expect(screen.queryByRole("region", { name: "Claims historical detail" })).toBeNull();
+  fireEvent.click(name);
+  expect(screen.getByRole("region", { name: "Claims historical detail" })).toBeVisible();
+  fireEvent.click(screen.getByRole("button", { name: "Collapse Claims" }));
+  expect(screen.queryByRole("region", { name: "Claims historical detail" })).toBeNull();
+});
