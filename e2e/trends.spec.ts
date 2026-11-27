@@ -6,8 +6,8 @@ test("opens trends, sorts, selects a period and shows its companies without phon
   const theme = data.themes[0];
   const cell = theme.cells.find((c: { count: number }) => c.count > 0);
   await page.goto("/themes");
-  await page.getByRole("link", { name: "Over time", exact: true }).click();
-  await expect(page.getByRole("heading", { name: "Problems over time" })).toBeVisible();
+  await page.getByRole("link", { name: "View theme trends", exact: true }).click();
+  await expect(page.getByRole("heading", { name: "Problem themes over time" })).toBeVisible();
   await page.getByRole("combobox", { name: "Sort trends" }).selectOption("rising");
   await page.screenshot({ path: "test-results/trends-overview.png" });
   await expect(page.getByRole("button", { name: "Trend Explorer", pressed: true })).toBeVisible();
@@ -25,13 +25,14 @@ test("opens trends, sorts, selects a period and shows its companies without phon
 
 test("home keeps comparison available and carries selected sectors and batch into trends", async ({ page }) => {
   await page.goto("/");
-  await page.getByRole("button", { name: "Combine sectors" }).click();
+  await page.getByRole("button", { name: "Select sectors" }).click();
   await page.getByRole("button", { name: /^B2B,/ }).click();
   await page.getByRole("button", { name: /^Fintech,/ }).click();
   await page.getByRole("combobox", { name: "Batch" }).selectOption("Winter 2012");
-  await expect(page.getByRole("link", { name: "Compare sector statistics", exact: true })).toBeVisible();
-  await page.getByRole("link", { name: "Explore problems over time", exact: true }).click();
-  await expect(page.getByRole("heading", { name: "Problems over time" })).toBeVisible();
+  await page.locator("summary").filter({ hasText: "More analyses" }).click();
+  await expect(page.getByRole("link", { name: /^Compare sectors/ })).toBeVisible();
+  await page.getByRole("link", { name: /^View theme trends/ }).click();
+  await expect(page.getByRole("heading", { name: "Problem themes over time" })).toBeVisible();
   const query = new URL(page.url()).searchParams;
   expect(query.get("batch")).toBe("Winter 2012");
   expect(query.get("sectors")).toBe("b2b,fintech");
@@ -43,7 +44,7 @@ test("home keeps comparison available and carries selected sectors and batch int
 test("explores, expands and compares up to five themes on the same page", async ({ page }) => {
   await page.route("**/api/themes/trends?*", async (route) => route.fulfill({ json: trendFixture(new URL(route.request().url()).searchParams) }));
   await page.goto("/themes/trends");
-  const explorer = page.getByRole("table", { name: "Problem trend explorer", exact: true });
+  const explorer = page.getByRole("table", { name: "Problem theme trend explorer", exact: true });
   await expect(explorer).toBeVisible();
   await expect(page.getByRole("region", { name: "Trend summary" })).toContainText("+9.0 percentage points");
   await page.getByRole("button", { name: "Expand Claims", exact: true }).click();

@@ -233,7 +233,7 @@ export default function Workspace({ sectorId, sectorName, themeId }: { sectorId:
       <main className="flex min-h-0 w-full flex-1 flex-col px-4 pb-4 pt-3 sm:px-6 lg:px-8">
         <div className="flex flex-wrap items-center gap-x-3 gap-y-1">
           <Link href={themeId ? `/themes?theme=${themeId}` : batch ? `/?batch=${encodeURIComponent(batch)}` : "/"} className="text-sm text-link hover:underline">
-            ‹ All {themeId ? "themes" : "sectors"}
+            ‹ All {themeId ? "problem themes" : "sectors"}
           </Link>
           <h1 className="text-2xl font-semibold tracking-[-0.015em]">{sectorName}</h1>
           <p className="text-sm text-text-secondary" aria-live="polite">
@@ -267,7 +267,7 @@ export default function Workspace({ sectorId, sectorName, themeId }: { sectorId:
 
         {state.kind === "error" && (
           <div className="mt-6 flex h-64 flex-col items-center justify-center gap-3 rounded-[var(--radius-card)] bg-surface text-center">
-            <p className="font-medium">{themeId ? "Couldn't load this theme. It may have been regenerated; choose it again from All themes." : "Couldn't load this sector."}</p>
+            <p className="font-medium">{themeId ? "Couldn't load this theme. It may have been regenerated; choose it again from All problem themes." : "Couldn't load this sector."}</p>
             <button type="button" onClick={load} className="pressable rounded-full bg-accent px-5 py-2 text-sm font-medium text-white">
               Try again
             </button>

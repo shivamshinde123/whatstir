@@ -10,7 +10,7 @@ it("renders sector columns, shared theme shares and research links", async () =>
   vi.stubGlobal("fetch", vi.fn(async () => new Response(JSON.stringify({ ...data, gate: false }))));
   render(<SectorComparisonView />);
   await screen.findByRole("region", { name: "Sector overview" });
-  for (const title of ["Sector overview", "Companies by batch year", "Shared problems", "Top problem themes", "Top sector problem groups", "Top tags"]) {
+  for (const title of ["Sector overview", "Companies by batch year", "Shared problem themes", "Top problem themes", "Top sector groups", "Top tags"]) {
     const heading = screen.getByText(title, { selector: "summary h2" });
     expect(heading.closest("details")).not.toHaveAttribute("open");
     fireEvent.click(heading);
@@ -31,9 +31,9 @@ it("renders sector columns, shared theme shares and research links", async () =>
   const fintechTags = within(tags).getByRole("region", { name: "fintech top tags" });
   expect(fintechTags).toHaveTextContent("AI1");
   expect(fintechTags.querySelector("[style*='width']")).toHaveStyle({ width: "50%" });
-  const groups = screen.getByRole("region", { name: "Top sector problem groups" });
+  const groups = screen.getByRole("region", { name: "Top sector groups" });
   expect(groups).toHaveTextContent("labels are not equivalent across sectors");
-  expect(within(groups).getAllByText("No problem groups assigned.")).toHaveLength(2);
+  expect(within(groups).getAllByText("No sector groups assigned.")).toHaveLength(2);
 });
 it("explains invalid sector selections", async () => {
   vi.stubGlobal("fetch", vi.fn(async () => new Response("{}", { status: 400 })));

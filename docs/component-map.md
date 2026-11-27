@@ -68,7 +68,7 @@ SectorComparisonView presents responsive per-sector columns, batch-year bars on 
 
 ## Combined sector research, issue #68
 
-HomeView owns Combine sectors selection. Treemap renders pressed buttons during selection and links otherwise. Workspace reuses the existing basket, group filter, profile, compare and chat components over the union.
+HomeView owns Select sectors. SectorSelectionActions shows the count, Research companies, the More analyses disclosure and Cancel. Treemap renders pressed buttons during selection and links otherwise. Workspace reuses the existing basket, group filter, profile, compare and chat components over the union.
 
 ## Theme components
 
@@ -94,3 +94,8 @@ ComparisonSection is the shared native details/summary wrapper for all six compa
 ## Trend Explorer states, issue #80
 
 ThemeTrendsView owns the shared Explorer/Heatmap filters, search, direction/sort, displayed history range, one expanded theme, selection of at most five themes, comparison visibility and existing URL-backed company drilldown. TrendPanels renders real-data summary cards, pooled change values, inline historical details and the comparison panel. TrendCharts supplies common formatting, sparklines and responsive historical bar/line charts with uniformly scaled text. Scoped trend classes in app/globals.css freeze the Heatmap theme and change columns with opaque backgrounds. No chart dependency is added.
+
+
+## Simplified sector selection, issue #82
+
+HomeView owns selected sector IDs, batch scope and selection mode. SectorSelectionActions renders count/guidance, the primary research link and Cancel. Its controlled native disclosure mounts secondary navigation only when open, closes on Escape/outside pointer/focus, and removes document listeners on close/unmount. Escape restores summary focus; HomeView restores Select sectors focus after Cancel. SubcategoryBar exposes the existing sector classifications as Sector group without renaming internal identifiers.

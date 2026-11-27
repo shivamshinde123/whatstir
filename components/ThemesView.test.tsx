@@ -64,7 +64,7 @@ it("shows empty and recoverable error states", async () => {
   expect(await screen.findByRole("alert")).toHaveTextContent("Couldn't load themes");
   respond([]);
   fireEvent.click(screen.getByRole("button", { name: "Try again" }));
-  expect(await screen.findByText("No themes yet")).toBeVisible();
+  expect(await screen.findByText("No problem themes yet")).toBeVisible();
   expect(within(screen.getByRole("main")).getByRole("link", { name: "Admin" })).toHaveAttribute("href", "/admin");
 });
 
@@ -72,7 +72,7 @@ it("offers a filter reset when no themes match", async () => {
   respond([themes[1]]); render(<ThemesView />);
   await screen.findByRole("heading", { name: "Focused problem" });
   fireEvent.click(screen.getByRole("checkbox", { name: "In 3+ sectors" }));
-  expect(screen.getByText("No themes match these filters")).toBeVisible();
+  expect(screen.getByText("No problem themes match these filters")).toBeVisible();
   fireEvent.click(screen.getByRole("button", { name: "Clear filters" }));
   expect(screen.getByRole("heading", { name: "Focused problem" })).toBeVisible();
 });

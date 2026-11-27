@@ -46,7 +46,7 @@ The acceptance journey in §13 of the source document applies unchanged. It also
 
 ## Combined sector research, issue #68
 
-Issue #68 adds research over two or more sectors. Select Combine sectors on home, select tiles or list rows, then Open N sectors. Single-sector navigation continues normally when selection is off. Cross-sector problem themes, batch trends and sector comparison remain separate issues.
+Issue #68 adds research over two or more sectors. Select sectors on home, select tiles or list rows, then Research companies. Single-sector navigation continues normally when selection is off. Issue #82 puts Compare sectors and View theme trends in More analyses and standardizes the labels Problem themes, Shared problem themes, Problem themes over time and Sector groups.
 
 ## Cross-sector problem themes, issue #69
 
@@ -66,3 +66,8 @@ Issue #70 adds theme shares over batch periods, Rising/Fading rankings, sector a
 ## Problems over time interaction acceptance, issue #80
 
 Use the four owner-supplied reference states on the existing page: default Trend Explorer, one expanded theme, comparison of 2-5 selected themes and Heatmap. Preserve real-data calculations and existing drilldown, maintain filter/search/sort state between views, freeze theme/change columns horizontally, and spell out percentage points. History display choices must not silently redefine the score. The reference data is illustrative only.
+
+
+## Selection and terminology acceptance, issue #82
+
+Use one primary Research companies action and disclose secondary analyses through More analyses after two sectors are selected. Retain exact selected scope, explain the four-sector comparison limit, support Escape/outside focus/pointer dismissal, restore focus on Cancel, and fit the menu within a 320px page. Use Problem themes for grouped cross-sector analysis, Problem for individual company needs and Sector groups for independently generated within-sector classifications. Preserve underlying data and calculations.

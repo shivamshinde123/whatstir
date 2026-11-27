@@ -8,7 +8,7 @@ afterEach(() => { vi.unstubAllGlobals(); window.history.replaceState(null, "", "
 
 it("defaults to the explorer with actual pooled summaries and full percentage-point wording", async () => {
   render(<ThemeTrendsView />);
-  const table = await screen.findByRole("table", { name: "Problem trend explorer" });
+  const table = await screen.findByRole("table", { name: "Problem theme trend explorer" });
   expect(screen.getByRole("button", { name: "Trend Explorer", pressed: true })).toBeVisible();
   const cards = screen.getByRole("region", { name: "Trend summary" });
   expect(cards).toHaveTextContent("2%"); expect(cards).toHaveTextContent("11%");
@@ -57,7 +57,7 @@ it("enforces five selections, compares real windows and retains selections acros
 
 it("preserves search, direction, sorting and history filters in heatmap mode without rescoring", async () => {
   render(<ThemeTrendsView />);
-  await screen.findByRole("table", { name: "Problem trend explorer" });
+  await screen.findByRole("table", { name: "Problem theme trend explorer" });
   fireEvent.change(screen.getByRole("searchbox"), { target: { value: "Sales" } });
   fireEvent.click(screen.getByRole("button", { name: "Fading" }));
   fireEvent.change(screen.getByRole("combobox", { name: "History range" }), { target: { value: "5" } });

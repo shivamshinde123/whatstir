@@ -66,9 +66,9 @@ export default function ThemesView() {
   return <div className="flex min-h-dvh flex-col lg:h-dvh lg:min-h-[760px]">
     <SiteHeader showSignOut={state.kind === "ready" && state.gate} />
     <main className="flex min-h-0 w-full flex-1 flex-col px-4 pb-5 pt-6 sm:px-6 lg:px-8">
-      <div className="flex flex-wrap items-center justify-between gap-3"><h1 className="text-headline">Problems across sectors</h1><Link href="/themes/trends" className="pressable rounded-full bg-surface px-4 py-2 text-sm text-link">Over time</Link></div>
-      <p className="mt-2 max-w-4xl text-text-secondary">Find companies tackling similar customer problems across industries. Choose a theme, then open its companies to explore and ask questions.</p>
-      <p className="mt-1 text-sm text-text-secondary">AI-generated groups and descriptions. Companies without embeddings are excluded.</p>
+      <div className="flex flex-wrap items-center justify-between gap-3"><h1 className="text-headline">Problem themes</h1><Link href="/themes/trends" className="pressable rounded-full bg-surface px-4 py-2 text-sm text-link">View theme trends</Link></div>
+      <p className="mt-2 max-w-4xl text-text-secondary">Find companies tackling similar customer problems across industries. Choose a problem theme, then open its companies to explore and ask questions.</p>
+      <p className="mt-1 text-sm text-text-secondary">Problem themes are AI-generated groups of companies addressing related customer problems. Companies without embeddings are excluded.</p>
 
       <div className="mt-5 flex flex-wrap items-end gap-4 rounded-[var(--radius-card)] border border-separator bg-surface p-3">
         <label className="min-w-0 basis-full flex-1 text-sm sm:min-w-64 lg:basis-80">Search themes, problems or companies
@@ -86,14 +86,14 @@ export default function ThemesView() {
 
       {state.kind === "error" && <div role="alert" className="mt-8"><p>Couldn&apos;t load themes.</p><button onClick={() => void load(query)} className="pressable mt-3 rounded-full bg-accent px-4 py-2 text-white">Try again</button></div>}
       {state.kind === "ready" && !themes.length && <div className="mt-6 rounded-[var(--radius-card)] bg-surface p-6">
-        <h2 className="font-semibold">{query || wide ? "No themes match these filters" : "No themes yet"}</h2>
+        <h2 className="font-semibold">{query || wide ? "No problem themes match these filters" : "No problem themes yet"}</h2>
         {query || wide ? <button className="pressable mt-3 text-link underline" onClick={() => { setQuery(""); setWide(false); }}>Clear filters</button>
           : <p className="mt-2 text-text-secondary">Generate problem themes from the company data in <Link href="/admin" className="text-link underline">Admin</Link>.</p>}
       </div>}
 
       {selected && <div className="mt-5 grid min-h-0 flex-1 gap-4 lg:grid-cols-[minmax(260px,0.85fr)_minmax(0,2fr)]">
-        <aside className="hidden min-h-0 flex-col overflow-hidden rounded-[var(--radius-card)] border border-separator bg-surface lg:flex" aria-label="Themes">
-          <h2 className="border-b border-separator px-4 py-3 font-semibold">Themes ({themes.length})</h2>
+        <aside className="hidden min-h-0 flex-col overflow-hidden rounded-[var(--radius-card)] border border-separator bg-surface lg:flex" aria-label="Problem themes">
+          <h2 className="border-b border-separator px-4 py-3 font-semibold">Problem themes ({themes.length})</h2>
           <nav aria-label="Choose a problem theme" className="min-h-0 flex-1 overflow-y-auto p-2">
             <ul className="space-y-1">{themes.map((theme) => <li key={theme.id}>
               <button type="button" aria-pressed={selected.id === theme.id} aria-controls="theme-detail" onClick={() => choose(theme.id)}
@@ -105,7 +105,7 @@ export default function ThemesView() {
             </li>)}</ul>
           </nav>
         </aside>
-        <label className="text-sm lg:hidden">Choose a theme
+        <label className="text-sm lg:hidden">Choose a problem theme
           <select value={selected.id} onChange={(e) => choose(Number(e.target.value))} className="mt-1 block w-full max-w-full rounded-lg border border-separator bg-surface px-3 py-2">
             {themes.map((theme) => <option key={theme.id} value={theme.id}>{theme.name} ({theme.count})</option>)}
           </select>

@@ -13,7 +13,7 @@ export default function SiteHeader({ showSignOut = false }: { showSignOut?: bool
         </Link>
         <div className="flex max-w-full flex-wrap items-center justify-end gap-1 sm:gap-5">
           <Link href="/themes" className="whitespace-nowrap rounded-full px-2 py-1 text-sm transition-colors hover:bg-surface sm:px-3">
-            Themes
+            Problem themes
           </Link>
           <Link href="/notes" className="whitespace-nowrap rounded-full px-2 py-1 text-sm transition-colors hover:bg-surface sm:px-3">
             Notes

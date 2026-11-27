@@ -172,7 +172,7 @@ describe("Logo", () => {
 /** Chooses a subcategory in the workspace's dropdown by its visible label, e.g. "Billing · 1". */
 function pick(label: string) {
   const option = screen.getByRole("option", { name: label }) as HTMLOptionElement;
-  fireEvent.change(screen.getByRole("combobox", { name: "Subcategory" }), { target: { value: option.value } });
+  fireEvent.change(screen.getByRole("combobox", { name: "Sector group" }), { target: { value: option.value } });
 }
 
 describe("SiteFooter", () => {
@@ -184,11 +184,11 @@ describe("SiteFooter", () => {
 });
 
 describe("SubcategoryBar", () => {
-  const options = () => within(screen.getByRole("combobox", { name: "Subcategory" })).getAllByRole("option");
+  const options = () => within(screen.getByRole("combobox", { name: "Sector group" })).getAllByRole("option");
 
   it("is one dropdown, not a row of chips", () => {
     render(<SubcategoryBar total={3} subcategories={SUBS} selected={null} onSelect={() => {}} />);
-    expect(screen.getByRole("combobox", { name: "Subcategory" }).tagName).toBe("SELECT");
+    expect(screen.getByRole("combobox", { name: "Sector group" }).tagName).toBe("SELECT");
     expect(screen.queryByRole("button")).toBeNull();
   });
 
@@ -196,18 +196,18 @@ describe("SubcategoryBar", () => {
     const onSelect = vi.fn();
     render(<SubcategoryBar total={3} subcategories={SUBS} selected={3} onSelect={onSelect} />);
     expect(options().map((o) => o.textContent)).toEqual(["All · 3", "AI · 2", "Scheduling · 2", "Billing · 1", "Unclassified · 0"]);
-    expect(screen.getByRole("combobox", { name: "Subcategory" })).toHaveDisplayValue("Scheduling · 2");
-    fireEvent.change(screen.getByRole("combobox", { name: "Subcategory" }), { target: { value: "" } });
+    expect(screen.getByRole("combobox", { name: "Sector group" })).toHaveDisplayValue("Scheduling · 2");
+    fireEvent.change(screen.getByRole("combobox", { name: "Sector group" }), { target: { value: "" } });
     expect(onSelect).toHaveBeenCalledWith(null);
-    fireEvent.change(screen.getByRole("combobox", { name: "Subcategory" }), { target: { value: "4" } });
+    fireEvent.change(screen.getByRole("combobox", { name: "Sector group" }), { target: { value: "4" } });
     expect(onSelect).toHaveBeenCalledWith(4);
   });
 
   it("shows the chosen group's description as the dropdown's tooltip", () => {
     const { rerender } = render(<SubcategoryBar total={3} subcategories={SUBS} selected={null} onSelect={() => {}} />);
-    expect(screen.getByRole("combobox", { name: "Subcategory" })).not.toHaveAttribute("title");
+    expect(screen.getByRole("combobox", { name: "Sector group" })).not.toHaveAttribute("title");
     rerender(<SubcategoryBar total={3} subcategories={SUBS} selected={3} onSelect={() => {}} />);
-    expect(screen.getByRole("combobox", { name: "Subcategory" })).toHaveAttribute("title", "Booking");
+    expect(screen.getByRole("combobox", { name: "Sector group" })).toHaveAttribute("title", "Booking");
   });
 
   it("labels the groups as AI-suggested and overlapping", () => {
