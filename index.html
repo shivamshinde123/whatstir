@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Whatstir — YC startups, by the problems they solve</title>
-<meta name="description" content="Explore about 6,400 Y Combinator startups by sector and by the customer problems they solve, through a chat that cites real companies.">
+<meta name="description" content="Explore about 6,400 Y Combinator startups by sector and by the customer problems they solve, through a chat that cites real companies, cross-sector problem themes and their trends over time.">
 <link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700&family=Newsreader:opsz,wght@6..72,300&family=Fragment+Mono&display=swap" rel="stylesheet">
 <style>
@@ -90,6 +90,15 @@ p{color:var(--sage-gray)}
 .prompt i{width:30px;height:30px;border-radius:50%;background:var(--sage-gray);display:grid;place-items:center;color:var(--linen);font-style:normal;font-size:14px}
 .cited{border-radius:12px;overflow:hidden;box-shadow:0 0 0 1px var(--mist)}
 
+/* across-sector feature rows */
+.rows{display:grid;gap:72px}
+.row{display:grid;grid-template-columns:minmax(0,.8fr) minmax(0,1.2fr);gap:48px;align-items:center}
+.row:nth-child(even){grid-template-columns:minmax(0,1.2fr) minmax(0,.8fr)}
+.row:nth-child(even) .copy{order:2}
+.row .shot{margin:0}
+.row .no{display:flex;gap:14px}
+.row p{font-size:17px;max-width:46ch}
+
 /* steps */
 .steps{list-style:none;padding:0;counter-reset:s}
 .steps li{counter-increment:s;display:grid;grid-template-columns:220px 1fr;gap:32px;padding:26px 0;box-shadow:0 -1px 0 var(--mist)}
@@ -111,6 +120,7 @@ footer a{color:var(--linen)}
   .specimens{grid-template-columns:1fr 1fr}.modes{grid-template-columns:1fr;gap:32px}
   .head,.steps li{grid-template-columns:1fr;gap:10px}.shot{margin-top:40px}
   .hero .wrap{grid-template-columns:1fr;gap:40px}
+  .row,.row:nth-child(even){grid-template-columns:1fr;gap:24px}.row:nth-child(even) .copy{order:0}.rows{gap:56px}
 }
 @media(max-width:600px){.specimens{grid-template-columns:1fr}.top nav a:not(.gh){display:none}section{padding:72px 0}}
 </style>
@@ -118,15 +128,15 @@ footer a{color:var(--linen)}
 <body>
 <header class="top"><div class="wrap">
   <a class="word" href="#">Whatstir</a>
-  <nav><a href="#demo">Demo</a><a href="#specimens">Features</a><a href="#modes">Ask</a><a href="#how">How it works</a><a class="gh" href="https://github.com/shivamshinde123/whatstir">GitHub</a></nav>
+  <nav><a href="#demo">Demo</a><a href="#specimens">Features</a><a href="#modes">Ask</a><a href="#themes">Themes</a><a href="#how">How it works</a><a class="gh" href="https://github.com/shivamshinde123/whatstir">GitHub</a></nav>
 </div></header>
 
 <main>
 <section class="hero"><div class="wrap">
   <div class="hero-copy">
-  <div class="tag"><span>~6,400 companies</span><span>9 sectors</span><span>cited answers</span></div>
+  <div class="tag"><span>~6,400 companies</span><span>9 sectors</span><span>40 problem themes</span><span>cited answers</span></div>
   <h1>What are startups stirring up?</h1>
-  <p class="lede">Explore Y Combinator startups by sector and by the <b>customer problems they solve</b>. Pick a sector, ask in plain English, and watch the companies each answer relies on collect in a grid.</p>
+  <p class="lede">Explore Y Combinator startups by sector and by the <b>customer problems they solve</b>. Pick a sector or several, ask in plain English, and watch the companies each answer relies on collect in a grid. Then follow the same problems across every sector, and across the years.</p>
   <div class="ctas">
     <a class="btn fill" href="https://github.com/shivamshinde123/whatstir#run-your-own-whatstir">Run your own Whatstir</a>
     <a class="btn ghost" href="https://github.com/shivamshinde123/whatstir">Read the source</a>
@@ -135,16 +145,16 @@ footer a{color:var(--linen)}
   </div>
   <figure class="shot">
   <div class="bar"><i></i><i></i><i></i><span class="tag">whatstir / home</span></div>
-  <img src="https://raw.githubusercontent.com/shivamshinde123/whatstir/main/docs/images/home.png" alt="Whatstir home: a serif headline beside a landscape, and a treemap of YC sectors sized by company count" width="1440" height="900">
+  <img src="img/home.webp" alt="Whatstir home: a serif headline beside a landscape, and a treemap of YC sectors sized by company count" width="1600" height="900">
   </figure>
 </div>
 </section>
 
 <section id="demo" style="padding-top:0"><div class="wrap">
-  <div class="head"><span class="tag">Demo · 3:35</span><h2>A walk through the field.</h2></div>
+  <div class="head"><span class="tag">Demo · 4:56</span><h2>A walk through the field.</h2></div>
   <figure class="shot" style="margin-top:0">
     <div class="bar"><i></i><i></i><i></i><span class="tag">whatstir / tour</span></div>
-    <video controls playsinline preload="none" poster="demo-poster.jpg" width="1280" height="720" aria-label="Whatstir demo: the sector map, filters, problem groups, asking questions, profiles, compare and notes">
+    <video controls playsinline preload="none" poster="demo-poster.jpg" width="1280" height="720" aria-label="Whatstir demo: the sector map, filters, problem groups, asking questions, profiles, notes, several sectors at once, sector comparison, problem themes, theme trends and repeat founders">
       <source src="demo.mp4" type="video/mp4">
       <a href="demo.mp4">Download the demo video</a>
     </video>
@@ -155,12 +165,12 @@ footer a{color:var(--linen)}
 <section id="specimens"><div class="wrap">
   <div class="head"><span class="tag">Specimens · 01–06</span><h2>The whole directory, filed by the problem it solves.</h2></div>
   <div class="specimens">
-    <article class="spec"><div class="no tag"><span>01</span><span>treemap</span></div><h3>Sector map</h3><p>Every sector as a tile sized by company count. Filter to a batch like "Fall 2026" or to active companies only.</p><div class="glyph">▦</div></article>
+    <article class="spec"><div class="no tag"><span>01</span><span>treemap</span></div><h3>Sector map</h3><p>Every sector as a tile sized by company count. Filter to a batch like "Fall 2026" or to active companies, or select several sectors at once.</p><div class="glyph">▦</div></article>
     <article class="spec foam"><div class="no tag"><span>02</span><span>basket</span></div><h3>The basket</h3><p>A sector as a wall of logos, narrowed by AI-suggested problem groups ("Scheduling", "Billing") or by name.</p><div class="glyph">❀</div></article>
     <article class="spec blush"><div class="no tag"><span>03</span><span>citations</span></div><h3>Ringed citations</h3><p>Answers are written only from the companies' own descriptions. The companies they cite get a crimson ring in the grid.</p><div class="glyph">◎</div></article>
     <article class="spec sand"><div class="no tag"><span>04</span><span>memory</span></div><h3>Follow-ups that remember</h3><p>Every company already discussed stays in context, so "tell me more about this one" just works.</p><div class="glyph">↺</div></article>
     <article class="spec euc"><div class="no tag"><span>05</span><span>web</span></div><h3>From the web</h3><p>Funding or news questions get a separate, clearly labelled web section with source links.</p><div class="glyph">⌖</div></article>
-    <article class="spec dark"><div class="no tag"><span>06</span><span>workbench</span></div><h3>Profile, compare, note</h3><p>Open a company profile, put two side by side, and keep notes on the ones worth a second look.</p><div class="glyph">⁂</div></article>
+    <article class="spec dark"><div class="no tag"><span>06</span><span>workbench</span></div><h3>Profile, compare, note</h3><p>Open a company profile with its founders, put two side by side, and keep notes on the ones worth a second look.</p><div class="glyph">⁂</div></article>
   </div>
 </div></section>
 
@@ -177,11 +187,38 @@ footer a{color:var(--linen)}
   <figure class="cited"><img src="https://raw.githubusercontent.com/shivamshinde123/whatstir/main/docs/images/workspace.png" alt="The Healthcare workspace: company basket, ringed results and a cited answer" loading="lazy" width="1440" height="900"></figure>
 </div></section>
 
+<section id="themes"><div class="wrap">
+  <div class="head"><span class="tag">Across sectors · 07–11</span><h2>Patterns that don't stop at a sector line.</h2></div>
+  <div class="rows">
+    <article class="row">
+      <div class="copy"><div class="no tag"><span>07</span><span>select</span></div><h3>Several sectors, one workspace</h3><p>Switch on Select sectors, pick two or more tiles, and Research companies combines their baskets into one workspace. The chat's scope follows, and each set of sectors keeps its own session.</p></div>
+      <figure class="shot"><div class="bar"><i></i><i></i><i></i><span class="tag">whatstir / select sectors</span></div><img src="img/select.webp" alt="The home treemap with Fintech and Healthcare selected, and the More analyses menu open" loading="lazy" width="1600" height="900"></figure>
+    </article>
+    <article class="row">
+      <div class="copy"><div class="no tag"><span>08</span><span>compare</span></div><h3>Compare sectors</h3><p>Put up to four sectors side by side: company counts, active share, the share tagged AI, companies by batch year, and the problem themes they share. Each view is a panel you open when you need it.</p></div>
+      <figure class="shot"><div class="bar"><i></i><i></i><i></i><span class="tag">whatstir / compare</span></div><img src="img/compare.webp" alt="Compare sectors for B2B, Fintech and Healthcare: an overview table and a line chart of companies by batch year" loading="lazy" width="1600" height="900"></figure>
+    </article>
+    <article class="row">
+      <div class="copy"><div class="no tag"><span>09</span><span>themes</span></div><h3>Problem themes</h3><p>Every company is clustered by what it does into 40 problem themes that cut across sectors, each named by a model. See a theme's sector mix, then open all of its companies as a workspace and ask questions inside the theme.</p></div>
+      <figure class="shot"><div class="bar"><i></i><i></i><i></i><span class="tag">whatstir / problem themes</span></div><img src="img/themes.webp" alt="The Problem themes page: a list of 40 themes and the selected theme's companies, sectors and sector mix" loading="lazy" width="1600" height="900"></figure>
+    </article>
+    <article class="row">
+      <div class="copy"><div class="no tag"><span>10</span><span>trends</span></div><h3>Problem themes over time</h3><p>See which problems are rising or fading across YC batches. Summary cards name the fastest risers, every theme gets a sparkline and a heatmap row, and up to five themes compare on one chart.</p></div>
+      <figure class="shot"><div class="bar"><i></i><i></i><i></i><span class="tag">whatstir / theme trends</span></div><img src="img/trends.webp" alt="Two problem themes compared on one chart of their share of companies by batch year, with a summary table" loading="lazy" width="1600" height="900"></figure>
+    </article>
+    <article class="row">
+      <div class="copy"><div class="no tag"><span>11</span><span>founders</span></div><h3>Repeat founders</h3><p>People who founded more than one YC company, matched by LinkedIn, with their companies newest first and whether they stayed in one sector. Search by name and compare a founder's companies side by side.</p></div>
+      <figure class="shot"><div class="bar"><i></i><i></i><i></i><span class="tag">whatstir / repeat founders</span></div><img src="img/founders.webp" alt="The Repeat founders page: totals for founders who stayed in one sector or changed, and cards listing each founder's companies" loading="lazy" width="1600" height="900"></figure>
+    </article>
+  </div>
+</div></section>
+
 <section id="how"><div class="wrap">
   <div class="head"><span class="tag">Field notes</span><h2>How an answer is grown.</h2></div>
   <ol class="steps">
     <li><div><h3>Load the directory</h3><p>Company data from the open-source yc-oss mirror goes into Postgres, with pgvector embeddings and AI-written problem groups per sector.</p></div></li>
-    <li><div><h3>Choose a scope</h3><p>A sector, a batch, a problem group, or companies you picked. The scope travels with every question in the session.</p></div></li>
+    <li><div><h3>Find patterns across sectors</h3><p>The same embeddings are clustered into 40 problem themes that cross sector lines, and a model names each one. Founders are read from each company's YC page and matched across companies by LinkedIn.</p></div></li>
+    <li><div><h3>Choose a scope</h3><p>A sector or several, a batch, a problem group, a problem theme, or companies you picked. The scope travels with every question in the session.</p></div></li>
     <li><div><h3>Answer from descriptions only</h3><p>Retrieval finds the relevant companies and the model answers from their own words. A schema check keeps every citation pointing at a real company.</p></div></li>
     <li><div><h3>Reach past the data</h3><p>When a question is about news or funding, a second call searches the web through OpenRouter and returns a labelled section with links.</p></div></li>
   </ol>
