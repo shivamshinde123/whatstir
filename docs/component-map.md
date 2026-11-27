@@ -1,5 +1,9 @@
 # Component map
 
+## Sector comparison, issue #71
+
+SectorComparisonView presents responsive per-sector columns, batch-year bars on one shared count scale, and a shared-problems table. HomeView exposes Compare sectors for 2-4 selected sectors alongside Open; larger research selections remain supported but are not comparable.
+
 ## Pages (`app/`)
 | Route | Component | Responsibility |
 |---|---|---|
@@ -73,3 +77,10 @@ ThemesView owns loading, retry, empty/no-match states, spread and size sorting, 
 ## Theme explorer update
 
 ThemesView now owns a desktop sidebar and one selected detail panel, server-backed search, plain-language sorting, a mobile theme picker, sector statistics and chart/table views. Example cards and View all companies open the theme workspace, preserving context. Workspace reuses Basket, ResultsGrid, Chat and ProfilePanel with a theme-specific API base. Basket lists full membership; ResultsGrid remains answer-driven. lib/session.ts owns separate theme conversations and resets; lib/chat.ts and lib/retrieval.ts enforce the pinned theme on the server.
+
+
+SectorComparisonView owns URL-based sector selection, add/remove/history loading and the local MetricPanel component for themes, groups and tags. SectorComparisonDetails exports SectorOverview (compact table), BatchYearChart (shared axes, range/count/share controls and accessible data table), SharedProblems (search, sort, count/percentage, expansion and heat cells), and the comparison palette. The existing comparison API and populations remain unchanged.
+
+BatchYearChart owns a ResizeObserver on its chart wrapper, disconnects on unmount and recalculates plot coordinates and x-axis tick density for the measured width. Its 280px-high SVG uses uniform aspect scaling. SectorComparisonView constrains only the comparison content to 1280px and uses the normal site header/typeface.
+
+ComparisonSection is the shared native details/summary wrapper for all six comparison panels. It provides a title, decorative open-state chevron and padded body, with no open attribute or React toggle state. Overview, chart, shared problems and MetricPanel use it; nested chart/filter state remains mounted during toggles.

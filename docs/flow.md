@@ -1,5 +1,9 @@
 # Code flow
 
+## Sector comparison, issue #71
+
+Home Combine sectors -> select 2-4 -> /compare?sectors=... -> GET /api/compare -> live company and group queries -> per-sector metrics and complete theme intersection -> single-sector or combined research workspace links.
+
 *This describes the planned design and gets updated as the code lands.*
 
 ## Entry points
@@ -119,3 +123,10 @@ Admin Generate themes -> POST /api/admin/themes -> claimRun("themes") -> after(r
 /themes fetches its searchable list, sorts by Most companies or Most sectors, filters by 3+ main sectors and selects one detail panel. Desktop uses a scrolling sidebar/detail split; phones use a native theme picker. The URL theme parameter restores selection on return. Search checks full membership on the server; chart/table toggling is local.
 
 View all N companies -> /themes/:id -> Workspace with theme API base -> getThemeWorkspace and getThemeSession. All live members appear in Companies. Results starts empty and only answer citations add tiles. Restoring a conversation restores its cited Results; New session clears Results. Retrieval, previous cited-company context, explicit selections and web-company matching retain the session's theme restriction. Clearing a batch, group or explicit selection never escapes that theme. Regeneration retires the old theme conversation; the themes page supplies new current links.
+
+
+### Sector comparison SVG controls
+
+/compare reads the sector list from the URL and loads /api/compare. SectorComparisonView writes a sorted sector list with history.pushState when chips or Add sector change the selection, then reloads that URL's data. A popstate listener reloads browser Back/Forward selections; cleanup aborts the mount request and removes the listener. The API retains the existing 2-4 unique-sector validation and shared-theme intersection rules.
+
+SectorComparisonDetails derives overview cells, common-axis line series and heatmap values from that response. Range/count/share, theme search/sort and expansion are local view state and cause no database writes or AI requests. Batch shares divide by the full current sector population, independently of the visible year range. Theme/group/tag panels continue to use the API's top-five lists and complete denominators. Shared problems uses the complete intersection rather than those truncated lists.

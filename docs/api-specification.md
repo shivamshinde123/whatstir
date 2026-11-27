@@ -1,5 +1,9 @@
 # API
 
+## Sector comparison, issue #71
+
+GET /api/compare?sectors=b2b,fintech accepts 2-4 unique known sector ids, canonicalises order and returns sector statistics and the full shared-theme intersection. Missing, unknown or out-of-range sector selections return 400. It returns the existing gate flag; failures return a plain 500 message.
+
 These are Next.js route handlers under `app/api/`. All of them return JSON. All of them are protected by the password gate, except `/api/cron/refresh`, which checks `CRON_SECRET` instead. Errors come back as `{ "error": string }` with a 4xx or 5xx status.
 
 ## Sectors

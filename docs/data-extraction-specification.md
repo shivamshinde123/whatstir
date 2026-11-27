@@ -1,5 +1,9 @@
 # Data extraction and processing
 
+## Sector comparison, issue #71
+
+Comparison denominators use all present companies in a sector, regardless of status or embedding/theme coverage. Active means exact source status Active. AI-tagged means at least one source tag equal to AI or Artificial Intelligence, after trimming and case normalisation. Count each normalised tag at most once per company. Batch-year bars use recognised Season YYYY values and disclose undated totals. Sector problem-group counts exclude fixed AI and Unclassified groups; assignments can overlap.
+
 ## Source
 
 - **Feed:** `GET https://yc-oss.github.io/api/companies/all.json`. It returns a JSON array of about 6.4k records, roughly 10 MB.
