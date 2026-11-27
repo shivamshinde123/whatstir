@@ -4,7 +4,7 @@
 
 **Explore Y Combinator startups by sector and by the customer problems they solve.**
 
-Pick a sector, ask questions in plain English, and watch the companies each answer relies on collect in a grid.
+Pick a sector or several, ask questions in plain English, and watch the companies each answer relies on collect in a grid. Then follow the same customer problems across every sector and across YC batches.
 
 ![Next.js 16](https://img.shields.io/badge/Next.js-16-0a1d08?logo=nextdotjs&logoColor=white)
 ![React 19](https://img.shields.io/badge/React-19-4a6d47?logo=react&logoColor=white)
@@ -16,7 +16,7 @@ Pick a sector, ask questions in plain English, and watch the companies each answ
 
 <a href="https://www.producthunt.com/products/whatstir?embed=true&amp;utm_source=badge-featured&amp;utm_medium=badge&amp;utm_campaign=badge-whatstir" target="_blank" rel="noopener noreferrer"><img alt="Whatstir - Explore YC startups by sector and the problems they solve | Product Hunt" width="250" height="54" src="https://api.producthunt.com/widgets/embed-image/v1/featured.svg?post_id=1308170&amp;theme=light&amp;t=1794087108402"></a>
 
-<img src="docs/images/home.png" alt="The Whatstir home page: a serif headline beside a misty landscape, and a treemap of YC sectors sized by company count" width="100%">
+<img src="docs/images/home.png" alt="The Whatstir home page: a serif headline beside a misty landscape, filters with Select sectors, and a treemap of YC sectors sized by company count" width="100%">
 
 </div>
 
@@ -49,15 +49,22 @@ Pick a sector, ask questions in plain English, and watch the companies each answ
 
 ## Demo video
 
-A three-and-a-half-minute tour, from the problem Whatstir solves to how it works: the sector map, filters, groups, asking questions, profiles, compare and notes.
+A five-minute tour, from the problem Whatstir solves to how it works: the sector map, filters, groups, asking questions, profiles, compare and notes, then researching several sectors at once, comparing sectors, problem themes, how themes change over time, and repeat founders.
 
-https://github.com/user-attachments/assets/ffe0e2e5-434d-4f02-be8f-5d640ac7faa6
+<a href="https://shivamshinde123.github.io/whatstir/#demo"><img src="docs/images/demo-poster.jpg" alt="Play the Whatstir demo video (4:56) on the project site" width="100%"></a>
+
+[Watch the demo on the project site](https://shivamshinde123.github.io/whatstir/#demo) (4:56).
 
 <sub>Music: "Inspired" by Kevin MacLeod ([incompetech.com](https://incompetech.com)), licensed under [CC BY 4.0](https://creativecommons.org/licenses/by/4.0/).</sub>
 
 ## Features
 
 - 🪴 **Sector treemap.** About 6,400 YC companies across 9 sectors, sized by count. Filter by batch ("Fall 2026") or show active companies only.
+- 🌾 **Several sectors at once.** **Select sectors** on the home page, pick two or more, and **Research companies** opens one workspace with their baskets combined and a chat scoped to all of them. Each set of sectors keeps its own session.
+- ⚖️ **Compare sectors.** Put two to four sectors side by side: company counts, active share, the share tagged AI, companies by batch year, the problem themes they share, and their top themes, groups and tags.
+- 🧭 **Problem themes.** Every company is clustered by what it does into up to 40 problem themes that cut across sectors, each named by a model. See a theme's sector mix, then open all of its companies as a workspace and ask questions inside the theme.
+- 📈 **Problem themes over time.** A Trend Explorer shows which problems are rising or fading across YC batches: summary cards, a sparkline per theme, a heatmap by year, and a chart comparing up to five themes.
+- 🔁 **Repeat founders.** People who founded more than one YC company, matched by LinkedIn, with their companies newest first and whether they stayed in one sector. Search them and compare a founder's companies side by side.
 - 🧺 **The basket.** Every company in a sector as a wall of logos, narrowed by AI-suggested problem groups ("Scheduling", "Billing", …) and by name.
 - 🦉 **Ask, Explore, Challenge.** Ask questions about the sector, a group, a batch or a hand-picked selection. Answers are written only from the companies' own descriptions and cite the companies they rely on.
 - 🪢 **Follow-ups that remember.** Every company already discussed stays in context for the whole session, so you can just ask "Tell me more about this company".
@@ -78,6 +85,22 @@ https://github.com/user-attachments/assets/ffe0e2e5-434d-4f02-be8f-5d640ac7faa6
 
 ![A company profile with its description, links and AI-generated problem card, next to the results grid and chat](docs/images/profile.png)
 
+**Problem themes,** with a theme's companies, sectors and sector mix.
+
+![The Problem themes page: a searchable list of themes and the selected theme's company count, sectors and sector mix](docs/images/problem-themes.png)
+
+**Problem themes over time,** with two themes compared across YC batches.
+
+![Two problem themes compared on one chart of their share of companies by batch year, with a comparison summary table](docs/images/theme-trends.png)
+
+**Compare sectors,** here B2B, Fintech and Healthcare.
+
+![Compare sectors: sector chips, an overview table of counts and shares, and a line chart of companies by batch year](docs/images/compare-sectors.png)
+
+**Repeat founders,** grouped by whether they stayed in one sector.
+
+![The Repeat founders page: totals for founders who stayed in one sector or changed, and cards listing each founder's companies](docs/images/repeat-founders.png)
+
 ## How it works
 
 ```mermaid
@@ -92,7 +115,8 @@ flowchart LR
 
 1. **Ingest.** `refresh` loads the yc-oss feed into Postgres. Each company is embedded (`text-embedding-3-small` by default) and given a short **problem card** written from its own description (`gpt-6-luna` by default). It's also placed in AI-suggested problem groups by **Jev** (`jev-latest`). Every AI call goes through [OpenRouter](https://openrouter.ai), with one key.
 2. **Ask.** A question is embedded, and pgvector picks the closest companies in scope (sector, group, batch or selection). Companies already discussed in the session are added back, and the whole conversation goes along. The answer model (`gpt-6.1-sol` by default; any structured-output model through OpenRouter) must answer from those descriptions only and cite company ids. Citations are checked against the candidates, and the cited companies join the grid. If the model needs facts the dataset lacks, one web search through OpenRouter adds a separate, labelled part with source links.
-3. **Keep fresh.** Vercel Cron calls `/api/cron/refresh` daily. Enrichment is keyed by content hashes, so unchanged companies cost nothing.
+3. **Find patterns.** `npm run themes` (or **Generate themes** in Admin) clusters the company embeddings into up to 40 problem themes with k-means, locally, and the writing model names each one. Theme trends compare each theme's share of companies in two windows of complete batch years (2020–2022 against 2023–2025 today); the current year is shown but left out of the change. With founder fetching on, founders are read from YC company pages and matched across companies by their LinkedIn profile to find repeat founders.
+4. **Keep fresh.** Vercel Cron calls `/api/cron/refresh` daily. Enrichment is keyed by content hashes, so unchanged companies cost nothing.
 
 There's more depth in [docs/system-architecture-document.md](docs/system-architecture-document.md) and [docs/flow.md](docs/flow.md).
 
@@ -254,10 +278,10 @@ Tests never call OpenRouter or YC. Vitest sets `AI_FAKE=1` and `FOUNDERS_FETCH=o
 
 ```text
 app/            Next.js routes: pages, API route handlers, the login page
-components/     React components (Workspace, Basket, ResultsGrid, Chat, Treemap, Tooltips, …)
-lib/            Server logic: ingestion, enrichment, retrieval, answers, sessions, notes
+components/     React components (Workspace, Basket, ResultsGrid, Chat, Treemap, ThemesView, ThemeTrendsView, SectorComparisonView, FoundersView, …)
+lib/            Server logic: ingestion, enrichment, retrieval, answers, sessions, notes, themes, trends, founders
 db/migrations/  SQL migrations (run with npm run migrate)
-scripts/        CLI entry points: migrate, refresh, subcategories, backfill
+scripts/        CLI entry points: migrate, refresh, subcategories, backfill, themes
 e2e/            Playwright end-to-end tests and a local feed server
 smoke/          Read-only checks for a live deployment
 test/           Test helpers and the 37-company fixture
