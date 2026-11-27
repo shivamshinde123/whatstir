@@ -11,7 +11,7 @@ test("selects sectors, compares them, stacks columns on phones and opens their c
   await page.getByRole("button", { name: "Combine sectors" }).click();
   await page.getByRole("button", { name: /^B2B,/ }).click();
   await page.getByRole("button", { name: /^Fintech,/ }).click();
-  await page.getByRole("link", { name: "Compare sectors", exact: true }).click();
+  await page.getByRole("link", { name: "Compare sector statistics", exact: true }).click();
   await expect(page.getByRole("heading", { level: 1 })).toHaveText("Compare sectors");
   await openSections(page);
   const a = page.getByRole("region", { name: "B2B top problem themes" });

@@ -193,3 +193,8 @@ GET /api/themes/:id returns the existing workspace shape with only live theme me
 ## Batch trends, issue #70
 
 GET /api/themes/trends accepts optional comma-separated sectors and a batch name. Optional theme and period must be supplied together to return that cell's companies. It returns periods with total/themed counts, theme shares and change scores, batch choices, excluded-undated count and the gate flag. Invalid filters return 400. Shares include unthemed live companies in the denominator; missing companies are excluded.
+
+
+### Trend Explorer response additions, issue #80
+
+The same endpoint also returns `currentYear` (UTC integer). Each theme has `previous` and `recent` objects shaped `{ count: number, total: number, share: number | null }`. Counts pool the same complete-year windows used by `score`; share is null when that window has no companies. `score` remains recent share minus previous share, or null if either window is absent. Existing cells, period totals, filters, drilldown and gate behavior are unchanged. Search, direction, sort, visible history range, view, expansion and comparison selection are local display state and introduce no API parameters.

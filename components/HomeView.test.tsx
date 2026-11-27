@@ -228,10 +228,10 @@ it("selects sectors in map and list mode, opens their canonical union and clears
   fireEvent.click(screen.getByRole("button", { name: /^Fintech,/ }));
   fireEvent.click(screen.getByRole("button", { name: /^B2B,/ }));
   expect(screen.getByRole("button", { name: /^B2B,/ })).toHaveAttribute("aria-pressed", "true");
-  expect(screen.getByRole("link", { name: "Open 2 sectors" })).toHaveAttribute("href", "/sector/b2b+fintech");
+  expect(screen.getByRole("link", { name: "Research selected sectors" })).toHaveAttribute("href", "/sector/b2b+fintech");
   fireEvent.click(screen.getByRole("button", { name: "Show as list" }));
   fireEvent.click(screen.getByRole("button", { name: /Consumer/ }));
-  expect(screen.getByRole("link", { name: "Open 3 sectors" })).toHaveAttribute("href", "/sector/b2b+consumer+fintech");
+  expect(screen.getByRole("link", { name: "Research selected sectors" })).toHaveAttribute("href", "/sector/b2b+consumer+fintech");
   fireEvent.click(screen.getByRole("button", { name: "Combine sectors" }));
-  expect(screen.queryByRole("link", { name: /Open .* sectors/ })).not.toBeInTheDocument();
+  expect(screen.queryByRole("link", { name: "Research selected sectors" })).not.toBeInTheDocument();
 });

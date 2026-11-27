@@ -8,7 +8,7 @@ test("combines sectors, asks across them and preserves the session on reload", a
   await page.getByRole("button", { name: /^Consumer,/ }).click();
   await page.getByRole("button", { name: /^B2B,/ }).click();
   await page.screenshot({ path: "test-results/combined-home.png" });
-  await page.getByRole("link", { name: "Open 2 sectors" }).click();
+  await page.getByRole("link", { name: "Research selected sectors" }).click();
   await expect(page).toHaveURL(/sector\/b2b\+consumer$/);
   await expect(page.getByRole("heading", { level: 1 })).toHaveText("B2B + Consumer");
   await expect(page.getByLabel("Question")).toBeVisible();

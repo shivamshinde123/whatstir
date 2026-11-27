@@ -5,6 +5,8 @@ All notable changes to Whatstir are recorded here. The format follows [Keep a Ch
 ## [Unreleased]
 
 ### Added
+- Clarify home actions as Research selected sectors, Compare sector statistics and Explore problems over time, with black buttons and white text. Longer labels wrap within the toolbar on phones.
+- Rebuild Problems over time as a Trend Explorer with real-data summary cards, search, historical sparklines, single-row expansion, comparison of up to five themes and a Heatmap with frozen theme/change columns. Preserve cohort calculations and spell out percentage points. Reveal the home trends action beside the comparison controls only after Combine sectors is enabled.
 - Explore problem themes over YC batch periods, with cohort shares, Rising/Fading sorting, sector/batch filters and company drilldowns (#70).
 
 - Make all six sector-comparison panels independently collapsible and closed by default (#71).

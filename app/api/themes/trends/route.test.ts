@@ -23,6 +23,9 @@ it("queries fixture shares against all live companies, including unthemed compan
   const data = await getThemeTrends(sql, { sectorIds: ["b2b"], batch: null, selection: null }, 2026);
   expect(data.periods).toEqual([{ id: "2020", label: "2020", total: 2, themed: 1 }]);
   expect(data.themes[0].cells[0].share).toBe(0.5);
+  expect(data.themes[0].previous).toEqual({ count: 1, total: 2, share: 0.5 });
+  expect(data.themes[0].recent).toEqual({ count: 0, total: 0, share: null });
+  expect(data.currentYear).toBe(2026);
   const detail = await getThemeTrends(sql, { sectorIds: ["b2b"], batch: null, selection: { themeId: data.themes[0].id, period: "2020" } }, 2026);
   expect(detail.companies.map((c) => c.id)).toEqual([1]);
 });

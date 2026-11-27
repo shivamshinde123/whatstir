@@ -89,3 +89,8 @@ SectorComparisonView owns URL-based sector selection, add/remove/history loading
 BatchYearChart owns a ResizeObserver on its chart wrapper, disconnects on unmount and recalculates plot coordinates and x-axis tick density for the measured width. Its 280px-high SVG uses uniform aspect scaling. SectorComparisonView constrains only the comparison content to 1280px and uses the normal site header/typeface.
 
 ComparisonSection is the shared native details/summary wrapper for all six comparison panels. It provides a title, decorative open-state chevron and padded body, with no open attribute or React toggle state. Overview, chart, shared problems and MetricPanel use it; nested chart/filter state remains mounted during toggles.
+
+
+## Trend Explorer states, issue #80
+
+ThemeTrendsView owns the shared Explorer/Heatmap filters, search, direction/sort, displayed history range, one expanded theme, selection of at most five themes, comparison visibility and existing URL-backed company drilldown. TrendPanels renders real-data summary cards, pooled change values, inline historical details and the comparison panel. TrendCharts supplies common formatting, sparklines and responsive historical bar/line charts with uniformly scaled text. Scoped trend classes in app/globals.css freeze the Heatmap theme and change columns with opaque backgrounds. No chart dependency is added.

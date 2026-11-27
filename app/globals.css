@@ -158,3 +158,41 @@ body {
     transform: scale(0.97);
   }
 }
+
+/* Problems over time: scoped horizontal table layout. */
+/* Keep focus rings and sticky content inside the horizontal table scroller. */
+.trend-scroll { contain: paint; container-type: inline-size; }
+.trend-detail { width: calc(100cqw - 1rem); }
+.trend-heatmap {
+  --theme-width: clamp(112px, 32vw, 240px);
+  --change-width: clamp(96px, 20vw, 220px);
+  border-collapse: separate;
+  border-spacing: 0;
+  width: max-content;
+  min-width: 100%;
+  table-layout: fixed;
+}
+.trend-theme {
+  position: sticky;
+  left: 0;
+  z-index: 2;
+  width: var(--theme-width);
+  min-width: var(--theme-width);
+  max-width: var(--theme-width);
+  background: white;
+  overflow-wrap: anywhere;
+}
+.trend-change {
+  position: sticky;
+  left: var(--theme-width);
+  z-index: 2;
+  width: var(--change-width);
+  min-width: var(--change-width);
+  max-width: var(--change-width);
+  background: white;
+  border-right: 1px solid var(--separator);
+}
+.trend-heatmap thead .trend-theme, .trend-heatmap thead .trend-change { background: var(--surface); z-index: 3; }
+.trend-period { width: 80px; min-width: 80px; }
+@media (min-width: 640px) { .trend-period { width: 112px; min-width: 112px; } }
+@media (max-width: 639px) { .trend-change { font-size: 12px; line-height: 1.4; } }

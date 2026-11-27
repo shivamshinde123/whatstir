@@ -12,8 +12,10 @@ export interface TrendCompany {
   themeId: number | null; themeName: string | null;
 }
 export interface TrendCell { period: string; count: number; total: number; share: number }
-export interface TrendTheme { id: number; name: string; score: number | null; cells: TrendCell[] }
+export interface TrendWindow { count: number; total: number; share: number | null }
+export interface TrendTheme { id: number; name: string; score: number | null; previous: TrendWindow; recent: TrendWindow; cells: TrendCell[] }
 export interface TrendData {
+  currentYear: number;
   periods: { id: string; label: string; total: number; themed: number }[];
   themes: TrendTheme[];
   batches: string[];
@@ -70,18 +72,23 @@ export function buildThemeTrends(companies: TrendCompany[], filters: TrendFilter
   const previous = dated.filter((c) => c.year >= currentYear - 6 && c.year < currentYear - 3);
   const names = new Map<number, string>();
   for (const { company } of dated) if (company.themeId !== null && company.themeName) names.set(company.themeId, company.themeName);
-  const themes = [...names].map(([id, name]) => ({
-    id, name,
-    score: trendScore({ count: recent.filter((c) => c.company.themeId === id).length, total: recent.length },
-      { count: previous.filter((c) => c.company.themeId === id).length, total: previous.length }),
-    cells: periods.map((period) => {
-      const count = dated.filter((c) => c.period === period.id && c.company.themeId === id).length;
-      return { period: period.id, count, total: period.total, share: count / period.total };
-    }),
-  }));
+  const themes = [...names].map(([id, name]) => {
+    const recentCount = recent.filter((c) => c.company.themeId === id).length;
+    const previousCount = previous.filter((c) => c.company.themeId === id).length;
+    return {
+      id, name,
+      score: trendScore({ count: recentCount, total: recent.length }, { count: previousCount, total: previous.length }),
+      previous: { count: previousCount, total: previous.length, share: previous.length ? previousCount / previous.length : null },
+      recent: { count: recentCount, total: recent.length, share: recent.length ? recentCount / recent.length : null },
+      cells: periods.map((period) => {
+        const count = dated.filter((c) => c.period === period.id && c.company.themeId === id).length;
+        return { period: period.id, count, total: period.total, share: count / period.total };
+      }),
+    };
+  });
   const selected = filters.selection;
   return {
-    periods, themes, batches, excludedUndated: filtered.length - dated.length,
+    currentYear, periods, themes, batches, excludedUndated: filtered.length - dated.length,
     recentYears: `${currentYear - 3}–${currentYear - 1}`, previousYears: `${currentYear - 6}–${currentYear - 4}`,
     companies: selected ? dated.filter((c) => c.company.themeId === selected.themeId && c.period === selected.period)
       .map(({ company: { id, name, sectorId, batch } }) => ({ id, name, sectorId, batch })) : [],
