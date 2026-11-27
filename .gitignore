@@ -8,3 +8,6 @@ next-env.d.ts
 coverage/
 playwright-report/
 test-results/
+
+# Local deployment verification notes are not repository source.
+.pstack/deploy-reports/
