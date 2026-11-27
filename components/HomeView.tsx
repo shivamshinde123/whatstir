@@ -113,7 +113,7 @@ export default function HomeView() {
         </div>
 
         <div className="mt-10 flex flex-wrap items-center justify-between gap-3">
-          <div className="flex flex-wrap items-center gap-2">
+          <div className="flex min-w-0 basis-full flex-wrap items-center gap-2 lg:basis-0 lg:flex-1">
           <div role="group" aria-label="Which companies to count" className="inline-flex rounded-full bg-surface p-0.5 text-sm">
             {[
               { label: "All companies", value: false },
@@ -154,20 +154,23 @@ export default function HomeView() {
             className="pressable rounded-full bg-surface px-4 py-1.5 text-sm aria-pressed:ring-2 aria-pressed:ring-accent">
             Combine sectors
           </button>
-          {combining && (selected.length >= 2 ? (
-            <Link href={`/sector/${selected.join("+")}${query}`} className="pressable rounded-full bg-accent px-4 py-1.5 text-sm text-white">
-              Open {selected.length} sectors
+          {combining && selected.length >= 2 && (
+            <Link href={`/sector/${selected.join("+")}${query}`} className="pressable rounded-full bg-black px-4 py-1.5 text-sm text-white">
+              Research selected sectors
             </Link>
-          ) : <p role="status" className="text-sm text-text-secondary">Select at least two sectors.</p>)}
-          {combining && selected.length >= 2 && selected.length <= 4 && <Link href={`/compare?${new URLSearchParams({ sectors: selected.join(",") })}`} className="pressable rounded-full bg-surface px-4 py-1.5 text-sm text-link ring-1 ring-separator">Compare sectors</Link>}
+          )}
+          {combining && <div className="flex max-w-full flex-wrap items-center gap-2">
+          {selected.length >= 2 && selected.length <= 4 && <Link href={`/compare?${new URLSearchParams({ sectors: selected.join(",") })}`} className="pressable rounded-full bg-black px-4 py-1.5 text-sm text-white">Compare sector statistics</Link>}
+          <Link href={`/themes/trends?${new URLSearchParams({ ...(chosen ? { batch: chosen.name } : {}), ...(combining && selected.length ? { sectors: selected.join(",") } : {}) })}`} className="pressable rounded-full bg-black px-4 py-1.5 text-sm text-white">Explore problems over time</Link>
+          </div>}
+          {combining && selected.length < 2 && <p role="status" className="text-sm text-text-secondary">Select at least two sectors.</p>}
           {combining && selected.length > 4 && <p className="text-sm text-text-secondary">Choose up to four sectors to compare.</p>}
           </div>
-          <Link href={`/themes/trends?${new URLSearchParams({ ...(chosen ? { batch: chosen.name } : {}), ...(combining && selected.length ? { sectors: selected.join(",") } : {}) })}`} className="pressable text-sm text-link hover:underline">Over time</Link>
           <button
             type="button"
             aria-pressed={asList}
             onClick={() => setAsList((v) => !v)}
-            className="pressable text-sm text-link hover:underline"
+            className="pressable ml-auto text-sm text-link hover:underline"
           >
             {asList ? "Show as map" : "Show as list"}
           </button>

@@ -119,3 +119,10 @@ Search uses case-insensitive strpos checks with an EXISTS query over full member
 ## Cohort aggregation (#70)
 
 Read live company identifiers, batch, sector and optional current theme membership, then aggregate deterministic period totals and per-theme shares in TypeScript. Time is injected into pure aggregation tests. A selected cell adds its member companies to the API response; other responses contain aggregate data only. Requests abort on filter changes to avoid stale results. No company mutation, new SDK or AI request occurs.
+
+
+## Trend Explorer presentation (#80)
+
+Keep all four supplied layouts on /themes/trends. Local state selects Explorer or Heatmap, one expanded theme id, up to five comparison ids and panel visibility. Filter changes abort the previous API request, clear expansion/selection and remove drilldown URL keys. View switches retain filters, search, sort, history, expansion and comparison. Search/direction can hide selected rows without removing them from comparison. Comparison removals close the panel below two themes; collapse returns focus to Compare themes.
+
+Charts observe their container width and use a matching 280px-high SVG viewBox with uniform scaling. Adaptive ticks keep labels separated on phones; sparkline text remains HTML outside its stretched path. Bar links and the period statistics table both activate the existing company drilldown and focus its region. Line charts have exact comparison statistics and per-point titles. Heatmap columns use responsive fixed widths and sticky positions inside the table scroll container. Paint containment prevents focused offscreen table controls from expanding the page scroll area. Inline container sizing keeps expanded details within the visible table viewport, independently of the wide table width. No new storage, migration or data source is introduced.

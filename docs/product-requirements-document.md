@@ -61,3 +61,8 @@ View all companies opens a theme-scoped research workspace. The Companies basket
 ## Batch trends, issue #70
 
 Issue #70 adds theme shares over batch periods, Rising/Fading rankings, sector and batch filtering, selected-cell company inspection and a current-description/pivot caveat. This compares today's descriptions across cohorts, not historical company descriptions.
+
+
+## Problems over time interaction acceptance, issue #80
+
+Use the four owner-supplied reference states on the existing page: default Trend Explorer, one expanded theme, comparison of 2-5 selected themes and Heatmap. Preserve real-data calculations and existing drilldown, maintain filter/search/sort state between views, freeze theme/change columns horizontally, and spell out percentage points. History display choices must not silently redefine the score. The reference data is illustrative only.

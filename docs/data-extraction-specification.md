@@ -117,3 +117,6 @@ Build before replacing; failures preserve the old set. Regeneration is manual af
 ## Batch trends, issue #70
 
 Trend years come only from recognised YC Season YYYY batch names, from 2005 through the current UTC year. Missing/unrecognised/future years are reported as excluded. Missing-source companies are excluded. Current theme memberships and descriptions are used; no historical descriptions are inferred.
+
+
+Trend Explorer (#80) exposes the already-computed earlier/recent pooled count and denominator alongside their shares. It does not change membership, cohort parsing, early pooling, small-sample labeling or score windows. The history range hides periods in charts/tables only; it never changes a pooled score or its denominator. Summary cards rank computable positive scores within the server-filtered scope, independently of local search/direction/history. Latest cohort uses the latest actual period in that scope and reports both total and themed companies.

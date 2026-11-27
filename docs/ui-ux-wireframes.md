@@ -247,3 +247,19 @@ Comparison tables increase their minimum width with the selected sector count, s
 ### Collapsible comparison panels
 
 All six panels start collapsed on page entry: Sector overview, Companies by batch year, Shared problems, Top problem themes, Top sector problem groups and Top tags. Each card has a native summary header with its existing readable title and a chevron that reflects the open state. Headers support click, Enter and Space with visible keyboard focus. Panels open independently, retain their local filter state while closed and return to collapsed defaults after reload or a sector-selection rebuild. Research and sector-selection controls remain outside the panels. The overview table uses Metric for its first column heading because Sector overview is now the summary title.
+
+
+## Problems over time reference states, issue #80
+
+Supersedes the heatmap-first layout in issue #70. Follow the owner's four SVG states on one page, retaining the sage tokens, standard navigation, readable body type and bounded desktop width. Use actual API values, not the SVG sample labels or numbers.
+
+1. Default Trend Explorer: title and Methodology disclosure, sector/batch/history filters, two rising-theme cards and latest cohort coverage, then a bordered Explorer with direction tabs, search, sorting, checkboxes, pooled earlier-to-recent share changes, historical sparklines and recent annual shares.
+2. Expanded theme: one inline detail section immediately below the selected row, with earlier/recent/current-year statistics, selectable historical bars, period-level count/denominator/share statistics and a theme workspace link.
+3. Compare themes: select two to five; insert a panel above the Explorer containing removable colored theme chips, Share/Count controls, synchronized history range, optional comparison-window shading, combined lines and comparative statistics. Collapse retains selection; clear removes it.
+4. Heatmap: replace the Explorer table with the historical heatmap, keeping search, filters and sort. Freeze the first theme and change columns during horizontal scrolling, with exact values and a common color legend.
+
+Spell out percentage points. Current-year data remains visibly marked and excluded from scoring. Missing comparison windows display Unavailable. Summary cards show honest empty states when no computable rising themes exist. Native controls, table captions, accessible names and focused company detail support keyboard use. Tables scroll inside their cards at phone widths, and chart text scales uniformly.
+
+Home reveals Over time only after Combine sectors is enabled, in the left control group directly beside Compare sectors when that action is available. Turning Combine sectors off hides Over time again. The comparison/Over time pair wraps together on phones; selected batch/sector URL propagation is unchanged.
+
+The home action labels are Research selected sectors, Compare sector statistics and Explore problems over time. Render all three as black buttons with white text. The last replaces the home Over time label; reveal/hide behavior and selected filters remain unchanged. On phones, the longer labels can stack within their shared group while staying inside the page bounds.
