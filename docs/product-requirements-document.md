@@ -57,3 +57,7 @@ Researchers can browse global problem themes, see company counts and sector shar
 The selected theme is displayed beside a searchable desktop list, with a mobile picker at phone widths. Theme details include actual company count, main-sector count at the inclusive 5% threshold, all-sector count, dominant-sector share, chart/table sector mix, and capped examples with remaining counts. Sorting is labelled Most companies / Most sectors. Existing navigation stays; unrelated reports, bookmarks and related-theme features are out of scope.
 
 View all companies opens a theme-scoped research workspace. The Companies basket contains all live theme members; Results begins empty and grows only from cited answers. Opening a theme does not duplicate its basket into Results. A new session clears Results; reopening an existing conversation restores its previous citations. Company selection, groups and batches can narrow this scope but cannot widen it outside the theme. Theme and sector conversations remain independent. Regeneration closes old theme sessions while preserving their history.
+
+## Batch trends, issue #70
+
+Issue #70 adds theme shares over batch periods, Rising/Fading rankings, sector and batch filtering, selected-cell company inspection and a current-description/pivot caveat. This compares today's descriptions across cohorts, not historical company descriptions.

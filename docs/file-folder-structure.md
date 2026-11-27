@@ -71,3 +71,7 @@ Whatstir/
 - Adjacent unit/integration/component/API tests and e2e/themes.spec.ts verify the feature. Browser fixtures seed themes after enrichment.
 
 Theme workspace additions: app/themes/[id]/page.tsx, app/api/themes/[id]/route.ts, its session/route.ts and session/reset/route.ts. Migration 009_theme_workspaces.sql adds session scope and indexes. lib/theme-workspace.integration.test.ts and app/api/themes/[id]/route.test.ts verify session isolation and API boundaries. Existing theme component and e2e tests now cover sidebar selection, server search, table view and question-driven Results.
+
+## Batch trends, issue #70
+
+lib/theme-trends.ts validates filters and aggregates cohorts. app/api/themes/trends/route.ts serves read-only data; app/themes/trends/page.tsx renders components/ThemeTrendsView.tsx. e2e/trends.spec.ts runs in the shared-state serial test project because theme generation in other specs replaces memberships.

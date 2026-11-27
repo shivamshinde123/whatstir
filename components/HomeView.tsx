@@ -162,6 +162,7 @@ export default function HomeView() {
           {combining && selected.length >= 2 && selected.length <= 4 && <Link href={`/compare?${new URLSearchParams({ sectors: selected.join(",") })}`} className="pressable rounded-full bg-surface px-4 py-1.5 text-sm text-link ring-1 ring-separator">Compare sectors</Link>}
           {combining && selected.length > 4 && <p className="text-sm text-text-secondary">Choose up to four sectors to compare.</p>}
           </div>
+          <Link href={`/themes/trends?${new URLSearchParams({ ...(chosen ? { batch: chosen.name } : {}), ...(combining && selected.length ? { sectors: selected.join(",") } : {}) })}`} className="pressable text-sm text-link hover:underline">Over time</Link>
           <button
             type="button"
             aria-pressed={asList}

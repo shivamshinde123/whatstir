@@ -124,8 +124,11 @@ Admin Generate themes -> POST /api/admin/themes -> claimRun("themes") -> after(r
 
 View all N companies -> /themes/:id -> Workspace with theme API base -> getThemeWorkspace and getThemeSession. All live members appear in Companies. Results starts empty and only answer citations add tiles. Restoring a conversation restores its cited Results; New session clears Results. Retrieval, previous cited-company context, explicit selections and web-company matching retain the session's theme restriction. Clearing a batch, group or explicit selection never escapes that theme. Regeneration retires the old theme conversation; the themes page supplies new current links.
 
+## Batch trends, issue #70
 
-### Sector comparison SVG controls
+Home or Themes -> /themes/trends -> GET /api/themes/trends -> live company/theme rows -> cohort aggregation -> heatmap. Selecting a cell stores theme and period in the URL and loads only that cell's companies into the response detail list. Links open the existing theme workspace/company profile.
+
+## Sector comparison SVG controls
 
 /compare reads the sector list from the URL and loads /api/compare. SectorComparisonView writes a sorted sector list with history.pushState when chips or Add sector change the selection, then reloads that URL's data. A popstate listener reloads browser Back/Forward selections; cleanup aborts the mount request and removes the listener. The API retains the existing 2-4 unique-sector validation and shared-theme intersection rules.
 

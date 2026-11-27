@@ -224,6 +224,10 @@ Keep the Whatstir header. A compact introduction and search/sort/filter toolbar 
 The theme workspace keeps the familiar three columns. Companies holds all theme members. Results is initially empty, fills from questions and citations, and clears on New session. This supersedes the interim interpretation that opening a theme should preload all members into Results. The pinned theme name stays in the page heading and chat scope, with an All themes return link restoring selection.
 Home filter alignment (#74): Combine sectors and its selection action sit in the left filter group beside All batches. Show as list remains on the right. The controls wrap on narrow screens.
 
+## Batch trends, issue #70
+
+Over time opens /themes/trends from the theme explorer or home. A native sector checkbox disclosure, batch dropdown and Rising/Fading select precede a tonal heatmap table. Each cell names its theme, period, percentage and count/denominator. Selected cells list companies below. The table scrolls within its own container on phones; the page does not scroll sideways. Small cohorts and the pivot caveat are visible.
+
 ## Sector comparison, both owner-supplied SVG references, issue #71
 
 Match compare_companies2.svg first: compact header/introduction, removable sector chips, Add sector, combined research action, sector overview table, overlaid batch-year line chart, shared-problems heatmap. Follow it with the three panels from compare_companies.svg: top problem themes, sector problem groups and tags. Use the references' white bordered cards, compact Arial typography, spacing, sage B2B, amber Consumer and slate Healthcare. Other sectors retain their existing colors. No large summary cards or per-sector batch bar charts remain.

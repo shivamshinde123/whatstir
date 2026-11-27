@@ -115,3 +115,7 @@ See lib/theme-clustering.ts for seeded spherical k-means and lib/themes.ts for t
 A theme workspace uses its live sector union for existing sector metadata and an additional immutable-per-session theme membership constraint. Each session stores theme_id/name independently of sector-session uniqueness. The browser selects a theme-specific API base and uses the common message API. All members are basket candidates, not initial Results tiles. Existing appendTiles handles answer citations. Theme resets create empty Results, as sector resets do. Current membership filters restored tiles and prior-company context; crafted selected ids are checked before saving a message. Regeneration ends active theme sessions before ON DELETE SET NULL retires their theme ids.
 
 Search uses case-insensitive strpos checks with an EXISTS query over full membership, preserving full counts. The client debounces requests and aborts stale searches. Sidebar selection updates the theme URL parameter; table display is a local accessible alternative to the coloured bar. Mobile uses a native select instead of compressing both panels.
+
+## Cohort aggregation (#70)
+
+Read live company identifiers, batch, sector and optional current theme membership, then aggregate deterministic period totals and per-theme shares in TypeScript. Time is injected into pure aggregation tests. A selected cell adds its member companies to the API response; other responses contain aggregate data only. Requests abort on filter changes to avoid stale results. No company mutation, new SDK or AI request occurs.

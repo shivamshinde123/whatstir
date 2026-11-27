@@ -189,3 +189,7 @@ Sector workspace, session and reset endpoints accept a plus-separated set of kno
 GET /api/themes accepts optional q, up to 200 trimmed characters. It searches theme names/descriptions and every live member company name, including members absent from examples. Matching returns each entire theme with unchanged counts and shares. Percent/underscore characters are literal text.
 
 GET /api/themes/:id returns the existing workspace shape with only live theme members and theme-specific group counts. GET /api/themes/:id/session restores or creates a separate theme conversation. POST /api/themes/:id/session/reset ends that conversation and creates one with empty messages and Results. Invalid, removed or empty themes return 404. These endpoints use the existing password gate. Message POST continues through /api/sessions/:uuid/messages; the server derives theme scope from the session, never a client-provided theme id. Outside-theme selections return 400; ended sessions return 409.
+
+## Batch trends, issue #70
+
+GET /api/themes/trends accepts optional comma-separated sectors and a batch name. Optional theme and period must be supplied together to return that cell's companies. It returns periods with total/themed counts, theme shares and change scores, batch choices, excluded-undated count and the gate flag. Invalid filters return 400. Shares include unthemed live companies in the denominator; missing companies are excluded.

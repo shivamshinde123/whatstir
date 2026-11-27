@@ -57,3 +57,7 @@ The server clusters existing Postgres embeddings locally and sends bounded custo
 ## Theme research boundary
 
 Theme workspace membership is enforced by company_themes joins in server queries. Client URLs select a theme; the persisted session is authoritative for message scope. The existing bounded vector retrieval and OpenRouter answering pipeline are reused, with membership constraints on candidates, prior citations, selected ids and web matching. No new processor, source or dependency is added. Theme regeneration ends active theme sessions before deleting old theme records, preserving name snapshots and conversation history.
+
+## Batch trends, issue #70
+
+Trends are read-only derived views over companies and stored theme memberships. No migration, generation job or AI call is needed. The existing password gate covers the new page and API.
