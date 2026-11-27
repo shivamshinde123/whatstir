@@ -211,7 +211,7 @@ A calm, botanical look, adapted from a style on styles.refero.design (decision 7
 
 ## Combined sector research, issue #68
 
-Home adds a Combine sectors pressed toggle. Selected map tiles and list rows show a tick and ring. Before two selections, the UI says Select at least two sectors. Open N sectors carries the selected batch. Combined workspace titles join names with +, and groups are qualified as Fintech · AI.
+Home adds a Select sectors pressed toggle. Selected map tiles and list rows show a tick and ring. The selection bar counts the choice and, before two selections, says to select at least two sectors. Research companies carries the selected batch. Combined workspace titles join names with +, and groups are qualified as Fintech · AI.
 
 ## Problem themes, issue #69
 
@@ -222,7 +222,7 @@ Home adds a Combine sectors pressed toggle. Selected map tiles and list rows sho
 Keep the Whatstir header. A compact introduction and search/sort/filter toolbar lead into a desktop theme sidebar and one scrollable detail panel. The selected row has a pressed state and a miniature sector bar. Details show the name, description, View all N companies action, actual statistics, an explained 5% main-sector threshold, chart/table toggle and example cards grouped by sector. Phones replace the sidebar with a native theme picker. Do not copy fictitious counts, YC branding, unsupported menus, related-theme claims or account controls from the visual reference.
 
 The theme workspace keeps the familiar three columns. Companies holds all theme members. Results is initially empty, fills from questions and citations, and clears on New session. This supersedes the interim interpretation that opening a theme should preload all members into Results. The pinned theme name stays in the page heading and chat scope, with an All themes return link restoring selection.
-Home filter alignment (#74): Combine sectors and its selection action sit in the left filter group beside All batches. Show as list remains on the right. The controls wrap on narrow screens.
+Home filter alignment (#74, updated by #82): Select sectors sits in the left filter group beside All batches. Show as list remains on the right. Research companies and More analyses sit in the selection bar under the filters. The controls wrap on narrow screens.
 
 ## Batch trends, issue #70
 
@@ -246,7 +246,7 @@ Comparison tables increase their minimum width with the selected sector count, s
 
 ### Collapsible comparison panels
 
-All six panels start collapsed on page entry: Sector overview, Companies by batch year, Shared problems, Top problem themes, Top sector problem groups and Top tags. Each card has a native summary header with its existing readable title and a chevron that reflects the open state. Headers support click, Enter and Space with visible keyboard focus. Panels open independently, retain their local filter state while closed and return to collapsed defaults after reload or a sector-selection rebuild. Research and sector-selection controls remain outside the panels. The overview table uses Metric for its first column heading because Sector overview is now the summary title.
+All six panels start collapsed on page entry: Sector overview, Companies by batch year, Shared problem themes, Top problem themes, Top sector groups and Top tags. Each card has a native summary header with its existing readable title and a chevron that reflects the open state. Headers support click, Enter and Space with visible keyboard focus. Panels open independently, retain their local filter state while closed and return to collapsed defaults after reload or a sector-selection rebuild. Research and sector-selection controls remain outside the panels. The overview table uses Metric for its first column heading because Sector overview is now the summary title.
 
 
 ## Problems over time reference states, issue #80
@@ -260,6 +260,10 @@ Supersedes the heatmap-first layout in issue #70. Follow the owner's four SVG st
 
 Spell out percentage points. Current-year data remains visibly marked and excluded from scoring. Missing comparison windows display Unavailable. Summary cards show honest empty states when no computable rising themes exist. Native controls, table captions, accessible names and focused company detail support keyboard use. Tables scroll inside their cards at phone widths, and chart text scales uniformly.
 
-Home reveals Over time only after Combine sectors is enabled, in the left control group directly beside Compare sectors when that action is available. Turning Combine sectors off hides Over time again. The comparison/Over time pair wraps together on phones; selected batch/sector URL propagation is unchanged.
+Home reveals further analyses only after Select sectors is on and at least two sectors are chosen. Research companies is the filled primary action. Compare sectors and View theme trends are inside More analyses, each with a short explanation, and stay hidden until that menu opens. Escape or a click outside closes it. More than four sectors explains why comparison is unavailable and still offers research and trends. Cancel clears the selection. Selected batch and sector parameters stay on the research and trends links. The menu stays inside the page at 320px.
 
-The home action labels are Research selected sectors, Compare sector statistics and Explore problems over time. Render all three as black buttons with white text. The last replaces the home Over time label; reveal/hide behavior and selected filters remain unchanged. On phones, the longer labels can stack within their shared group while staying inside the page bounds.
+Terminology: Problem is an individual company customer need. Problem theme is an AI-generated cross-sector grouping of related company problems. Sector group is an independently generated classification within a sector. Use Problem themes in navigation and the catalog, Shared problem themes in comparison, and Problem themes over time in trends. Short theme references inside these established contexts are acceptable. Comparison retains its all-batches scope and says so in the menu; research and trends retain the selected batch. Cancel restores focus to Select sectors.
+
+The workspace group picker is labeled Sector group, while internal subcategory identifiers and stored data remain unchanged. Catalog empty states and return links use Problem themes.
+
+Explorer theme rows expand/collapse when clicking noninteractive cells or their padding, including share values and sparklines. Name and chevron buttons retain native keyboard support and toggle once; comparison checkboxes select themes independently. Expanded detail rows retain their own chart and company interactions without collapsing the parent row.

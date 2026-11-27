@@ -111,7 +111,7 @@ test("answers written in Markdown render as formatting, not symbols", async ({ p
 test("a no-match answer shows the message and leaves the grid unchanged", async ({ page }) => {
   await open(page);
   // A scope with no companies at all, before anything is in the session, answers without the model.
-  const select = page.getByRole("combobox", { name: "Subcategory" });
+  const select = page.getByRole("combobox", { name: "Sector group" });
   const empty = (await select.locator("option").allTextContents()).find((t) => / · 0$/.test(t))!;
   const group = empty.replace(/ · 0$/, "");
   await select.selectOption({ label: empty });
@@ -263,7 +263,7 @@ test("a follow-up keeps the company from earlier, even in a group that doesn't h
   const sector = await (await request.get("/api/sectors/consumer")).json();
   const icracked = sector.companies.find((c: { id: number }) => c.id === 6);
   const other = sector.subcategories.find((s: { id: number }) => !icracked.subcategoryIds.includes(s.id));
-  await page.getByRole("combobox", { name: "Subcategory" }).selectOption({ value: String(other.id) });
+  await page.getByRole("combobox", { name: "Sector group" }).selectOption({ value: String(other.id) });
 
   await ask(page, "Tell me more about this company [ids:6]");
   const answers = page.locator('li[data-action="ask"]');

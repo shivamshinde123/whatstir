@@ -29,7 +29,7 @@ it("plots all sectors on a common year axis, fills missing years and switches to
 it("searches, sorts, expands and switches heatmap values without dropping shared themes", () => {
   const sharedThemes = Array.from({ length: 10 }, (_, i) => ({ id: i, name: `Theme ${i}`, sectors: sectors.map((s) => ({ id: s.id, count: i + 1, share: (i + 1) / 10 })) }));
   render(<SharedProblems sectors={sectors} sharedThemes={sharedThemes} />);
-  fireEvent.click(screen.getByText("Shared problems", { selector: "summary h2" }));
+  fireEvent.click(screen.getByText("Shared problem themes", { selector: "summary h2" }));
   const table = screen.getByRole("table", { name: "Shared theme shares by sector" });
   expect(within(table).getAllByRole("row")).toHaveLength(9);
   fireEvent.click(screen.getByRole("button", { name: "View all shared problems" }));

@@ -8,7 +8,7 @@ afterEach(() => { vi.unstubAllGlobals(); window.history.replaceState(null, "", "
 
 it("defaults to the explorer with actual pooled summaries and full percentage-point wording", async () => {
   render(<ThemeTrendsView />);
-  const table = await screen.findByRole("table", { name: "Problem trend explorer" });
+  const table = await screen.findByRole("table", { name: "Problem theme trend explorer" });
   expect(screen.getByRole("button", { name: "Trend Explorer", pressed: true })).toBeVisible();
   const cards = screen.getByRole("region", { name: "Trend summary" });
   expect(cards).toHaveTextContent("2%"); expect(cards).toHaveTextContent("11%");
@@ -57,7 +57,7 @@ it("enforces five selections, compares real windows and retains selections acros
 
 it("preserves search, direction, sorting and history filters in heatmap mode without rescoring", async () => {
   render(<ThemeTrendsView />);
-  await screen.findByRole("table", { name: "Problem trend explorer" });
+  await screen.findByRole("table", { name: "Problem theme trend explorer" });
   fireEvent.change(screen.getByRole("searchbox"), { target: { value: "Sales" } });
   fireEvent.click(screen.getByRole("button", { name: "Fading" }));
   fireEvent.change(screen.getByRole("combobox", { name: "History range" }), { target: { value: "5" } });
@@ -72,4 +72,25 @@ it("preserves search, direction, sorting and history filters in heatmap mode wit
   expect(screen.getByRole("button", { name: "Fading", pressed: true })).toBeVisible();
   fireEvent.change(screen.getByRole("searchbox"), { target: { value: "missing" } });
   expect(screen.getByText("No problem themes match your search and filters.")).toBeVisible();
+});
+
+
+it("toggles details from row cells without coupling checkbox selection or double-toggling buttons", async () => {
+  render(<ThemeTrendsView />);
+  const name = await screen.findByRole("button", { name: "Claims" });
+  const row = name.closest("tr");
+  if (!row) throw new Error("Expected the theme table row");
+  const cells = within(row).getAllByRole("cell");
+  fireEvent.click(cells[1]);
+  expect(screen.getByRole("region", { name: "Claims historical detail" })).toBeVisible();
+  fireEvent.click(cells[2]);
+  expect(screen.queryByRole("region", { name: "Claims historical detail" })).toBeNull();
+  const checkbox = within(row).getByRole("checkbox", { name: "Select Claims" });
+  fireEvent.click(checkbox);
+  expect(checkbox).toBeChecked();
+  expect(screen.queryByRole("region", { name: "Claims historical detail" })).toBeNull();
+  fireEvent.click(name);
+  expect(screen.getByRole("region", { name: "Claims historical detail" })).toBeVisible();
+  fireEvent.click(screen.getByRole("button", { name: "Collapse Claims" }));
+  expect(screen.queryByRole("region", { name: "Claims historical detail" })).toBeNull();
 });

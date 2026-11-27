@@ -106,7 +106,7 @@ export function SharedProblems({ sectors, sharedThemes }: ComparisonData) {
   const filtered = sharedThemes.filter((t) => t.name.toLowerCase().includes(query.trim().toLowerCase())).sort((a, b) => sort === "size" ? b.sectors.reduce((sum, s) => sum + s.count, 0) - a.sectors.reduce((sum, s) => sum + s.count, 0) || a.name.localeCompare(b.name) : a.name.localeCompare(b.name));
   const maximum = Math.max(0.01, ...sharedThemes.flatMap((t) => t.sectors.map((s) => counts ? s.count : s.share)));
   const visible = expanded ? filtered : filtered.slice(0, 8);
-  return <ComparisonSection title="Shared problems">
+  return <ComparisonSection title="Shared problem themes">
     <p className="mt-1 text-sm text-text-secondary">Problem themes represented in every selected sector.</p>
     <div className="my-4 flex flex-wrap items-center gap-2">
       <input aria-label="Search problem themes" placeholder="Search problem themes..." value={query} onChange={(e) => { setQuery(e.target.value); setExpanded(false); }} type="search" className="mr-auto w-full max-w-[320px] rounded-[5px] border border-[#dce1d7] bg-bg px-3 py-2 text-sm" />

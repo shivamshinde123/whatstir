@@ -35,7 +35,7 @@ function MetricPanel({ sectors, kind, title, description }: {
             <span className="whitespace-nowrap text-right text-[13px] leading-5 tabular-nums">{kind === "tags" ? item.count.toLocaleString("en-US") : `${pct.format(item.share)} (${item.count.toLocaleString("en-US")})`}</span>
           </li>)}
         </ul>
-        {!items.length && <p className="text-sm text-text-secondary">{kind === "themes" ? "No theme assignments yet." : kind === "groups" ? "No problem groups assigned." : "No source tags available."}</p>}
+        {!items.length && <p className="text-sm text-text-secondary">{kind === "themes" ? "No theme assignments yet." : kind === "groups" ? "No sector groups assigned." : "No source tags available."}</p>}
       </section>)}
     </div>
   </ComparisonSection>;
@@ -75,7 +75,7 @@ export default function SectorComparisonView() {
     <main className="mx-auto w-full max-w-7xl min-w-0 flex-1 px-4 py-6 sm:px-6 sm:py-8">
       <Link href="/" className="block text-sm leading-5 text-text-secondary hover:underline">‹ All sectors</Link>
       <h1 className="mt-3 text-headline font-semibold">Compare sectors</h1>
-      <p className="mt-2 text-sm leading-6 text-text-secondary">Explore company distributions, trends and shared problems across sectors.</p>
+      <p className="mt-2 text-sm leading-6 text-text-secondary">Explore company distributions, trends and shared problem themes across sectors.</p>
       {state.kind === "loading" && <p role="status" className="mt-6">Loading comparison...</p>}
       {state.kind === "error" && <div role="alert" className="mt-6"><p>{state.message}</p><button onClick={() => void load()} className="pressable mt-3 text-link underline">Try again</button></div>}
       {data && <>
@@ -88,9 +88,9 @@ export default function SectorComparisonView() {
         <BatchYearChart sectors={data.sectors} />
         <SharedProblems sectors={data.sectors} sharedThemes={data.sharedThemes} />
         <MetricPanel sectors={data.sectors} kind="themes" title="Top problem themes" description="Shared theme classification; shares use all companies in each sector." />
-        <MetricPanel sectors={data.sectors} kind="groups" title="Top sector problem groups" description="Groups are generated separately within each sector; labels are not equivalent across sectors and memberships may overlap." />
+        <MetricPanel sectors={data.sectors} kind="groups" title="Top sector groups" description="Groups are generated separately within each sector; labels are not equivalent across sectors and memberships may overlap." />
         <MetricPanel sectors={data.sectors} kind="tags" title="Top tags" description="Source tags describe technologies and categories. Percentages show each tag's share of the sector." />
-        <p className="mt-4 text-sm text-text-secondary">Counts include every company still listed in each sector, including companies without a theme, across all batches and statuses. Themes and problem groups are AI-generated and reflect current descriptions. Problem groups may overlap. Tagged AI counts the source tags AI or Artificial Intelligence; it is separate from the AI problem group.</p>
+        <p className="mt-4 text-sm text-text-secondary">Counts include every company still listed in each sector, including companies without a theme, across all batches and statuses. Problem themes and sector groups are AI-generated and reflect current descriptions. Sector groups may overlap. Tagged AI counts the source tags AI or Artificial Intelligence; it is separate from the AI sector group.</p>
       </>}
     </main>
     <SiteFooter />

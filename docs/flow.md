@@ -2,7 +2,7 @@
 
 ## Sector comparison, issue #71
 
-Home Combine sectors -> select 2-4 -> /compare?sectors=... -> GET /api/compare -> live company and group queries -> per-sector metrics and complete theme intersection -> single-sector or combined research workspace links.
+Home Select sectors -> two or more sectors -> Research companies, or More analyses -> Compare sectors (2-4) / View theme trends. Compare: /compare?sectors=... -> GET /api/compare -> live company and group queries -> per-sector metrics and complete theme intersection -> single-sector or combined research workspace links. Trends keep the selected sectors and batch.
 
 *This describes the planned design and gets updated as the code lands.*
 
@@ -138,3 +138,8 @@ SectorComparisonDetails derives overview cells, common-axis line series and heat
 ## Trend Explorer flow, issue #80
 
 This supersedes the heatmap-first presentation above. /themes/trends loads the existing endpoint and defaults to summary cards plus the Explorer table. Selecting a theme name or expand button inserts its bar chart and period statistics immediately below that row, replacing any previous expansion. Selecting 2-5 checkboxes enables Compare themes, which inserts the combined line chart and pooled comparison statistics above the Explorer. Changing to Heatmap retains the same filter/search/sort/history state and comparison panel. Theme and change columns remain frozen while periods scroll. Selecting a bar, period heading or heatmap cell updates theme/period query keys, reloads the existing company detail response and focuses the resulting company region.
+
+
+## Sector selection disclosure, issue #82
+
+Select sectors enters selection mode; map/list choices update one shared sector set. Before two choices, show count and guidance. With two or more, Research companies opens the combined workspace with the chosen batch. More analyses reveals Compare sectors (two to four sectors, all batches) and View theme trends (selected sectors and batch). Cancel clears the selection and returns focus to the entry button. No API contract, data processing or calculation changes.

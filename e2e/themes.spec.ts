@@ -6,7 +6,7 @@ test("explores a theme and adds only answer citations to Results", async ({ page
   const { themes }: { themes: Theme[] } = await (await request.get("/api/themes")).json();
   await page.setViewportSize({ width: 1440, height: 1000 });
   await page.goto("/themes");
-  await expect(page.getByRole("heading", { level: 1 })).toHaveText("Problems across sectors");
+  await expect(page.getByRole("heading", { level: 1 })).toHaveText("Problem themes");
   await page.getByRole("checkbox", { name: "In 3+ sectors" }).check();
   await page.getByLabel("Sort by").selectOption("spread");
   const navigation = page.getByRole("navigation", { name: "Choose a problem theme" });
@@ -48,7 +48,7 @@ test("explores a theme and adds only answer citations to Results", async ({ page
   await page.getByRole("button", { name: "Start over" }).click();
   await expect(page.locator("[data-tile-id]")).toHaveCount(0);
   await expect(page.getByRole("list", { name: "Companies in this theme" }).getByRole("button")).toHaveCount(theme.count);
-  await page.getByRole("link", { name: "‹ All themes" }).click();
+  await page.getByRole("link", { name: "‹ All problem themes" }).click();
   await expect(page.getByRole("heading", { name: theme.name, exact: true })).toBeVisible();
 });
 
@@ -77,7 +77,7 @@ test("Admin regeneration retires old theme workspaces", async ({ page, request }
   const row = page.locator("tr").filter({ has: page.getByRole("cell", { name: "themes", exact: true }) }).first();
   await expect(row.getByText("OK", { exact: true })).toBeVisible();
   expect((await request.get(`/api/themes/${oldId}`)).status()).toBe(404);
-  await page.getByRole("link", { name: "Themes", exact: true }).click();
+  await page.getByRole("link", { name: "Problem themes", exact: true }).click();
   await expect(page.getByRole("link", { name: /^View all/ })).toBeVisible();
 });
 
@@ -85,7 +85,7 @@ test("fits phone widths, supports keyboard controls and shows an empty state", a
   for (const width of [320, 375]) {
     await page.setViewportSize({ width, height: 800 });
     await page.goto("/themes");
-    const picker = page.getByRole("combobox", { name: "Choose a theme", exact: true });
+    const picker = page.getByRole("combobox", { name: "Choose a problem theme", exact: true });
     await expect(picker).toBeVisible();
     const value = await picker.locator("option").last().getAttribute("value");
     if (!value) throw new Error("Expected theme option");
@@ -100,5 +100,5 @@ test("fits phone widths, supports keyboard controls and shows an empty state", a
   }
   await page.route("**/api/themes", (r) => r.fulfill({ json: { themes: [], gate: false } }));
   await page.reload();
-  await expect(page.getByText("No themes yet")).toBeVisible();
+  await expect(page.getByText("No problem themes yet")).toBeVisible();
 });

@@ -2,7 +2,7 @@ import type { SubcategoryInfo } from "@/lib/workspace";
 
 const fmt = new Intl.NumberFormat("en-US");
 
-/** A dropdown that narrows the basket: All, AI, the problem groups, Unclassified. Never touches the grid. */
+/** A dropdown that narrows the basket: All, AI, the sector groups, Unclassified. Never touches the grid. */
 export default function SubcategoryBar({
   total,
   subcategories,
@@ -17,7 +17,7 @@ export default function SubcategoryBar({
   return (
     <div className="flex flex-wrap items-center gap-x-2 gap-y-1">
       <select
-        aria-label="Subcategory"
+        aria-label="Sector group"
         // Native option tooltips can't be styled, so the chosen group's description shows on the select.
         title={subcategories.find((s) => s.id === selected)?.description ?? undefined}
         value={selected ?? ""}

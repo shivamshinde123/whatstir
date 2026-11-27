@@ -36,7 +36,7 @@ test("performance: a 3,500-company sector loads and stays usable", async ({ page
 
   // Find the dropdown first (role queries over 3,500 buttons are slow in themselves), then time
   // only the choice and the re-render.
-  const select = page.locator('select[aria-label="Subcategory"]');
+  const select = page.locator('select[aria-label="Sector group"]');
   await expect(select.locator("option").nth(1)).toHaveText("AI · 1,750");
   const t = Date.now();
   await select.selectOption({ index: 1 });

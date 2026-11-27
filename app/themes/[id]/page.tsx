@@ -5,7 +5,7 @@ import Workspace from "@/components/Workspace";
 import { db } from "@/lib/db";
 import { getThemeHeader, parseThemeId } from "@/lib/themes";
 
-export const metadata = { title: "Theme workspace · Whatstir" };
+export const metadata = { title: "Problem theme workspace · Whatstir" };
 
 export default function ThemePage(props: PageProps<"/themes/[id]">) {
   return <Suspense fallback={<p role="status" className="p-8">Loading theme workspace…</p>}><ThemeContent {...props} /></Suspense>;

@@ -6,6 +6,7 @@ import type { SectorOverview } from "@/lib/sectors";
 import { layoutTreemap } from "@/lib/treemap";
 import SiteFooter from "./SiteFooter";
 import SiteHeader from "./SiteHeader";
+import SectorSelectionActions from "./SectorSelectionActions";
 import Treemap, { tileLabel } from "./Treemap";
 
 type Data = SectorOverview & { gate: boolean };
@@ -36,6 +37,7 @@ export default function HomeView() {
   /** The chosen YC batch ("Fall 2026"), or null for all. Kept in the URL so "‹ All sectors" returns to it. */
   const [batch, setBatchState] = useState<string | null>(null);
   const [combining, setCombining] = useState(false);
+  const selectionTrigger = useRef<HTMLButtonElement>(null);
   const [selected, setSelected] = useState<string[]>([]);
   const toggleSector = (id: string) => setSelected((ids) => ids.includes(id) ? ids.filter((v) => v !== id) : [...ids, id].sort());
   const [asList, setAsList] = useState(false);
@@ -150,21 +152,10 @@ export default function HomeView() {
               Clear batch
             </button>
           )}
-          <button type="button" aria-pressed={combining} onClick={() => { setCombining((v) => !v); setSelected([]); }}
+          <button ref={selectionTrigger} type="button" aria-pressed={combining} onClick={() => { setCombining((v) => !v); setSelected([]); }}
             className="pressable rounded-full bg-surface px-4 py-1.5 text-sm aria-pressed:ring-2 aria-pressed:ring-accent">
-            Combine sectors
+            Select sectors
           </button>
-          {combining && selected.length >= 2 && (
-            <Link href={`/sector/${selected.join("+")}${query}`} className="pressable rounded-full bg-black px-4 py-1.5 text-sm text-white">
-              Research selected sectors
-            </Link>
-          )}
-          {combining && <div className="flex max-w-full flex-wrap items-center gap-2">
-          {selected.length >= 2 && selected.length <= 4 && <Link href={`/compare?${new URLSearchParams({ sectors: selected.join(",") })}`} className="pressable rounded-full bg-black px-4 py-1.5 text-sm text-white">Compare sector statistics</Link>}
-          <Link href={`/themes/trends?${new URLSearchParams({ ...(chosen ? { batch: chosen.name } : {}), ...(combining && selected.length ? { sectors: selected.join(",") } : {}) })}`} className="pressable rounded-full bg-black px-4 py-1.5 text-sm text-white">Explore problems over time</Link>
-          </div>}
-          {combining && selected.length < 2 && <p role="status" className="text-sm text-text-secondary">Select at least two sectors.</p>}
-          {combining && selected.length > 4 && <p className="text-sm text-text-secondary">Choose up to four sectors to compare.</p>}
           </div>
           <button
             type="button"
@@ -175,6 +166,8 @@ export default function HomeView() {
             {asList ? "Show as map" : "Show as list"}
           </button>
         </div>
+
+        {combining && <SectorSelectionActions selected={selected} batch={chosen?.name ?? null} onCancel={() => { setCombining(false); setSelected([]); selectionTrigger.current?.focus(); }} />}
 
         {/* Always mounted so it can be measured; the states render inside it. */}
         <div ref={mapRef} hidden={asList && !!data && !empty} className="mt-4 h-[max(420px,calc(100dvh-20rem))] w-full">

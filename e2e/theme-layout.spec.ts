@@ -128,7 +128,7 @@ test.describe("full-width layout", () => {
     expect(widths[1] / sum).toBeCloseTo(0.3, 2);
     expect(widths[2] / sum).toBeCloseTo(0.4, 2);
     const title = (await page.getByRole("heading", { level: 1, name: "B2B" }).boundingBox())!;
-    const select = (await page.getByRole("combobox", { name: "Subcategory" }).boundingBox())!;
+    const select = (await page.getByRole("combobox", { name: "Sector group" }).boundingBox())!;
     expect(Math.abs(select.y + select.height / 2 - (title.y + title.height / 2))).toBeLessThan(12);
   });
 

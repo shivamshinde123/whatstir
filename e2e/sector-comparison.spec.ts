@@ -1,6 +1,6 @@
 import { expect, test, type Page } from "@playwright/test";
 
-const sectionTitles = ["Sector overview", "Companies by batch year", "Shared problems", "Top problem themes", "Top sector problem groups", "Top tags"];
+const sectionTitles = ["Sector overview", "Companies by batch year", "Shared problem themes", "Top problem themes", "Top sector groups", "Top tags"];
 async function openSections(page: Page) {
   for (const title of sectionTitles) await page.getByRole("region", { name: title, exact: true }).locator("summary").click();
 }
@@ -8,16 +8,17 @@ async function openSections(page: Page) {
 test("selects sectors, compares them, stacks columns on phones and opens their combined workspace", async ({ page }) => {
   await page.route("**/bookface-images.s3.amazonaws.com/**", (r) => r.fulfill({ status: 204 }));
   await page.goto("/");
-  await page.getByRole("button", { name: "Combine sectors" }).click();
+  await page.getByRole("button", { name: "Select sectors" }).click();
   await page.getByRole("button", { name: /^B2B,/ }).click();
   await page.getByRole("button", { name: /^Fintech,/ }).click();
-  await page.getByRole("link", { name: "Compare sector statistics", exact: true }).click();
+  await page.locator("summary").filter({ hasText: "More analyses" }).click();
+  await page.getByRole("link", { name: /^Compare sectors/ }).click();
   await expect(page.getByRole("heading", { level: 1 })).toHaveText("Compare sectors");
   await openSections(page);
   const a = page.getByRole("region", { name: "B2B top problem themes" });
   const b = page.getByRole("region", { name: "Fintech top problem themes" });
   await expect(a).toBeVisible(); await expect(b).toBeVisible();
-  await expect(page.getByRole("heading", { name: "Shared problems" })).toBeVisible();
+  await expect(page.getByRole("heading", { name: "Shared problem themes" })).toBeVisible();
   const themes = page.getByRole("region", { name: "Top problem themes", exact: true });
   const tags = page.getByRole("region", { name: "Top tags", exact: true });
   await expect(themes).toBeVisible();
@@ -58,7 +59,7 @@ for (const count of [3, 4]) {
     await expect(panel.getByText("No theme assignments yet.")).toBeVisible();
     await page.screenshot({ path: `test-results/sector-comparison-${count}-desktop.png`, fullPage: true });
     await page.setViewportSize({ width: 320, height: 812 });
-    for (const title of ["Top problem themes", "Top sector problem groups", "Top tags"]) {
+    for (const title of ["Top problem themes", "Top sector groups", "Top tags"]) {
       const section = page.getByRole("region", { name: title, exact: true });
       const columns = section.getByRole("region");
       const firstBox = await columns.first().boundingBox(), lastBox = await columns.last().boundingBox();

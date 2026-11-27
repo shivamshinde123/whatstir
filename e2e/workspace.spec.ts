@@ -22,7 +22,7 @@ test.describe("sector workspace", () => {
     await expect(page.getByRole("heading", { level: 1, name: "B2B" })).toBeVisible();
     await expect(page.getByText("6 companies", { exact: true })).toBeVisible();
     await expect(basket(page).getByRole("button")).toHaveCount(6);
-    const options = page.getByRole("combobox", { name: "Subcategory" }).locator("option");
+    const options = page.getByRole("combobox", { name: "Sector group" }).locator("option");
     await expect(options.first()).toHaveText(/^All · 6$/);
     await expect(options.nth(1)).toHaveText(/^AI · \d+$/);
     await expect(options.last()).toHaveText(/^Unclassified · \d+$/);
@@ -33,7 +33,7 @@ test.describe("sector workspace", () => {
   test("selecting a group narrows the basket, and All restores it", async ({ page }) => {
     await page.goto("/sector/b2b");
     await expect(basket(page).getByRole("button")).toHaveCount(6);
-    const select = page.getByRole("combobox", { name: "Subcategory" });
+    const select = page.getByRole("combobox", { name: "Sector group" });
     // Pick the first problem group that has companies.
     const texts = await select.locator("option").allTextContents();
     const index = texts.findIndex((t, i) => i > 1 && !/^Unclassified/.test(t) && !/ 0$/.test(t));
