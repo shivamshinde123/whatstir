@@ -6,13 +6,18 @@ All notable changes to Whatstir are recorded here. The format follows [Keep a Ch
 
 ### Added
 - Explore problem themes over YC batch periods, with cohort shares, Rising/Fading sorting, sector/batch filters and company drilldowns (#70).
+
+- Make all six sector-comparison panels independently collapsible and closed by default (#71).
 - Cross-sector problem themes, with a searchable sidebar explorer, sector charts and tables, and theme-scoped company research. View all companies opens the full Companies basket; Results grows from answer citations. Generate themes manually from Admin or `npm run themes` (#69).
 - Research multiple sectors together, with combined company baskets, sector-labelled groups and persistent sessions per sector set (#68).
 - **A demo video in the README.** A three-and-a-half-minute tour of Whatstir plays at the top of the README (#63).
 - **Repeat founders.** A new Founders page lists people who founded more than one YC company, matched by LinkedIn, with their companies in order and whether they stayed in one sector. Search by founder or company name, and compare a founder's companies side by side. Admin has a switch to turn founder fetching on and an Extract founders button to fill it in (#67).
 - **A how-it-works slide deck.** `docs/diagrams/` has an eight-slide Excalidraw deck covering the refresh, enrichment, exploring, the company card and asking a question, plus a GIF of the company card scrolling (#65).
 
+- Compare 2-4 sectors using editable sector chips, an overview table, a batch-year line chart, searchable shared-problem heatmap and aligned theme/group/tag panels based on the supplied SVG designs (#71).
+
 ### Fixed
+- Make sector comparison text readable on wide screens, cap content width and prevent stretched or overlapping batch-chart labels (#71).
 - Keep Combine sectors beside the batch filter on the left of the home page (#74).
 - Update Next.js and its ESLint configuration to 16.4.6, with compatible lint-tool dependency fixes for the release security audit.
 - **Pages no longer hang on Supabase's transaction pooler.** Loading several companies at once (Compare) could wait forever, because queries were pipelined on one connection. Each connection now runs one query at a time (#67).

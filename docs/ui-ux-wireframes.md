@@ -1,5 +1,9 @@
 # UI/UX wireframes
 
+## Sector comparison, issue #71
+
+Home offers Compare sectors beside Open for 2-4 selected sectors. /compare uses one card per sector on desktop, stacked on phones. Year bars share the same count scale across cards. Each card links to its workspace; the set links to combined research. The shared-themes table scrolls within its own container. Missing themes/groups and empty sectors have explicit empty states. All comparison counts cover every batch, as stated on the page.
+
 ## 1. Landing page: treemap
 ```
 ┌ Whatstir (translucent bar) ──────────────────────────── [Sign out]┐
@@ -223,3 +227,23 @@ Home filter alignment (#74): Combine sectors and its selection action sit in the
 ## Batch trends, issue #70
 
 Over time opens /themes/trends from the theme explorer or home. A native sector checkbox disclosure, batch dropdown and Rising/Fading select precede a tonal heatmap table. Each cell names its theme, period, percentage and count/denominator. Selected cells list companies below. The table scrolls within its own container on phones; the page does not scroll sideways. Small cohorts and the pivot caveat are visible.
+
+## Sector comparison, both owner-supplied SVG references, issue #71
+
+Match compare_companies2.svg first: compact header/introduction, removable sector chips, Add sector, combined research action, sector overview table, overlaid batch-year line chart, shared-problems heatmap. Follow it with the three panels from compare_companies.svg: top problem themes, sector problem groups and tags. Use the references' white bordered cards, compact Arial typography, spacing, sage B2B, amber Consumer and slate Healthcare. Other sectors retain their existing colors. No large summary cards or per-sector batch bar charts remain.
+
+Overview shows company count, active count/share and source AI-tag share. Its sector headings link to research. Chips preserve 2-4 sectors; add/remove updates the canonical URL and live data, including browser Back/Forward. The chart shares one year axis and y-scale across all selected sectors, fills missing years with zero, supports All/last 10/last 5 years and Count/Share. Share means the fraction of all current sector companies in that batch year. Exact values and unknown-year counts have a screen-reader table equivalent.
+
+Shared problems uses a search field, theme-name/company-count sort and Percentage/Count control. Show eight themes initially with View all/Show fewer. Heat cells use a common green scale, retaining text values and adequate foreground contrast. The data stays live and can contain more/different themes and years than the illustrative SVG. Overview/heat tables scroll internally on phones. Three-sector chart panels use three columns from 768px, with wrapped labels and stacked phone columns. Four sectors use two columns on tablets and four from 1024px.
+
+Theme/group bars share one percentage scale per panel; tags share a count scale. Scale descriptions are accessible text. Tags show counts as in the SVG. Theme names remain links. Empty columns remain visible. Notes explain source populations, overlapping groups and independently generated sector group labels. No data-layer, dependency or model-generation change is involved.
+
+### Comparison readability correction, superseding the miniature SVG type scale
+
+Keep the same overview, chart, heatmap and metric panels, with the existing sector colors. Use the standard app header and font. Comparison content is centered with a maximum width of 1280px. Body/table/control text is at least 14px; chart labels and compact values are 13px; panel headings are 18px. Increase row padding and control heights accordingly. The chart is 280px tall and measures its container via ResizeObserver, so its viewBox uses actual CSS-pixel coordinates and text scales equally in both axes. Tick density reduces on phones to avoid overlapping years. All controls and existing table phone scrolling remain available. This correction follows the owner's wide-screen readability feedback and supersedes the earlier exact miniature font sizes.
+
+Comparison tables increase their minimum width with the selected sector count, so larger percentage/count strings stay inside their cells. On phones the tables scroll internally rather than shrinking text or overlapping neighboring cells. Axis ticks prefer five-year milestones and always retain the first and last visible years.
+
+### Collapsible comparison panels
+
+All six panels start collapsed on page entry: Sector overview, Companies by batch year, Shared problems, Top problem themes, Top sector problem groups and Top tags. Each card has a native summary header with its existing readable title and a chevron that reflects the open state. Headers support click, Enter and Space with visible keyboard focus. Panels open independently, retain their local filter state while closed and return to collapsed defaults after reload or a sector-selection rebuild. Research and sector-selection controls remain outside the panels. The overview table uses Metric for its first column heading because Sector overview is now the summary title.

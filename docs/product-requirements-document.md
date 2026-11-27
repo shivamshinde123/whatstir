@@ -1,5 +1,9 @@
 # Product requirements
 
+## Sector comparison, issue #71
+
+Issue #71 compares 2-4 sectors across all batches and statuses. Show total/active counts, active share, batch-year counts, top five themes, top five problem groups, top five tags and source AI-tag share. List themes found in every selected sector, even outside an individual top five. Stack columns on phones and link into research.
+
 The full requirements live in [initial_idea.md](initial_idea.md) (v1.2, 2026-11-01). This file records only how its open (TBD) items were resolved and what the MVP contains. If the two conflict, the decisions here win, because they were made later. See [decision.md](decision.md).
 
 ## Product

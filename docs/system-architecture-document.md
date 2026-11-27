@@ -1,5 +1,9 @@
 # System architecture
 
+## Sector comparison, issue #71
+
+Sector comparison is a read-only view over existing companies, source tags, sector groups and current theme memberships. No migration, enrichment, AI call, new processor or dependency is introduced. The existing password gate protects the page and API.
+
 ```
                 ┌──────────────── Vercel (Next.js) ────────────────┐
  Browser ──────▶│ proxy.ts (password gate)                          │

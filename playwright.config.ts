@@ -9,7 +9,7 @@ export const E2E_PASSWORD = "e2e-password";
 // The default models and no real key, whatever a local .env says: /admin's AI line is predictable,
 // and the e2e servers can never spend real OpenRouter credit even if AI_FAKE were dropped.
 const AI_DEFAULTS = { OPENROUTER_API_KEY: "", AI_MODEL_ANSWER: "", AI_MODEL_WRITE: "", AI_MODEL_EMBED: "", JEV_MODEL: "", WEB_SEARCH: "" };
-const SHARED_STATE = /(admin|batch|chat|cross-sector|founders|notes|selection|themes|trends)\.spec\.ts/;
+const SHARED_STATE = /(admin|batch|chat|cross-sector|founders|notes|selection|themes|trends|sector-comparison)\.spec\.ts/;
 
 export default defineConfig({
   testDir: "./e2e",
